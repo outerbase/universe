@@ -60,25 +60,46 @@ templateRowContent.innerHTML = `
 
     .dropdown {
         position: absolute;
-        border: 1px solid #ccc;
-        background-color: white;
+        border: 1px solid rgb(47, 47, 47);
+        background-color: rgb(60, 60, 60);
         z-index: 1000;
-        top: 24px;
+        top: 20px;
         left: 0px;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
     .dropdown-item {
-        padding: 5px;
+        padding: 6px 16px;
+        min-width: 200px;
         cursor: pointer;
+        color: white;
+        font-family: 'Monaco', 'Courier New', monospace;
+        font-size: 13px;
+    }
+
+    .dropdown-item:first-child {
+        padding-top: 8px;
+    }
+
+    .dropdown-item:last-child {
+        padding-bottom: 8px;
     }
 
     .dropdown-item:hover {
-        background-color: #f0f0f0;
+        background-color: rgb(40, 40, 40);
     }
 
     .keyword { color: #98d7c8; }
     .string { color: #d99ad9; }
+    .braces { color: #e4c945; }
+    .variable-name { color: white; }
     .comment { color: #6a6a6a; }
+    .request { 
+        color: gray;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
     .secret { 
         color: rgba(0, 0, 0, 0.85);
         -webkit-filter: blur(0px); /* Required, or background color on ::before won't work */
@@ -100,15 +121,15 @@ templateRowContent.innerHTML = `
 
 <div id="container">
     <pre><code id="highlight"></code></pre>
-    <div id="code" contentEditable="false"></div>
+    <div id="code" contentEditable="false" spellcheck="false"></div>
 
     <!-- Show a line hint when the line is empty and cursor is active -->
     <div id="hint" style="display: block;">Type '/' for a list of code block suggestions.</div>
 
     <!-- "/" options to show -->
     <div id="dropdown" class="dropdown" style="display: none;">
-        <div class="dropdown-item" data-value="Option 1">Option 1</div>
-        <div class="dropdown-item" data-value="Option 2">Option 2</div>    
+        <div class="dropdown-item" data-value="OB:WASM:Slack">Slack</div>
+        <div class="dropdown-item" data-value="OB:WASM:Mailgun">Mailgun</div>    
     </div>
 </div>
 `;
@@ -145,6 +166,12 @@ class OuterbaseEditorRowText extends HTMLElement {
             // Send an event to the editor to update the rows value
             this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
         });
+
+        // -----------------------------
+        // Key up and down events for the dropdown menu specifically
+        // this.codeDiv.addEventListener('keyup', (event) => this.handleKeyUp(event));
+        // this.codeDiv.addEventListener('keydown', (event) => this.handleKeyDown(event));
+        // -----------------------------
 
         this.codeDiv.addEventListener('keyup', (event) => this.checkForSlash(event.target));
 
@@ -184,12 +211,10 @@ class OuterbaseEditorRowText extends HTMLElement {
             }
 
             if (event.key === 'Tab') {
-                console.log('Tab pressed')
                 event.preventDefault();
 
-                let test = this.codeDiv.innerText + '\u00A0\u00A0\u00A0\u00A0';
-                console.log('Test: ', test)
-                this.codeDiv.innerText = test;
+                let tab = this.codeDiv.innerText + '\u00A0\u00A0\u00A0\u00A0';
+                this.codeDiv.innerText = tab;
                 this.updateCode();
                 this.updateHint();
                 
@@ -205,11 +230,6 @@ class OuterbaseEditorRowText extends HTMLElement {
             }
         });
         
-        // this.codeDiv.addEventListener('scroll', function() {
-        //     // this.shadowRoot.querySelector('#hint').style.display = 'none';
-        //     this.shadowRoot.querySelector('#hint').style.opacity = '0';
-        // });
-        
         // Enable contentEditable on focus
         this.codeDiv.addEventListener('focus', () => {
             this.codeDiv.contentEditable = true;
@@ -220,6 +240,13 @@ class OuterbaseEditorRowText extends HTMLElement {
         this.codeDiv.addEventListener('blur', () => {
             this.codeDiv.contentEditable = false;
             this.updateHint()
+
+            // When the codeDiv loses focus, hide the hint forcefully on a delay
+            // in case it happens quickly and `this.updateHint()` doesn't catch it.
+            setTimeout(() => {
+                var hint = this.shadow.querySelector("#hint");
+                hint.style.opacity = '0';
+            }, 400);
         });
 
         this.codeDiv.addEventListener('click', () => {
@@ -278,6 +305,12 @@ class OuterbaseEditorRowText extends HTMLElement {
         // Replace "{{SECRET.any_key}}" with a special div
         code = code.replace(/{{SECRET\..+?}}/g, '<span class="secret">$&</span>');
 
+        // Replace "{{request.type.any_key}}" with a special div
+        code = code.replace(/{{request\..+?}}/g, '<span class="request">$&</span>');
+
+        // Braces
+        code = code.replace(/(\{|\}|\(|\))/g, '<span class="braces">$&</span>');
+
         this.shadow.querySelector("#highlight").innerHTML = code;
     }
 
@@ -290,17 +323,50 @@ class OuterbaseEditorRowText extends HTMLElement {
             .replace(/'/g, "&#039;");
     }
 
+    // checkForSlash(textarea) {
+    //     var text = textarea.innerText;
+    //     var cursorPos = textarea.selectionStart;
+    //     var textUpToCursor = text.substring(0, cursorPos);
+    //     var currentLine = textUpToCursor.split("\n").pop();
+
+    //     if (currentLine.trim() === '/') {
+    //         this.showDropdown(textarea);
+    //     } else {
+    //         this.hideDropdown();
+    //     }
+    // }
+
     checkForSlash(textarea) {
         var text = textarea.innerText;
         var cursorPos = textarea.selectionStart;
         var textUpToCursor = text.substring(0, cursorPos);
         var currentLine = textUpToCursor.split("\n").pop();
-
-        if (currentLine.trim() === '/') {
-            this.showDropdown(textarea);
+        var slashIndex = currentLine.lastIndexOf('/');
+    
+        if (slashIndex === 0) {
+            var filterText = currentLine.substring(slashIndex + 1);
+            this.filterAndShowDropdown(filterText);
         } else {
             this.hideDropdown();
         }
+    }
+    
+    filterAndShowDropdown(filterText) {
+        var dropdown = this.shadow.querySelector('#dropdown');
+        var items = dropdown.getElementsByClassName('dropdown-item');
+        var showDropdown = false;
+    
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.textContent.toLowerCase().includes(filterText.toLowerCase())) {
+                item.style.display = '';
+                showDropdown = true;
+            } else {
+                item.style.display = 'none';
+            }
+        }
+    
+        dropdown.style.display = showDropdown ? '' : 'none';
     }
 
     updateHint() {
@@ -353,11 +419,15 @@ class OuterbaseEditorRowText extends HTMLElement {
     }
 
     insertText(text) {
-        var textarea = this.shadow.querySelector("#code");
+        this.codeDiv.innerText = text;
 
-        textarea.innerText = text;
+        this.updateCode();
+        this.updateHint();
         this.hideDropdown();
-        this.updateCode(); // Update your code display
+
+        var lineNumber = this.getAttribute('line-number');
+        this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
+        this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
     }
 }
 

@@ -19,16 +19,20 @@ templateEditor.innerHTML = `
 class OuterbaseEditor extends HTMLElement {
     container = null;
     rowData = [
-        { value: "// What goes here?" },
-        { value: 'var test = "Hello, world!"; // Here is a comment' },
-        { value: "var secret = {{SECRET.AWS_PROD}}" },
         { value: "" },
-        { value: "/*" },
-        { value: "  A block level comment here." },
-        { value: "*/" },
-        { value: "" },
-        { value: "// Add my Slack bot" },
-        { isBlock: true, blockContent: "Slack Bot" },
+        // { value: "// What goes here?" },
+        // { value: 'var test = "Hello, world!"; // Here is a comment' },
+        // { value: "var secret = {{SECRET.AWS_PROD}}" },
+        // { value: "" },
+        // { value: "var username = {{request.body.username}}" },
+        // { value: "" },
+        // { value: "/*" },
+        // { value: "  A block level comment here." },
+        // { value: "*/" },
+        // { value: "" },
+        // { value: "// Add my Slack bot" },
+        // { value: "OB:WASM:1" },
+        // { isBlock: true, blockContent: "Slack Bot" },
     ];
 
     // Drag and drop row support
@@ -209,11 +213,16 @@ class OuterbaseEditor extends HTMLElement {
         editorRow.setAttribute("line-number", index + 1);
         editorRow.setAttribute("data-index", index.toString());
 
-        // Check if it's a special case or a regular editor row
-        if (data.isBlock) {
-            // Create and append special content
+        // If the text starts with OB:WASM:SOME_ID_HERE, then show the row as a special case
+        if (data.value.startsWith("OB:WASM:")) {
+            data.isBlock = true;
+            
+            // Get content after OB:WASM:
+            let wasmId = data.value.substring(8);
+            data.blockContent = wasmId;
+
             const specialDiv = document.createElement("div");
-            specialDiv.style = "width: 400px; height: 80px; background-color: #d6d6db; border-radius: 8px; padding: 8px 16px; margin: 8px 0;";
+            specialDiv.style = "width: 400px; height: 80px; font-family: 'Monaco', 'Courier New', monospace; font-size: 13px; color: white; background-color: rgb(33, 33, 33); border: 1px solid rgb(60, 60, 60); border-radius: 8px; padding: 8px 16px; margin: 8px 0;";
             specialDiv.textContent = data.blockContent;
             specialDiv.setAttribute("line-number", index + 1);
             editorRow.appendChild(specialDiv);

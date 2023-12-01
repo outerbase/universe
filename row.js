@@ -76,22 +76,13 @@ class OuterbaseEditorRow extends HTMLElement {
     connectedCallback() {
         const dragHandle = this.shadowRoot.querySelector('#line-number');
 
-        // if (!dragHandle) return;
-
         dragHandle.addEventListener('mousedown', () => {
             this.setAttribute('draggable', 'true');
-            // this.dispatchEvent(new CustomEvent('row-dragstart', { bubbles: true, composed: true }));
         });
 
         this.addEventListener('dragend', () => {
             this.removeAttribute('draggable');
-            // this.dispatchEvent(new CustomEvent('row-dragend', { bubbles: true, composed: true }));
         });
-
-        // this.addEventListener('action-newline', () => {
-        //     console.log('Row received action-newline')
-        //     // this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true }));
-        // });
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
