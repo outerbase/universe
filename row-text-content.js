@@ -54,6 +54,8 @@ templateRowContent.innerHTML = `
         font-size: 13px;
         line-height: 1.5;
         user-select: none;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
     }
 
     .dropdown {
@@ -101,7 +103,7 @@ templateRowContent.innerHTML = `
     <div id="code" contentEditable="false"></div>
 
     <!-- Show a line hint when the line is empty and cursor is active -->
-    <div id="hint" style="display: none;">Type '/' for a list of code block suggestions.</div>
+    <div id="hint" style="display: block;">Type '/' for a list of code block suggestions.</div>
 
     <!-- "/" options to show -->
     <div id="dropdown" class="dropdown" style="display: none;">
@@ -203,9 +205,10 @@ class OuterbaseEditorRowText extends HTMLElement {
             }
         });
         
-        this.codeDiv.addEventListener('scroll', function() {
-            this.shadowRoot.querySelector('#hint').style.display = 'none';
-        });
+        // this.codeDiv.addEventListener('scroll', function() {
+        //     // this.shadowRoot.querySelector('#hint').style.display = 'none';
+        //     this.shadowRoot.querySelector('#hint').style.opacity = '0';
+        // });
         
         // Enable contentEditable on focus
         this.codeDiv.addEventListener('focus', () => {
@@ -316,10 +319,26 @@ class OuterbaseEditorRowText extends HTMLElement {
             var hintTop = (numberOfLines - 1) * lineHeight;
 
             hint.style.top = hintTop + '2px';
-            hint.style.left = '4px'; // Adjust based on your styling
-            hint.style.display = 'block';
+            hint.style.left = '4px';
+
+            // Wait 500ms before showing the hint
+            setTimeout(() => {
+                hint.style.opacity = '1';
+            }, 500);
         } else {
+            // If the line was empty and the user clicked away, hide the hint
+            if (this.codeDiv.contentEditable !== 'true') {
+                hint.style.opacity = '0';
+                return;
+            }
+
+            // If a character was typed, hide the hint
             hint.style.display = 'none';
+            hint.style.opacity = '0';
+
+            setTimeout(() => {
+                hint.style.display = 'block';
+            }, 300);
         }
     }
 
