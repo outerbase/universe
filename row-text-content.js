@@ -90,6 +90,10 @@ templateRowContent.innerHTML = `
         background-color: rgb(40, 40, 40);
     }
 
+    .dropdown-item.selected {
+        background-color: rgb(40, 40, 40);
+    }
+
     .keyword { color: #98d7c8; }
     .string { color: #d99ad9; }
     .braces { color: #e4c945; }
@@ -142,6 +146,8 @@ class OuterbaseEditorRowText extends HTMLElement {
         ];
     }
 
+    selectedItemIndex = -1;
+
     constructor() {
         super();
 
@@ -167,16 +173,18 @@ class OuterbaseEditorRowText extends HTMLElement {
             this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
         });
 
-        // -----------------------------
-        // Key up and down events for the dropdown menu specifically
-        // this.codeDiv.addEventListener('keyup', (event) => this.handleKeyUp(event));
-        // this.codeDiv.addEventListener('keydown', (event) => this.handleKeyDown(event));
-        // -----------------------------
-
         this.codeDiv.addEventListener('keyup', (event) => this.checkForSlash(event.target));
 
         this.codeDiv.addEventListener('keydown', (event) => {
             var lineNumber = this.getAttribute('line-number');
+
+            // If event key is ArrowDown and the character in front of the cursor is a /, then don't do anything
+            if ((event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'Enter') && this.codeDiv.innerText.length && this.codeDiv.innerText[this.codeDiv.innerText.length - 1] === '/') {
+                event.preventDefault();
+                // Do the up/down actions for the dropdown menu instead
+                this.navigateDropdown(event.key);
+                return;
+            }
 
             // Detect up arrow key
             if (event.key === 'ArrowUp') {
@@ -308,8 +316,9 @@ class OuterbaseEditorRowText extends HTMLElement {
         // Replace "{{request.type.any_key}}" with a special div
         code = code.replace(/{{request\..+?}}/g, '<span class="request">$&</span>');
 
-        // Braces
-        code = code.replace(/(\{|\}|\(|\))/g, '<span class="braces">$&</span>');
+        // Braces - match single curly braces not part of double curly braces
+        code = code.replace(/(?<!\{)\{(?!\{)|(?<!\})\}(?!\})/g, '<span class="braces">$&</span>');
+
 
         this.shadow.querySelector("#highlight").innerHTML = code;
     }
@@ -322,19 +331,6 @@ class OuterbaseEditorRowText extends HTMLElement {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
-
-    // checkForSlash(textarea) {
-    //     var text = textarea.innerText;
-    //     var cursorPos = textarea.selectionStart;
-    //     var textUpToCursor = text.substring(0, cursorPos);
-    //     var currentLine = textUpToCursor.split("\n").pop();
-
-    //     if (currentLine.trim() === '/') {
-    //         this.showDropdown(textarea);
-    //     } else {
-    //         this.hideDropdown();
-    //     }
-    // }
 
     checkForSlash(textarea) {
         var text = textarea.innerText;
@@ -409,6 +405,7 @@ class OuterbaseEditorRowText extends HTMLElement {
     }
 
     showDropdown() {
+        this.selectedItemIndex = -1;
         var dropdown = this.shadow.querySelector("#dropdown");
         dropdown.style.display = 'block';
     }
@@ -428,6 +425,29 @@ class OuterbaseEditorRowText extends HTMLElement {
         var lineNumber = this.getAttribute('line-number');
         this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
         this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+    }
+
+    navigateDropdown(key) {
+        const dropdown = this.shadow.querySelector('#dropdown');
+        const items = Array.from(dropdown.getElementsByClassName('dropdown-item'));
+        const visibleItems = items.filter(item => item.style.display !== 'none');
+    
+        if (key === 'ArrowDown') {
+            this.selectedItemIndex = (this.selectedItemIndex + 1) % visibleItems.length;
+        } else if (key === 'ArrowUp') {
+            this.selectedItemIndex = (this.selectedItemIndex - 1 + visibleItems.length) % visibleItems.length;
+        } else if (key === 'Enter' && this.selectedItemIndex !== -1) {            
+            let option = visibleItems[this.selectedItemIndex]
+            let value = option.getAttribute('data-value');
+
+            this.insertText(value);
+            this.hideDropdown();
+            return;
+        }
+    
+        visibleItems.forEach((item, index) => {
+            item.classList.toggle('selected', index === this.selectedItemIndex);
+        });
     }
 }
 
