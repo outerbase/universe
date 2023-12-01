@@ -316,8 +316,9 @@ class OuterbaseEditorRowText extends HTMLElement {
         // Replace "{{request.type.any_key}}" with a special div
         code = code.replace(/{{request\..+?}}/g, '<span class="request">$&</span>');
 
-        // Braces
-        code = code.replace(/(\{|\}|\(|\))/g, '<span class="braces">$&</span>');
+        // Braces - match single curly braces not part of double curly braces
+        code = code.replace(/(?<!\{)\{(?!\{)|(?<!\})\}(?!\})/g, '<span class="braces">$&</span>');
+
 
         this.shadow.querySelector("#highlight").innerHTML = code;
     }
