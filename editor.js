@@ -20,17 +20,17 @@ class OuterbaseEditor extends HTMLElement {
     container = null;
     rowData = [
         { value: "" },
-        // { value: "// What goes here?" },
-        // { value: 'var test = "Hello, world!"; // Here is a comment' },
-        // { value: "var secret = {{SECRET.AWS_PROD}}" },
-        // { value: "" },
-        // { value: "var username = {{request.body.username}}" },
-        // { value: "" },
-        // { value: "/*" },
-        // { value: "  A block level comment here." },
-        // { value: "*/" },
-        // { value: "" },
-        // { value: "// Add my Slack bot" },
+        { value: "// What goes here?" },
+        { value: 'var test = "Hello, world!"; // Here is a comment' },
+        { value: "var secret = {{SECRET.AWS_PROD}}" },
+        { value: "" },
+        { value: "var username = {{request.body.username}}" },
+        { value: "" },
+        { value: "/*" },
+        { value: "  A block level comment here." },
+        { value: "*/" },
+        { value: "" },
+        { value: "// Add my Slack bot" },
         // { value: "OB:WASM:1" },
         // { isBlock: true, blockContent: "Slack Bot" },
     ];
@@ -132,16 +132,7 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.contentEditable = true;
             codeElement.focus();
 
-            // Make the cursor go to the end of the line
-            var range = document.createRange();
-            var sel = window.getSelection();
-
-            if (codeElement && codeElement.childNodes.length === 0) return;
-            range.setStart(codeElement.childNodes[0], codeElement.childNodes[0].length);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-
+            this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length);
         });
 
         this.addEventListener('action-update', (event) => {
@@ -153,6 +144,56 @@ class OuterbaseEditor extends HTMLElement {
         });
 
         this.addEventListener('action-up', (event) => {
+            let lineNumber = event.detail.lineNumber;
+            let cursorPosition = event.detail.cursorPosition;
+
+            console.log('action-up', lineNumber, cursorPosition);
+
+            // Row shadow root
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`).shadowRoot
+
+            // Find the `slot` element in rowElement
+            let slotElement = rowElement.querySelector('slot');
+
+            // Find the `outerbase-editor-row-text` element in slotElement
+            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
+
+            if (!rowTextElement) return;
+            let codeElement = rowTextElement.querySelector('#code');
+
+            // Make codeElement contentEditable
+            codeElement.contentEditable = true;
+            codeElement.focus();
+
+            // Move the cursor up to the line above at the same position if possible
+            this.moveCursorToPosition(codeElement, cursorPosition);
+        });
+
+        this.addEventListener('action-down', (event) => {
+            let lineNumber = event.detail.lineNumber;
+            let cursorPosition = event.detail.cursorPosition;
+
+            // Row shadow root
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`).shadowRoot
+
+            // Find the `slot` element in rowElement
+            let slotElement = rowElement.querySelector('slot');
+
+            // Find the `outerbase-editor-row-text` element in slotElement
+            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
+
+            if (!rowTextElement) return;
+            let codeElement = rowTextElement.querySelector('#code');
+
+            // Make codeElement contentEditable
+            codeElement.contentEditable = true;
+            codeElement.focus();
+
+            // Move the cursor up to the line below at the same position if possible
+            this.moveCursorToPosition(codeElement, cursorPosition);
+        });
+
+        this.addEventListener('action-left', (event) => {
             let lineNumber = event.detail.lineNumber;
 
             // Row shadow root
@@ -170,9 +211,12 @@ class OuterbaseEditor extends HTMLElement {
             // Make codeElement contentEditable
             codeElement.contentEditable = true;
             codeElement.focus();
+
+            // Move the cursor of codeElement to the end of the line
+            this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length);
         });
 
-        this.addEventListener('action-down', (event) => {
+        this.addEventListener('action-right', (event) => {
             let lineNumber = event.detail.lineNumber;
 
             // Row shadow root
@@ -191,6 +235,18 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.contentEditable = true;
             codeElement.focus();
         });
+    }
+
+    moveCursorToPosition(element, position) {
+        var range = document.createRange();
+        var sel = window.getSelection();
+
+        if (element && element.childNodes.length === 0) return;
+
+        range.setStart(element.childNodes[0], position);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 
     getRowDataIndex(element) {

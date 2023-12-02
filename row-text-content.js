@@ -160,6 +160,23 @@ class OuterbaseEditorRowText extends HTMLElement {
         this.updateHint()
     }
 
+    getCursorPosition() {
+        const selection = this.shadowRoot.getSelection ? this.shadowRoot.getSelection() : window.getSelection();
+
+        if (!selection || selection.rangeCount === 0) {
+            return 0;
+        }
+
+        const range = selection.getRangeAt(0);
+        const clonedRange = range.cloneRange();
+        clonedRange.selectNodeContents(this.codeDiv);
+        clonedRange.setEnd(range.endContainer, range.endOffset);
+
+        const position = clonedRange.toString().length;
+
+        return position;
+    }
+
     connectedCallback() {
         this.codeDiv = this.shadowRoot.querySelector('#code');
 
@@ -188,15 +205,54 @@ class OuterbaseEditorRowText extends HTMLElement {
 
             // Detect up arrow key
             if (event.key === 'ArrowUp') {
+                var cursorPos = this.getCursorPosition(this.codeDiv);
+                console.log('Cursor Pos: ', cursorPos);
+
                 event.preventDefault();
-                this.dispatchEvent(new CustomEvent('action-up', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+                this.dispatchEvent(new CustomEvent('action-up', { 
+                    bubbles: true, 
+                    composed: true, 
+                    detail: { 
+                        lineNumber: lineNumber,
+                        cursorPosition: cursorPos
+                    } 
+                }));
                 return;
             }
 
             if (event.key === 'ArrowDown') {
                 event.preventDefault();
-                this.dispatchEvent(new CustomEvent('action-down', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+                this.dispatchEvent(new CustomEvent('action-down', { 
+                    bubbles: true, 
+                    composed: true, 
+                    detail: { 
+                        lineNumber: lineNumber,
+                        cursorPosition: this.getCursorPosition(this.codeDiv)
+                    } 
+                }));
                 return;
+            }
+
+            if (event.key === 'ArrowLeft') {
+                var text = this.codeDiv.innerText;
+                var cursorPos = this.getCursorPosition(this.codeDiv);
+
+                if (cursorPos === 0) {
+                    event.preventDefault();
+                    this.dispatchEvent(new CustomEvent('action-left', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+                    return;
+                }
+            }
+
+            if (event.key === 'ArrowRight') {
+                var text = this.codeDiv.innerText;
+                var cursorPos = this.getCursorPosition(this.codeDiv);
+
+                if (cursorPos === text.length) {
+                    event.preventDefault();
+                    this.dispatchEvent(new CustomEvent('action-right', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+                    return;
+                }
             }
 
             // Detect delete key
