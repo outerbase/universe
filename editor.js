@@ -19,18 +19,18 @@ templateEditor.innerHTML = `
 class OuterbaseEditor extends HTMLElement {
     container = null;
     rowData = [
-        { value: "" },
-        { value: "// What goes here?" },
-        { value: 'var test = "Hello, world!"; // Here is a comment' },
-        { value: "var secret = {{SECRET.AWS_PROD}}" },
-        { value: "" },
-        { value: "var username = {{request.body.username}}" },
-        { value: "" },
-        { value: "/*" },
-        { value: "  A block level comment here." },
-        { value: "*/" },
-        { value: "" },
-        { value: "// Add my Slack bot" },
+        // { value: "" },
+        // { value: "// What goes here?" },
+        // { value: 'var test = "Hello, world!"; // Here is a comment' },
+        // { value: "var secret = {{SECRET.AWS_PROD}}" },
+        // { value: "" },
+        // { value: "var username = {{request.body.username}}" },
+        // { value: "" },
+        // { value: "/*" },
+        // { value: "  A block level comment here." },
+        // { value: "*/" },
+        // { value: "" },
+        // { value: "// Add my Slack bot" },
         // { value: "OB:WASM:1" },
         // { isBlock: true, blockContent: "Slack Bot" },
     ];
@@ -40,7 +40,7 @@ class OuterbaseEditor extends HTMLElement {
     dropTarget = null;
 
     static get observedAttributes() {
-        return [];
+        return ["code"];
     }
 
     constructor() {
@@ -48,6 +48,20 @@ class OuterbaseEditor extends HTMLElement {
 
         this.shadow = this.attachShadow({ mode: "open" });
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === "code") {
+            // Parse the code into rows array from string, splitting on `\n` characters
+            this.rowData = newValue.split("\\n").map((item, index) => {
+                return {
+                    value: item,
+                    lineNumber: (index + 1).toString()
+                };
+            });
+
+            this.render();
+        }
     }
 
     connectedCallback() {
@@ -97,10 +111,12 @@ class OuterbaseEditor extends HTMLElement {
             this.render(); 
 
             // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`).shadowRoot
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
+            if (!rowElement || !rowElement.shadowRoot) return;
+            let rowShadowRoot = rowElement.shadowRoot
 
             // Find the `slot` element in rowElement
-            let slotElement = rowElement.querySelector('slot');
+            let slotElement = rowShadowRoot.querySelector('slot');
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
@@ -119,10 +135,13 @@ class OuterbaseEditor extends HTMLElement {
             this.render(); 
 
             // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`).shadowRoot
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`)
+            if (!rowElement || !rowElement.shadowRoot) return;
+            let rowShadowRoot = rowElement.shadowRoot
+            
 
             // Find the `slot` element in rowElement
-            let slotElement = rowElement.querySelector('slot');
+            let slotElement = rowShadowRoot.querySelector('slot');
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
@@ -132,6 +151,7 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.contentEditable = true;
             codeElement.focus();
 
+            if (codeElement.childNodes.length === 0) return;
             this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length);
         });
 
@@ -147,13 +167,13 @@ class OuterbaseEditor extends HTMLElement {
             let lineNumber = event.detail.lineNumber;
             let cursorPosition = event.detail.cursorPosition;
 
-            console.log('action-up', lineNumber, cursorPosition);
-
             // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`).shadowRoot
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`)
+            if (!rowElement || !rowElement.shadowRoot) return;
+            let rowShadowRoot = rowElement.shadowRoot
 
             // Find the `slot` element in rowElement
-            let slotElement = rowElement.querySelector('slot');
+            let slotElement = rowShadowRoot.querySelector('slot');
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
@@ -174,10 +194,12 @@ class OuterbaseEditor extends HTMLElement {
             let cursorPosition = event.detail.cursorPosition;
 
             // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`).shadowRoot
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
+            if (!rowElement || !rowElement.shadowRoot) return;
+            let rowShadowRoot = rowElement.shadowRoot
 
             // Find the `slot` element in rowElement
-            let slotElement = rowElement.querySelector('slot');
+            let slotElement = rowShadowRoot.querySelector('slot');
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
@@ -197,10 +219,12 @@ class OuterbaseEditor extends HTMLElement {
             let lineNumber = event.detail.lineNumber;
 
             // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`).shadowRoot
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`)
+            if (!rowElement || !rowElement.shadowRoot) return;
+            let rowShadowRoot = rowElement.shadowRoot
 
             // Find the `slot` element in rowElement
-            let slotElement = rowElement.querySelector('slot');
+            let slotElement = rowShadowRoot.querySelector('slot');
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
@@ -213,6 +237,7 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.focus();
 
             // Move the cursor of codeElement to the end of the line
+            if (codeElement.childNodes.length === 0) return;
             this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length);
         });
 
@@ -220,10 +245,12 @@ class OuterbaseEditor extends HTMLElement {
             let lineNumber = event.detail.lineNumber;
 
             // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`).shadowRoot
+            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
+            if (!rowElement || !rowElement.shadowRoot) return;
+            let rowShadowRoot = rowElement.shadowRoot
 
             // Find the `slot` element in rowElement
-            let slotElement = rowElement.querySelector('slot');
+            let slotElement = rowShadowRoot.querySelector('slot');
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
@@ -235,6 +262,28 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.contentEditable = true;
             codeElement.focus();
         });
+
+        this.addEventListener('action-select-all', (event) => {
+            let lineNumber = event.detail.lineNumber;
+            
+            let container = this.shadow.querySelector("#editor-rows");
+            console.log('Select all: ', container);
+
+            this.selectTextInDiv(container);
+        });
+    }
+
+    selectTextInDiv(divElement) {
+        // const selection = this.shadowRoot.getSelection ? this.shadowRoot.getSelection() : window.getSelection();
+
+        // if (window.getSelection && document.createRange) {
+            const range = document.createRange();
+            range.selectNodeContents(divElement);
+    
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        // }
     }
 
     moveCursorToPosition(element, position) {
@@ -243,7 +292,9 @@ class OuterbaseEditor extends HTMLElement {
 
         if (element && element.childNodes.length === 0) return;
 
-        range.setStart(element.childNodes[0], position);
+        let lineLength = element.childNodes[0].length;
+        range.setStart(element.childNodes[0], position > lineLength ? lineLength : position);
+
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
@@ -252,10 +303,6 @@ class OuterbaseEditor extends HTMLElement {
     getRowDataIndex(element) {
         const indexAttr = element.getAttribute('data-index');
         return indexAttr ? parseInt(indexAttr, 10) : null;
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        this.render();
     }
 
     render() {

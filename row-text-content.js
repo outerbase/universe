@@ -206,7 +206,6 @@ class OuterbaseEditorRowText extends HTMLElement {
             // Detect up arrow key
             if (event.key === 'ArrowUp') {
                 var cursorPos = this.getCursorPosition(this.codeDiv);
-                console.log('Cursor Pos: ', cursorPos);
 
                 event.preventDefault();
                 this.dispatchEvent(new CustomEvent('action-up', { 
@@ -290,6 +289,13 @@ class OuterbaseEditorRowText extends HTMLElement {
                 sel.removeAllRanges();
                 sel.addRange(range);
 
+                return;
+            }
+
+            // Detect when the user clicks CMD+A or CTRL+A
+            if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
+                event.preventDefault();
+                this.dispatchEvent(new CustomEvent('action-select-all', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
                 return;
             }
         });
