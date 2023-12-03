@@ -40,7 +40,10 @@ class OuterbaseEditor extends HTMLElement {
     dropTarget = null;
 
     static get observedAttributes() {
-        return ["code"];
+        return [
+            "code",
+            "read-only"
+        ];
     }
 
     constructor() {
@@ -56,9 +59,22 @@ class OuterbaseEditor extends HTMLElement {
             this.rowData = newValue.split("\\n").map((item, index) => {
                 return {
                     value: item,
-                    lineNumber: (index + 1).toString()
+                    lineNumber: (index + 1).toString(),
+                    'read-only': this.getAttribute('read-only') === "true" ? true : false
                 };
             });
+
+            this.render();
+        } else if (name === "read-only") {
+            if (newValue === "true") {
+                this.rowData.forEach((item, index) => {
+                    item['read-only'] = true;
+                });
+            } else {
+                this.rowData.forEach((item, index) => {
+                    item['read-only'] = false;
+                });
+            }
 
             this.render();
         }
@@ -334,6 +350,7 @@ class OuterbaseEditor extends HTMLElement {
             const editorRowText = document.createElement("outerbase-editor-row-text");
             editorRowText.setAttribute("line-number", index + 1);
             editorRowText.setAttribute("value", data.value);
+            editorRowText.setAttribute("read-only", data['read-only'] ? "true" : "false");
             editorRow.appendChild(editorRowText);
         }
 

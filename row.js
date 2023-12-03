@@ -62,7 +62,7 @@ class OuterbaseEditorRow extends HTMLElement {
     static get observedAttributes() {
         return [
             "line-number",
-            "max-line-number"
+            "max-line-number",
         ];
     }
 
