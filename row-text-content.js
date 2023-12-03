@@ -142,7 +142,8 @@ class OuterbaseEditorRowText extends HTMLElement {
     static get observedAttributes() {
         return [
             "line-number",
-            "value"
+            "value",
+            "read-only"
         ];
     }
 
@@ -302,6 +303,12 @@ class OuterbaseEditorRowText extends HTMLElement {
         
         // Enable contentEditable on focus
         this.codeDiv.addEventListener('focus', () => {
+            // If the editor is read-only, don't allow focus.
+            if (this.getAttribute('read-only') === 'true') {
+                this.codeDiv.blur();
+                return;
+            }
+
             this.codeDiv.contentEditable = true;
             this.updateHint()
         });
@@ -344,7 +351,6 @@ class OuterbaseEditorRowText extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-
         if (name === "value") {
             this.shadow.querySelector("#code").innerText = newValue;
         }
