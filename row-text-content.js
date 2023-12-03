@@ -271,11 +271,10 @@ class OuterbaseEditorRowText extends HTMLElement {
                 // Get text after cursor, and text to persist
                 var text = this.codeDiv.innerText;
                 var textAfterCursor = text.substring(cursorPos);
-                // var textToPersist = text.substring(0, cursorPos);
+
                 let detail = { 
                     lineNumber: lineNumber, 
-                    textAfterCursor: textAfterCursor,
-                    // textToPersist: textToPersist
+                    textAfterCursor: textAfterCursor
                 }
 
                 // If cursor is at 0 position, send an event to the editor to delete the row
@@ -311,8 +310,15 @@ class OuterbaseEditorRowText extends HTMLElement {
             if (event.key === 'Tab') {
                 event.preventDefault();
 
-                let tab = this.codeDiv.innerText + '\u00A0\u00A0\u00A0\u00A0';
-                this.codeDiv.innerText = tab;
+                // Get current cursor position
+                var cursorPos = this.getCursorPosition(this.codeDiv);
+                
+                // Insert 4 spaces at the cursor position
+                var text = this.codeDiv.innerText;
+                var textBeforeCursor = text.substring(0, cursorPos);
+                var textAfterCursor = text.substring(cursorPos);
+                this.codeDiv.innerText = textBeforeCursor + '\u00A0\u00A0\u00A0\u00A0' + textAfterCursor;
+
                 this.updateCode();
                 this.updateHint();
                 
@@ -323,6 +329,8 @@ class OuterbaseEditorRowText extends HTMLElement {
                 range.collapse(true);
                 sel.removeAllRanges();
                 sel.addRange(range);
+
+                this.moveCursorToPosition(this.codeDiv, cursorPos + 4);
 
                 return;
             }
@@ -432,6 +440,21 @@ class OuterbaseEditorRowText extends HTMLElement {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+    }
+
+    // TODO: This also exists in `editor.js` and can be centralized somewhere for reusability
+    moveCursorToPosition(element, position) {
+        var range = document.createRange();
+        var sel = window.getSelection();
+
+        if (element && element.childNodes.length === 0) return;
+
+        let lineLength = element.childNodes[0].length;
+        range.setStart(element.childNodes[0], position > lineLength ? lineLength : position);
+
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 
     checkForSlash(textarea) {
