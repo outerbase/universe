@@ -197,8 +197,14 @@ class OuterbaseEditorRowText extends HTMLElement {
             var lineNumber = this.getAttribute('line-number');
 
             // If event key is ArrowDown and the character in front of the cursor is a /, then don't do anything
-            if ((event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'Enter') && this.codeDiv.innerText.length && this.codeDiv.innerText[this.codeDiv.innerText.length - 1] === '/') {
+            if ((event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'Enter') && 
+                this.codeDiv.innerText.length && 
+                this.codeDiv.innerText[this.codeDiv.innerText.length - 1] === '/' &&
+                // If the dropdown is already showing, don't do anything because Up/Down arrows will control the dropdown menu options
+                this.shadow.querySelector('#dropdown').style.display !== 'none'
+            ) {
                 event.preventDefault();
+
                 // Do the up/down actions for the dropdown menu instead
                 this.navigateDropdown(event.key);
                 return;
@@ -259,9 +265,24 @@ class OuterbaseEditorRowText extends HTMLElement {
             if (event.key === 'Backspace') {
                 var text = this.codeDiv.innerText;
 
-                if (text === '') {
+                // Get current cursor position
+                var cursorPos = this.getCursorPosition(this.codeDiv);
+
+                // Get text after cursor, and text to persist
+                var text = this.codeDiv.innerText;
+                var textAfterCursor = text.substring(cursorPos);
+                // var textToPersist = text.substring(0, cursorPos);
+                let detail = { 
+                    lineNumber: lineNumber, 
+                    textAfterCursor: textAfterCursor,
+                    // textToPersist: textToPersist
+                }
+
+                // If cursor is at 0 position, send an event to the editor to delete the row
+                if (cursorPos === 0) {
+                // if (text === '') {
                     event.preventDefault();
-                    this.dispatchEvent(new CustomEvent('action-delete', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+                    this.dispatchEvent(new CustomEvent('action-delete', { bubbles: true, composed: true, detail: detail }));
                     return;
                 }
             }
@@ -269,8 +290,21 @@ class OuterbaseEditorRowText extends HTMLElement {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 
-                // TODO: Take any characters to the right of the cursor down into a new line with it.
-                this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+                // Get current cursor position
+                var cursorPos = this.getCursorPosition(this.codeDiv);
+
+                // Get text after cursor, and text to persist
+                var text = this.codeDiv.innerText;
+                var textAfterCursor = text.substring(cursorPos);
+                var textToPersist = text.substring(0, cursorPos);
+                let detail = { 
+                    lineNumber: lineNumber, 
+                    textAfterCursor: textAfterCursor,
+                    textToPersist: textToPersist
+                }
+
+                this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true, detail: detail }));
+
                 return;
             }
 

@@ -19,18 +19,18 @@ templateEditor.innerHTML = `
 class OuterbaseEditor extends HTMLElement {
     container = null;
     rowData = [
-        // { value: "" },
-        // { value: "// What goes here?" },
-        // { value: 'var test = "Hello, world!"; // Here is a comment' },
-        // { value: "var secret = {{SECRET.AWS_PROD}}" },
-        // { value: "" },
-        // { value: "var username = {{request.body.username}}" },
-        // { value: "" },
-        // { value: "/*" },
-        // { value: "  A block level comment here." },
-        // { value: "*/" },
-        // { value: "" },
-        // { value: "// Add my Slack bot" },
+        { value: "" },
+        { value: "// What goes here?" },
+        { value: 'var test = "Hello, world!"; // Here is a comment' },
+        { value: "var secret = {{SECRET.AWS_PROD}}" },
+        { value: "" },
+        { value: "var username = {{request.body.username}}" },
+        { value: "" },
+        { value: "/*" },
+        { value: "  A block level comment here." },
+        { value: "*/" },
+        { value: "" },
+        { value: "// Add my Slack bot" },
         // { value: "OB:WASM:1" },
         // { isBlock: true, blockContent: "Slack Bot" },
     ];
@@ -121,22 +121,20 @@ class OuterbaseEditor extends HTMLElement {
 
         this.addEventListener('action-newline', (event) => {
             let lineNumber = event.detail.lineNumber;
+            let textAfterCursor = event.detail.textAfterCursor;
+            let textToPersist = event.detail.textToPersist;
 
             // Insert a new row at the line number
-            this.rowData.splice(lineNumber, 0, { value: "" });
+            this.rowData.splice(lineNumber, 0, { value: textAfterCursor ?? "" });
             this.render(); 
 
-            // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
-            if (!rowElement || !rowElement.shadowRoot) return;
-            let rowShadowRoot = rowElement.shadowRoot
+            // Previous line
+            if (lineNumber > 0) {
+                this.rowData[lineNumber - 1].value = textToPersist ?? "";
+                this.render(); 
+            }
 
-            // Find the `slot` element in rowElement
-            let slotElement = rowShadowRoot.querySelector('slot');
-
-            // Find the `outerbase-editor-row-text` element in slotElement
-            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-            let codeElement = rowTextElement.querySelector('#code');
+            let codeElement = this.getCodeDivFromLineNumber(lineNumber)
 
             // Make codeElement contentEditable
             codeElement.contentEditable = true;
@@ -145,9 +143,16 @@ class OuterbaseEditor extends HTMLElement {
 
         this.addEventListener('action-delete', (event) => {
             let lineNumber = event.detail.lineNumber;
+            let textAfterCursor = event.detail.textAfterCursor;
 
             // Delete the row at the line number
             this.rowData.splice(lineNumber - 1, 1);
+
+            // Append textAfterCursor to the previous line
+            if (lineNumber > 1) {
+                this.rowData[lineNumber - 2].value += textAfterCursor ?? "";
+            }
+
             this.render(); 
 
             // Row shadow root
@@ -168,7 +173,9 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.focus();
 
             if (codeElement.childNodes.length === 0) return;
-            this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length);
+
+            // Move cursor to end of line, minus the length of textAfterCursor
+            this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length - (textAfterCursor?.length ?? 0));
         });
 
         this.addEventListener('action-update', (event) => {
@@ -287,6 +294,21 @@ class OuterbaseEditor extends HTMLElement {
 
             this.selectTextInDiv(container);
         });
+    }
+
+    getCodeDivFromLineNumber(lineNumber) {
+        let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
+        if (!rowElement || !rowElement.shadowRoot) return;
+        let rowShadowRoot = rowElement.shadowRoot
+
+        // Find the `slot` element in rowElement
+        let slotElement = rowShadowRoot.querySelector('slot');
+
+        // Find the `outerbase-editor-row-text` element in slotElement
+        let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
+        let codeElement = rowTextElement.querySelector('#code');
+
+        return codeElement
     }
 
     selectTextInDiv(divElement) {
