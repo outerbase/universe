@@ -42,7 +42,8 @@ class OuterbaseEditor extends HTMLElement {
     static get observedAttributes() {
         return [
             "code",
-            "readonly"
+            "readonly",
+            "show-line-numbers"
         ];
     }
 
@@ -76,6 +77,8 @@ class OuterbaseEditor extends HTMLElement {
                 });
             }
 
+            this.render();
+        }  else if (name === "show-line-numbers" && this.shadow.querySelector("#line-number-container")) {
             this.render();
         }
     }
@@ -184,6 +187,9 @@ class OuterbaseEditor extends HTMLElement {
 
             // Update the row at the line number
             this.rowData[lineNumber - 1].value = value;
+
+            // This render call loses focus, so we need to re-focus
+            // this.render();
         });
 
         this.addEventListener('action-up', (event) => {
@@ -302,25 +308,6 @@ class OuterbaseEditor extends HTMLElement {
         return codeElement
     }
 
-    // selectTextInDiv(divElement) {
-    //     // Ensure divElement is part of the shadow DOM
-    //     if (!this.shadowRoot.contains(divElement)) {
-    //         console.error('Provided element is not inside the shadow DOM of this component');
-    //         return;
-    //     }
-    
-    //     const selection = window.getSelection(); // Use window.getSelection for broader support
-    
-    //     if (selection && document.createRange) {
-    //         const range = document.createRange();
-    //         range.selectNodeContents(divElement);
-    
-    //         selection.removeAllRanges();
-    //         selection.addRange(range);
-    //     }
-    // }
-    
-
     moveCursorToPosition(element, position) {
         var range = document.createRange();
         var sel = window.getSelection();
@@ -347,13 +334,19 @@ class OuterbaseEditor extends HTMLElement {
     }
 
     createAndAppendRow(data, index) {
+        // Create a string of "9" repeated for the max line number length
+        const maxLineNumberLength = this.rowData.length.toString().length;
+        const maxLineNumberString = "9".repeat(maxLineNumberLength);
+
         const editorRow = document.createElement("outerbase-editor-row");
         editorRow.setAttribute("line-number", index + 1);
+        editorRow.setAttribute("max-line-number", maxLineNumberString);
         editorRow.setAttribute("data-index", index.toString());
         editorRow.setAttribute("readonly", data['readonly'] ? "true" : "false");
+        editorRow.setAttribute("show-line-numbers", this.getAttribute("show-line-numbers"));
 
         // If the text starts with OB:WASM:SOME_ID_HERE, then show the row as a special case
-        if (data.value.startsWith("OB:WASM:")) {
+        if (data.value?.startsWith("OB:WASM:")) {
             data.isBlock = true;
             
             // Get content after OB:WASM:
