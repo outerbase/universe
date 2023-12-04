@@ -143,7 +143,7 @@ class OuterbaseEditorRowText extends HTMLElement {
         return [
             "line-number",
             "value",
-            "read-only"
+            "readonly"
         ];
     }
 
@@ -176,6 +176,24 @@ class OuterbaseEditorRowText extends HTMLElement {
         const position = clonedRange.toString().length;
 
         return position;
+    }
+
+    selectText() {
+        // Assuming this.shadowRoot points to the shadow DOM of the element
+        const shadowRoot = this.shadowRoot;
+
+        // You might need to adjust the selector based on how your text is structured
+        const textContainer = this.codeDiv;
+
+        if (textContainer) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+
+            range.selectNodeContents(textContainer);
+
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
     }
 
     connectedCallback() {
@@ -331,22 +349,16 @@ class OuterbaseEditorRowText extends HTMLElement {
                 sel.addRange(range);
 
                 this.moveCursorToPosition(this.codeDiv, cursorPos + 4);
+                this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
 
-                return;
-            }
-
-            // Detect when the user clicks CMD+A or CTRL+A
-            if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
-                event.preventDefault();
-                this.dispatchEvent(new CustomEvent('action-select-all', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
                 return;
             }
         });
         
         // Enable contentEditable on focus
         this.codeDiv.addEventListener('focus', () => {
-            // If the editor is read-only, don't allow focus.
-            if (this.getAttribute('read-only') === 'true') {
+            // If the editor is readonly, don't allow focus.
+            if (this.getAttribute('readonly') === 'true') {
                 this.codeDiv.blur();
                 return;
             }
@@ -547,9 +559,19 @@ class OuterbaseEditorRowText extends HTMLElement {
         this.updateHint();
         this.hideDropdown();
 
+        // Get text after cursor, and text to persist
         var lineNumber = this.getAttribute('line-number');
+        var text = this.codeDiv.innerText;
+        var textToPersist =text;
+        let detail = { 
+            lineNumber: lineNumber,
+            textToPersist: textToPersist
+        }
+
+
         this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
-        this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true, detail: { lineNumber: lineNumber } }));
+        this.dispatchEvent(new CustomEvent('action-newline', { bubbles: true, composed: true, detail: detail }));
+
     }
 
     navigateDropdown(key) {
@@ -561,12 +583,13 @@ class OuterbaseEditorRowText extends HTMLElement {
             this.selectedItemIndex = (this.selectedItemIndex + 1) % visibleItems.length;
         } else if (key === 'ArrowUp') {
             this.selectedItemIndex = (this.selectedItemIndex - 1 + visibleItems.length) % visibleItems.length;
-        } else if (key === 'Enter' && this.selectedItemIndex !== -1) {            
+        } else if (key === 'Enter' && this.selectedItemIndex !== -1) {
             let option = visibleItems[this.selectedItemIndex]
             let value = option.getAttribute('data-value');
 
             this.insertText(value);
             this.hideDropdown();
+
             return;
         }
     
