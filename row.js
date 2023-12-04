@@ -12,10 +12,12 @@ templateRow.innerHTML = `
         line-height: 1.5;
         text-align: right;
         padding: 0px 20px;
-        user-select: none;
         margin-right: 16px;
         height: 100%;
         color: transparent;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
     }
 
     #line-number:hover {
@@ -35,6 +37,9 @@ templateRow.innerHTML = `
         font-family: 'Monaco', 'Courier New', monospace;
         font-size: 13px;
         line-height: 1.5;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
     }
 
     #row {
@@ -63,6 +68,7 @@ class OuterbaseEditorRow extends HTMLElement {
         return [
             "line-number",
             "max-line-number",
+            "readonly"
         ];
     }
 
@@ -77,6 +83,10 @@ class OuterbaseEditorRow extends HTMLElement {
         const dragHandle = this.shadowRoot.querySelector('#line-number');
 
         dragHandle.addEventListener('mousedown', () => {
+            if (this.getAttribute('readonly') === 'true') {
+                return;
+            }
+
             this.setAttribute('draggable', 'true');
         });
 

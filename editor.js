@@ -42,7 +42,7 @@ class OuterbaseEditor extends HTMLElement {
     static get observedAttributes() {
         return [
             "code",
-            "read-only"
+            "readonly"
         ];
     }
 
@@ -60,19 +60,19 @@ class OuterbaseEditor extends HTMLElement {
                 return {
                     value: item,
                     lineNumber: (index + 1).toString(),
-                    'read-only': this.getAttribute('read-only') === "true" ? true : false
+                    'readonly': this.getAttribute('readonly') === "true" ? true : false
                 };
             });
 
             this.render();
-        } else if (name === "read-only") {
+        } else if (name === "readonly") {
             if (newValue === "true") {
                 this.rowData.forEach((item, index) => {
-                    item['read-only'] = true;
+                    item['readonly'] = true;
                 });
             } else {
                 this.rowData.forEach((item, index) => {
-                    item['read-only'] = false;
+                    item['readonly'] = false;
                 });
             }
 
@@ -285,15 +285,6 @@ class OuterbaseEditor extends HTMLElement {
             codeElement.contentEditable = true;
             codeElement.focus();
         });
-
-        this.addEventListener('action-select-all', (event) => {
-            let lineNumber = event.detail.lineNumber;
-            
-            let container = this.shadow.querySelector("#editor-rows");
-            console.log('Select all: ', container);
-
-            this.selectTextInDiv(container);
-        });
     }
 
     getCodeDivFromLineNumber(lineNumber) {
@@ -311,18 +302,24 @@ class OuterbaseEditor extends HTMLElement {
         return codeElement
     }
 
-    selectTextInDiv(divElement) {
-        // const selection = this.shadowRoot.getSelection ? this.shadowRoot.getSelection() : window.getSelection();
-
-        // if (window.getSelection && document.createRange) {
-            const range = document.createRange();
-            range.selectNodeContents(divElement);
+    // selectTextInDiv(divElement) {
+    //     // Ensure divElement is part of the shadow DOM
+    //     if (!this.shadowRoot.contains(divElement)) {
+    //         console.error('Provided element is not inside the shadow DOM of this component');
+    //         return;
+    //     }
     
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-        // }
-    }
+    //     const selection = window.getSelection(); // Use window.getSelection for broader support
+    
+    //     if (selection && document.createRange) {
+    //         const range = document.createRange();
+    //         range.selectNodeContents(divElement);
+    
+    //         selection.removeAllRanges();
+    //         selection.addRange(range);
+    //     }
+    // }
+    
 
     moveCursorToPosition(element, position) {
         var range = document.createRange();
@@ -353,6 +350,7 @@ class OuterbaseEditor extends HTMLElement {
         const editorRow = document.createElement("outerbase-editor-row");
         editorRow.setAttribute("line-number", index + 1);
         editorRow.setAttribute("data-index", index.toString());
+        editorRow.setAttribute("readonly", data['readonly'] ? "true" : "false");
 
         // If the text starts with OB:WASM:SOME_ID_HERE, then show the row as a special case
         if (data.value.startsWith("OB:WASM:")) {
@@ -372,7 +370,7 @@ class OuterbaseEditor extends HTMLElement {
             const editorRowText = document.createElement("outerbase-editor-row-text");
             editorRowText.setAttribute("line-number", index + 1);
             editorRowText.setAttribute("value", data.value);
-            editorRowText.setAttribute("read-only", data['read-only'] ? "true" : "false");
+            editorRowText.setAttribute("readonly", data['readonly'] ? "true" : "false");
             editorRow.appendChild(editorRowText);
         }
 
