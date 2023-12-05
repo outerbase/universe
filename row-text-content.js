@@ -29,12 +29,12 @@ templateRowContent.innerHTML = `
         height: 100%;
         caret-color: white;
         cursor: text;
+        white-space: nowrap;
     }
 
     #highlight {
         pointer-events: none;
-        white-space: pre-wrap;
-        word-wrap: break-word;
+        white-space: nowrap;
         user-select: none;
         color: #9abbef;
     }
@@ -353,45 +353,6 @@ class OuterbaseEditorRowText extends HTMLElement {
 
                 return;
             }
-
-            // When user types Command+] or Command+[ on Mac, or Ctrl+] or Ctrl+[ on Windows, indent or unindent the line
-            // if ((event.metaKey || event.ctrlKey) && (event.key === ']' || event.key === '[')) {
-            //     event.preventDefault();
-
-            //     // Get current cursor position
-            //     var cursorPos = this.getCursorPosition(this.codeDiv);
-
-            //     // Get text after cursor, and text to persist
-            //     var text = '\u00A0\u00A0\u00A0\u00A0' + this.codeDiv.innerText;
-            //     // var textBeforeCursor = text.substring(0, cursorPos);
-            //     // var textAfterCursor = text.substring(cursorPos);
-            //     // var textToPersist = text.substring(0, cursorPos);
-            //     let detail = { 
-            //         lineNumber: lineNumber, 
-            //         // textAfterCursor: textAfterCursor,
-            //         value: text
-            //     }
-
-            //     console.log('Text: ', text)
-
-            //     this.updateCode();
-            //     this.updateHint();
-
-
-            //     this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: detail }));
-
-            //     setTimeout(() => {
-            //         this.moveCursorToPosition(this.codeDiv, cursorPos + 4);
-            //     }, 100);
-
-            //     // if (event.key === ']') {
-            //     //     this.dispatchEvent(new CustomEvent('action-indent', { bubbles: true, composed: true, detail: detail }));
-            //     // } else {
-            //     //     this.dispatchEvent(new CustomEvent('action-unindent', { bubbles: true, composed: true, detail: detail }));
-            //     // }
-
-            //     return;
-            // }
         });
         
         // Enable contentEditable on focus

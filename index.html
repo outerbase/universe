@@ -2,7 +2,8 @@
 <head>
     <title>Test</title>
 
-    <!-- <script type="module" src="./universe-editor/main.js" defer></script> -->
+    <!-- <script type="module" src="./universe-editor/main.js"></script> -->
+    <!-- <script type="module" src="editor.js"></script> -->
     <script src="editor.js" defer></script>
     <script src="row.js" defer></script>
     <script src="row-text-content.js" defer></script>
@@ -15,7 +16,18 @@
 </head>
 
 <body>
-    <outerbase-editor readonly="false" show-line-numbers="true" code="function test() {\n// Comment here...\n}"></outerbase-editor>
+    <outerbase-editor 
+        readonly="false" 
+        show-line-numbers="true" 
+    />
 </body>
+
+<script>
+    var code = "function test() {\n// Comment here...\n}"
+    const editor = document.querySelector('outerbase-editor');
+
+    // Change the `code` attribute to change the code in the editor
+    editor.setAttribute('code', code);
+</script>
 
 </html>
