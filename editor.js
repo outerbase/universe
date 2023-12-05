@@ -1,3 +1,6 @@
+// import './row-text-content.js';
+// import './row.js';
+
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <style>
@@ -6,7 +9,7 @@ templateEditor.innerHTML = `
         display: flex;
         flex-direction: column;
         height: 100%;
-        overflow-y: scroll;
+        overflow-y: hidden;
         background: #171717;
     }
 </style>
@@ -19,21 +22,23 @@ templateEditor.innerHTML = `
 class OuterbaseEditor extends HTMLElement {
     container = null;
     rowData = [
-        { value: "" },
-        { value: "// What goes here?" },
-        { value: 'var test = "Hello, world!"; // Here is a comment' },
-        { value: "var secret = {{SECRET.AWS_PROD}}" },
-        { value: "" },
-        { value: "var username = {{request.body.username}}" },
-        { value: "" },
-        { value: "/*" },
-        { value: "  A block level comment here." },
-        { value: "*/" },
-        { value: "" },
-        { value: "// Add my Slack bot" },
+        // { value: "" },
+        // { value: "// What goes here?" },
+        // { value: 'var test = "Hello, world!"; // Here is a comment' },
+        // { value: "var secret = {{SECRET.AWS_PROD}}" },
+        // { value: "" },
+        // { value: "var username = {{request.body.username}}" },
+        // { value: "" },
+        // { value: "/*" },
+        // { value: "  A block level comment here." },
+        // { value: "*/" },
+        // { value: "" },
+        // { value: "// Add my Slack bot" },
         // { value: "OB:WASM:1" },
         // { isBlock: true, blockContent: "Slack Bot" },
     ];
+
+    code = "";
 
     // Drag and drop row support
     draggedElement = null;
@@ -54,18 +59,30 @@ class OuterbaseEditor extends HTMLElement {
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
     }
 
+    redrawRowData() {
+        // Parse the code into rows array from string, splitting on `\n` characters
+        this.rowData = this.code.trim().split(`\n`).map((item, index) => {
+            item = item.replace(/^ +/g, match => '\u00A0'.repeat(match.length));
+
+            return {
+                value: item,
+                lineNumber: (index + 1).toString(),
+                'readonly': this.getAttribute('readonly') === "true" ? true : false
+            };
+        });
+
+        // If no rows exist, put a default row in.
+        if (this.rowData.length === 0) {
+            this.rowData = [{ value: "" }];
+        }
+
+        this.render();
+    }
+
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "code") {
-            // Parse the code into rows array from string, splitting on `\n` characters
-            this.rowData = newValue.split("\\n").map((item, index) => {
-                return {
-                    value: item,
-                    lineNumber: (index + 1).toString(),
-                    'readonly': this.getAttribute('readonly') === "true" ? true : false
-                };
-            });
-
-            this.render();
+            this.code = newValue;
+            this.redrawRowData();
         } else if (name === "readonly") {
             if (newValue === "true") {
                 this.rowData.forEach((item, index) => {
@@ -169,6 +186,8 @@ class OuterbaseEditor extends HTMLElement {
 
             // Find the `outerbase-editor-row-text` element in slotElement
             let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
+            
+            if (!rowTextElement) return;
             let codeElement = rowTextElement.querySelector('#code');
 
             // Make codeElement contentEditable

@@ -11,7 +11,7 @@ templateRow.innerHTML = `
         font-size: 13px;
         line-height: 1.5;
         text-align: right;
-        padding: 0px 20px 0 8px;
+        padding: 0px 0px 0px 8px;
         height: 100%;
         color: transparent;
         -webkit-user-select: none; /* Safari */
