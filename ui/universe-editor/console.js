@@ -1,5 +1,5 @@
-var templateRow = document.createElement("template");
-templateRow.innerHTML = `
+var templateConsole = document.createElement("template");
+templateConsole.innerHTML = `
 <style>
     #container {
         display: flex;
@@ -56,7 +56,7 @@ class OuterbaseConsole extends HTMLElement {
         super();
 
         this.shadow = this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = templateRow.innerHTML;
+        this.shadowRoot.innerHTML = templateConsole.innerHTML;
     }
 
     connectedCallback() {

@@ -5,7 +5,9 @@
   "main": "editor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode production"
+    "build-web-component-bundle": "webpack --mode production",
+    "run-tauri-app": "pnpm tauri dev",
+    "build-tauri-app": "pnpm tauri build"
   },
   "keywords": [],
   "author": "",

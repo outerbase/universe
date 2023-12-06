@@ -1,5 +1,5 @@
-var templateRow = document.createElement("template");
-templateRow.innerHTML = `
+var templateActionBar = document.createElement("template");
+templateActionBar.innerHTML = `
 <style>
     #container {
         display: flex;
@@ -42,7 +42,7 @@ class OuterbaseActionBar extends HTMLElement {
         super();
 
         this.shadow = this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = templateRow.innerHTML;
+        this.shadowRoot.innerHTML = templateActionBar.innerHTML;
     }
 
     connectedCallback() {
