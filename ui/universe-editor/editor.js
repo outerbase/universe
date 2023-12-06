@@ -31,7 +31,7 @@ templateEditor.innerHTML = `
 
 <div id="container">
     <outerbase-action-bar></outerbase-action-bar>
-    
+
     <div id="editor-rows">
 
     </div>
