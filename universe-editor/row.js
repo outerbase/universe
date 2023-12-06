@@ -61,6 +61,7 @@ templateRow.innerHTML = `
 </div>
 `;
 
+// export default 
 class OuterbaseEditorRow extends HTMLElement {
     static get observedAttributes() {
         return [

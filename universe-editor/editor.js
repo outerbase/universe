@@ -4,6 +4,13 @@
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <style>
+    #container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+    }
+
     #editor-rows {
         padding: 16px 0;
         display: flex;
@@ -12,14 +19,29 @@ templateEditor.innerHTML = `
         overflow-y: hidden;
         background: #171717;
     }
+
+    #bottom-pane {
+        display: flex;
+        flex-direction: column;
+        height: 300px;
+        width: 100%;
+        background-color: yellow;
+    }
 </style>
 
-<div id="editor-rows">
+<div id="container">
+    <outerbase-action-bar></outerbase-action-bar>
+    
+    <div id="editor-rows">
 
+    </div>
+
+    <outerbase-console></outerbase-console>
 </div>
 `;
 
-class OuterbaseEditor extends HTMLElement {
+// export
+ class OuterbaseEditor extends HTMLElement {
     container = null;
     rowData = [
         // { value: "" },

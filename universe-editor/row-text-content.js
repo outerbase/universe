@@ -98,7 +98,7 @@ templateRowContent.innerHTML = `
     .string { color: #d99ad9; }
     .braces { color: #e4c945; }
     .variable-name { color: white; }
-    .comment { color: #6a6a6a; }
+    .comment { color: #6a6a6a !important; }
     .request { 
         color: gray;
         text-decoration: underline;
@@ -138,6 +138,7 @@ templateRowContent.innerHTML = `
 </div>
 `;
 
+// export default 
 class OuterbaseEditorRowText extends HTMLElement {
     static get observedAttributes() {
         return [
@@ -426,12 +427,6 @@ class OuterbaseEditorRowText extends HTMLElement {
         // Keywords
         code = code.replace(/(var|let|const|function|return|if|else|for|while|break|continue)/g, '<span class="keyword">$1</span>');
 
-        // Inline comments
-        code = code.replace(/(\/\/.*)/g, '<span class="comment">$1</span>');
-
-        // Block comments
-        code = code.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>');
-
         // Replace "{{SECRET.any_key}}" with a special div
         code = code.replace(/{{SECRET\..+?}}/g, '<span class="secret">$&</span>');
 
@@ -441,6 +436,11 @@ class OuterbaseEditorRowText extends HTMLElement {
         // Braces - match single curly braces not part of double curly braces
         code = code.replace(/(?<!\{)\{(?!\{)|(?<!\})\}(?!\})/g, '<span class="braces">$&</span>');
 
+        // Inline comments
+        code = code.replace(/(\/\/.*)/g, '<span class="comment">$1</span>');
+
+        // Block comments
+        code = code.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>');
 
         this.shadow.querySelector("#highlight").innerHTML = code;
     }

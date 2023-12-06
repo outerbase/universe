@@ -2,11 +2,24 @@
 <head>
     <title>Test</title>
 
-    <!-- <script type="module" src="./universe-editor/main.js"></script> -->
-    <!-- <script type="module" src="editor.js"></script> -->
-    <script src="editor.js" defer></script>
-    <script src="row.js" defer></script>
-    <script src="row-text-content.js" defer></script>
+    <!-- <script type="module" src="http://127.0.0.1:8080/dist/bundle.js"></script> -->
+
+    <script src="./universe-editor/editor.js" defer></script>
+    <script src="./universe-editor/row.js" defer></script>
+    <script src="./universe-editor/row-text-content.js" defer></script>
+    <script src="./universe-editor/console.js" defer></script>
+    <script src="./universe-editor/action-bar.js" defer></script>
+
+    <!-- 
+        To run this example, make sure the three web components have their `export class` lines uncommented.
+        
+        Then, run the following commands in the root directory:
+
+        - npm run build 
+        - http-server --cors 
+
+        Then the script import above will work.
+    -->
 
     <style>
         body {
@@ -19,7 +32,7 @@
     <outerbase-editor 
         readonly="false" 
         show-line-numbers="true" 
-    />
+    ></outerbase-editor>
 </body>
 
 <script>
