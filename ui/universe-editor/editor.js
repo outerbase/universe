@@ -30,13 +30,13 @@ templateEditor.innerHTML = `
 </style>
 
 <div id="container">
-    <outerbase-action-bar></outerbase-action-bar>
+    <!-- <outerbase-action-bar></outerbase-action-bar> -->
 
     <div id="editor-rows">
 
     </div>
 
-    <outerbase-console></outerbase-console>
+    <!-- <outerbase-console></outerbase-console> -->
 </div>
 `;
 

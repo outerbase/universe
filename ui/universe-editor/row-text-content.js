@@ -29,14 +29,16 @@ templateRowContent.innerHTML = `
         height: 100%;
         caret-color: white;
         cursor: text;
-        white-space: nowrap;
     }
 
     #highlight {
         pointer-events: none;
-        white-space: nowrap;
         user-select: none;
         color: #9abbef;
+    }
+
+    #code, #highlight {
+        white-space: pre;
     }
 
     #code, #highlight {
@@ -94,9 +96,14 @@ templateRowContent.innerHTML = `
         background-color: rgb(40, 40, 40);
     }
 
+    .function-name { color: #ff0000; }
     .keyword { color: #98d7c8; }
     .string { color: #d99ad9; }
+    .number { color: purple; }
+    .boolean { color: green; }
+    .null { color: pink; }
     .braces { color: #e4c945; }
+    .punctuation { color: indigo; }
     .variable-name { color: white; }
     .comment { color: #6a6a6a !important; }
     .request { 
@@ -120,11 +127,14 @@ templateRowContent.innerHTML = `
         transform: translate(-50%, -50%); /* Center the pseudo-element */
         border-radius: 4px;
     }
-    
+
+    /* PRISMJS OVERRIDES */
+    pre[class*=language-]{padding:0 !important;margin:0 !important;overflow:auto !important}
+    pre[class*=language-]{background:transparent !important;}
 </style>
 
 <div id="container">
-    <pre><code id="highlight"></code></pre>
+    <pre><code class="language-javascript no-whitespace-normalization" id="highlight"></code></pre>
     <div id="code" contentEditable="false" spellcheck="false"></div>
 
     <!-- Show a line hint when the line is empty and cursor is active -->
@@ -152,9 +162,35 @@ class OuterbaseEditorRowText extends HTMLElement {
 
     constructor() {
         super();
-
+    
         this.shadow = this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = templateRowContent.innerHTML;
+        this.shadow.innerHTML = templateRowContent.innerHTML;
+
+        const css = `
+        /* PrismJS 1.29.0
+https://prismjs.com/download.html#themes=prism-tomorrow&languages=css+clike+javascript+css-extras&plugins=inline-color */
+code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyIDIiPjxwYXRoIGZpbGw9ImdyYXkiIGQ9Ik0wIDBoMnYySDB6Ii8+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDBoMXYxSDB6TTEgMWgxdjFIMXoiLz48L3N2Zz4=);background-position:center;background-size:110%;display:inline-block;height:1.333ch;width:1.333ch;margin:0 .333ch;box-sizing:border-box;border:1px solid #fff;outline:1px solid rgba(0,0,0,.5);overflow:hidden}span.inline-color{display:block;height:120%;width:120%}
+`;
+
+        const style = document.createElement('style');
+        style.textContent = css;
+        this.shadow.appendChild(style);
+    
+        // Add Prism JS
+        const script = document.createElement('script');
+        script.src = "./universe-editor/prism/prism.js";
+        script.onload = () => {
+            // Ensure Prism is available and highlight
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAllUnder(this.shadow);
+                // const codeBlocks = this.shadow.querySelectorAll('code');
+                // codeBlocks.forEach(block => Prism.highlightElement(block));
+            }
+        };
+        this.shadow.appendChild(script);
+
+        this.render();
     }
 
     changeContentEditable(bool) {
@@ -420,30 +456,13 @@ class OuterbaseEditorRowText extends HTMLElement {
     updateCode() {
         var code = this.shadow.querySelector("#code").innerText;
         code = this.escapeHtml(code);
-
-        // Single and double quote strings
-        code = code.replace(/(&#039;|&quot;)(.*?)(&#039;|&quot;)/g, '<span class="string">$&</span>');
-
-        // Keywords
-        code = code.replace(/(var|let|const|function|return|if|else|for|while|break|continue)/g, '<span class="keyword">$1</span>');
-
-        // Replace "{{SECRET.any_key}}" with a special div
-        code = code.replace(/{{SECRET\..+?}}/g, '<span class="secret">$&</span>');
-
-        // Replace "{{request.type.any_key}}" with a special div
-        code = code.replace(/{{request\..+?}}/g, '<span class="request">$&</span>');
-
-        // Braces - match single curly braces not part of double curly braces
-        code = code.replace(/(?<!\{)\{(?!\{)|(?<!\})\}(?!\})/g, '<span class="braces">$&</span>');
-
-        // Inline comments
-        code = code.replace(/(\/\/.*)/g, '<span class="comment">$1</span>');
-
-        // Block comments
-        code = code.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="comment">$1</span>');
-
         this.shadow.querySelector("#highlight").innerHTML = code;
+
+        if (typeof Prism !== 'undefined' && this.codeDiv) {
+            Prism.highlightAllUnder(this.shadow);
+        }
     }
+        
 
     escapeHtml(unsafe) {
         return unsafe

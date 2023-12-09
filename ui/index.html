@@ -10,6 +10,9 @@
     <script src="./universe-editor/console.js" defer></script>
     <script src="./universe-editor/action-bar.js" defer></script>
 
+    <!-- <link href="./universe-editor/prism/prism.css" rel="stylesheet" />
+    <script src="./universe-editor/prism/prism.js"></script> -->
+
     <!-- 
         To run this example, make sure the three web components have their `export class` lines uncommented.
         
@@ -36,7 +39,7 @@
 </body>
 
 <script>
-    var code = "function test() {\n// Comment here...\n}"
+    var code = "function test() {\n\u00A0\u00A0\u00A0\u00A0// Comment here...\n}"
     const editor = document.querySelector('outerbase-editor');
 
     // Change the `code` attribute to change the code in the editor
