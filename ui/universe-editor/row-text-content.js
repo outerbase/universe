@@ -131,6 +131,28 @@ templateRowContent.innerHTML = `
     /* PRISMJS OVERRIDES */
     pre[class*=language-]{padding:0 !important;margin:0 !important;overflow:auto !important}
     pre[class*=language-]{background:transparent !important;}
+
+
+    .token.request-variable .class-name {
+        /* Styles for 'request' */
+        color: gray;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+    
+    .token.request-variable .property {
+        /* Styles for 'NAME' */
+        color: gray;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+    
+    .token.request-variable .punctuation {
+        /* Styles for '.' and '{{}}' */
+        color: gray;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
 </style>
 
 <div id="container">
@@ -183,9 +205,29 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
         script.onload = () => {
             // Ensure Prism is available and highlight
             if (typeof Prism !== 'undefined') {
+                // Ensure Prism and its JavaScript language are loaded
+                if (Prism && Prism.languages && Prism.languages.javascript) {
+                    // {{request.TYPE.NAME}} – Create a new token in the JavaScript language for
+                    Prism.languages.insertBefore('javascript', 'punctuation', {
+                        'request-variable': {
+                            pattern: /{{request\.\w+\.\w+}}/,
+                            inside: {
+                                'variable': {
+                                    pattern: /request\.\w+\.\w+/,
+                                    inside: {
+                                        'class-name': /^request/,
+                                        'punctuation': /\./,
+                                        'property': /\w+$/
+                                    }
+                                },
+                                'punctuation': /{{|}}/
+                            }
+                        }
+                    });
+                }
+
                 Prism.highlightAllUnder(this.shadow);
-                // const codeBlocks = this.shadow.querySelectorAll('code');
-                // codeBlocks.forEach(block => Prism.highlightElement(block));
+
             }
         };
         this.shadow.appendChild(script);
@@ -456,6 +498,7 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
     updateCode() {
         var code = this.shadow.querySelector("#code").innerText;
         code = this.escapeHtml(code);
+
         this.shadow.querySelector("#highlight").innerHTML = code;
 
         if (typeof Prism !== 'undefined' && this.codeDiv) {
@@ -464,6 +507,13 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
     }
         
 
+    /**
+     * Required for when users type a string such as '<html>' into the editor, which
+     * traditionally would be interpreted as HTML and not displayed as text. This function
+     * escapes the HTML so that it is displayed as text.
+     * @param {*} unsafe 
+     * @returns string
+     */
     escapeHtml(unsafe) {
         return unsafe
             .replace(/&/g, "&amp;")
