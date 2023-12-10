@@ -96,43 +96,18 @@ templateRowContent.innerHTML = `
         background-color: rgb(40, 40, 40);
     }
 
-    .function-name { color: #ff0000; }
-    .keyword { color: #98d7c8; }
-    .string { color: #d99ad9; }
-    .number { color: purple; }
-    .boolean { color: green; }
-    .null { color: pink; }
-    .braces { color: #e4c945; }
-    .punctuation { color: indigo; }
-    .variable-name { color: white; }
-    .comment { color: #6a6a6a !important; }
-    .request { 
-        color: gray;
-        text-decoration: underline;
-        text-underline-offset: 4px;
-    }
-    .secret { 
-        color: rgba(0, 0, 0, 0.85);
-        -webkit-filter: blur(0px); /* Required, or background color on ::before won't work */
-    }
-    .secret::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: calc(100% + 4px); /* 4px wider than the container */
-        height: calc(100% + 6px); /* 4px taller than the container */
-        background-color: #a099e8;
-        z-index: -1;
-        transform: translate(-50%, -50%); /* Center the pseudo-element */
-        border-radius: 4px;
-    }
-
-    /* PRISMJS OVERRIDES */
+    /** 
+     * Prism Overrides
+     * These overrides are necessary to properly style the editor to match the
+     * the expected look and feel of the editor for Universe.
+     */
     pre[class*=language-]{padding:0 !important;margin:0 !important;overflow:auto !important}
     pre[class*=language-]{background:transparent !important;}
+    /** ----------------------------------------- */
 
-
+    /**
+     * Styles all instances of the "{{request.TYPE.NAME}}" token from Prism.
+     */
     .token.request-variable .class-name {
         /* Styles for 'request' */
         color: gray;
@@ -153,6 +128,7 @@ templateRowContent.innerHTML = `
         text-decoration: underline;
         text-underline-offset: 4px;
     }
+    /** ----------------------------------------- */
 </style>
 
 <div id="container">
@@ -227,7 +203,6 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
                 }
 
                 Prism.highlightAllUnder(this.shadow);
-
             }
         };
         this.shadow.appendChild(script);
