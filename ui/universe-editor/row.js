@@ -6,7 +6,7 @@ templateRow.innerHTML = `
     }
 
     #max-line-number {
-        background-color: #171717;
+        background-color: transparent;
         font-family: 'Monaco', 'Courier New', monospace;
         font-size: 13px;
         line-height: 1.5;
@@ -68,7 +68,8 @@ class OuterbaseEditorRow extends HTMLElement {
             "line-number",
             "max-line-number",
             "show-line-numbers",
-            "readonly"
+            "readonly",
+            "language"
         ];
     }
 

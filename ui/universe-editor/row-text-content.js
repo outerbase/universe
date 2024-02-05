@@ -132,11 +132,13 @@ templateRowContent.innerHTML = `
 </style>
 
 <div id="container">
-    <pre><code class="language-javascript no-whitespace-normalization" id="highlight"></code></pre>
+    <pre><code class=" no-whitespace-normalization" id="highlight"></code></pre>
     <div id="code" contentEditable="false" spellcheck="false"></div>
 
     <!-- Show a line hint when the line is empty and cursor is active -->
-    <div id="hint" style="display: block;">Type '/' for a list of code block suggestions.</div>
+    <!-- <div id="hint" style="display: block;">Type '/' for a list of code block suggestions.</div> -->
+    <!-- DISABLING ABOVE UNTIL WE SUPPORT SUGGESTIONS -->
+    <div id="hint" style="display: block;"></div>
 
     <!-- "/" options to show -->
     <div id="dropdown" class="dropdown" style="display: none;">
@@ -152,7 +154,8 @@ class OuterbaseEditorRowText extends HTMLElement {
         return [
             "line-number",
             "value",
-            "readonly"
+            "readonly",
+            "language"
         ];
     }
 
@@ -182,7 +185,7 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
             // Ensure Prism is available and highlight
             if (typeof Prism !== 'undefined') {
                 // Ensure Prism and its JavaScript language are loaded
-                if (Prism && Prism.languages && Prism.languages.javascript) {
+                if (Prism && Prism.languages && Prism.languages.javascript && Prism.languages.sql) {
                     // {{request.TYPE.NAME}} – Create a new token in the JavaScript language for
                     Prism.languages.insertBefore('javascript', 'punctuation', {
                         'request-variable': {
@@ -206,6 +209,11 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
             }
         };
         this.shadow.appendChild(script);
+
+        // Add Prism SQL
+        const scriptSQL = document.createElement('script');
+        scriptSQL.src = "./universe-editor/prism/prism-sql.min.js";
+        this.shadow.appendChild(scriptSQL);
 
         this.render();
     }
@@ -263,7 +271,7 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
             this.dispatchEvent(new CustomEvent('action-update', { bubbles: true, composed: true, detail: { lineNumber: lineNumber, value: this.codeDiv.innerText } }));
         });
 
-        this.codeDiv.addEventListener('keyup', (event) => this.checkForSlash(event.target));
+        // this.codeDiv.addEventListener('keyup', (event) => this.checkForSlash(event.target));
 
         this.codeDiv.addEventListener('keydown', (event) => {
             var lineNumber = this.getAttribute('line-number');
@@ -461,6 +469,10 @@ span.inline-color-wrapper{background:url(data:image/svg+xml;base64,PHN2ZyB4bWxuc
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "value") {
             this.shadow.querySelector("#code").innerText = newValue;
+        }
+
+        if (name === "language") {
+            this.shadow.querySelector("#highlight").className = `language-${newValue}`;
         }
 
         this.render();

@@ -4,11 +4,15 @@
 
     <!-- <script type="module" src="http://127.0.0.1:8080/dist/bundle.js"></script> -->
 
+    <!-- <script type="module" src="./universe-editor/editor-lite.js" defer></script> -->
+    <script src="./universe-editor/editor-lite.js" defer></script>
+
     <script src="./universe-editor/editor.js" defer></script>
     <script src="./universe-editor/row.js" defer></script>
     <script src="./universe-editor/row-text-content.js" defer></script>
     <script src="./universe-editor/console.js" defer></script>
     <script src="./universe-editor/action-bar.js" defer></script>
+    
 
     <!-- <link href="./universe-editor/prism/prism.css" rel="stylesheet" />
     <script src="./universe-editor/prism/prism.js"></script> -->
@@ -27,23 +31,44 @@
     <style>
         body {
             margin: 0;
+            background-color: black;
         }
     </style>
 </head>
 
 <body>
-    <outerbase-editor 
+    <!-- <div class='code-editor'>
+        <textarea></textarea>
+        <pre><code></code></pre>
+    </div> -->
+
+    <outerbase-editor-lite
+        language="javascript"
+    ></outerbase-editor-lite>
+
+    <!-- <outerbase-editor 
         readonly="false" 
         show-line-numbers="true" 
-    ></outerbase-editor>
+        language="javascript"
+    ></outerbase-editor> -->
 </body>
 
 <script>
     var code = "function test() {\n\u00A0\u00A0\u00A0\u00A0// Comment here...\n}"
-    const editor = document.querySelector('outerbase-editor');
+    const editor = document.querySelector('outerbase-editor-lite');
 
     // Change the `code` attribute to change the code in the editor
     editor.setAttribute('code', code);
+
+    // Add an event listener for the 'code-update' event
+    editor.addEventListener('code-update', (event) => {
+        // Access the code from the event detail
+        // console.log('Code updated:', event.detail.code);
+
+        // You can now use event.detail.code as needed
+        // For example, display it in another element, store it, etc.
+    });
 </script>
+
 
 </html>
