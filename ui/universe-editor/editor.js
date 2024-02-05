@@ -1,6 +1,9 @@
 // import './row-text-content.js';
 // import './row.js';
 
+// import './prism/prism.js';
+// import './prism/prism-sql.min.js';
+
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <style>
@@ -17,7 +20,7 @@ templateEditor.innerHTML = `
         flex-direction: column;
         height: 100%;
         overflow-y: hidden;
-        background: #171717;
+        background: transparent;
     }
 
     #bottom-pane {
@@ -43,24 +46,12 @@ templateEditor.innerHTML = `
 // export
  class OuterbaseEditor extends HTMLElement {
     container = null;
-    rowData = [
-        // { value: "" },
-        // { value: "// What goes here?" },
-        // { value: 'var test = "Hello, world!"; // Here is a comment' },
-        // { value: "var secret = {{SECRET.AWS_PROD}}" },
-        // { value: "" },
-        // { value: "var username = {{request.body.username}}" },
-        // { value: "" },
-        // { value: "/*" },
-        // { value: "  A block level comment here." },
-        // { value: "*/" },
-        // { value: "" },
-        // { value: "// Add my Slack bot" },
-        // { value: "OB:WASM:1" },
-        // { isBlock: true, blockContent: "Slack Bot" },
-    ];
+    rowData = [];
 
     code = "";
+
+    // Store selected text value
+    selectedTextValue = "";
 
     // Drag and drop row support
     draggedElement = null;
@@ -70,7 +61,8 @@ templateEditor.innerHTML = `
         return [
             "code",
             "readonly",
-            "show-line-numbers"
+            "show-line-numbers",
+            "language"
         ];
     }
 
@@ -122,6 +114,61 @@ templateEditor.innerHTML = `
         }
     }
 
+    selectAllText() {
+        // Assuming this method is called within the parent web component
+        const childComponents = this.shadowRoot.querySelectorAll('outerbase-editor-row');
+
+        var firstBlock;
+        var lastBlock;
+
+        childComponents.forEach((rowComponent) => {
+            console.log('Row Component: ', rowComponent.shadowRoot)
+
+            const slot = rowComponent.shadowRoot.querySelector('slot'); // Add a name if it's a named slot, e.g., 'slot[name="something"]'
+            const editorRowText = slot.assignedElements()[0].shadowRoot;
+            const codeObject = editorRowText.querySelector('#code')
+            const codeValue = codeObject.innerHTML;
+
+            lastBlock = rowComponent;
+            
+            if (!firstBlock) {
+                firstBlock = rowComponent;
+            }
+
+            console.log('Code Object', codeObject)
+
+            // CHange the background color of the codeObject
+            // codeObject.style.backgroundColor = '#e8f0fe20'; // Example selection color
+
+
+            // codeObject.selectAllText();
+
+            // console.log('Text Components', codeValue)
+
+            this.selectedTextValue += codeValue + '\n';
+        });
+
+        // Get all blocks
+        // const blocks = this.shadowRoot.querySelectorAll('outerbase-editor-row');
+        // if (blocks.length === 0) return; // Exit if no blocks found
+
+        const selection = window.getSelection();
+        const range = new Range();
+
+        // Set the start of the range to the start of the first block
+        range.setStart(this.container, 0);
+        // Set the end of the range to the end of the last block
+        // Note: This assumes blocks are text nodes or contain text nodes. Adjust as necessary.
+        range.setEnd(this.container, 3);
+
+        // Clear existing selections
+        selection.removeAllRanges();
+        // Add the new range
+        selection.addRange(range);
+
+        console.log('Range: ', range)
+    }
+
     connectedCallback() {
         this.render();
 
@@ -159,6 +206,15 @@ templateEditor.innerHTML = `
             // Reset everything
             this.draggedElement = null;
             this.dropTarget = null;
+        });
+
+        this.addEventListener('keydown', (event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
+                event.preventDefault(); // Prevent the default action
+                this.selectAllText(); // Custom method to handle selection
+
+                console.log('SELECT ALL TEXT')
+            }
         });
 
         this.addEventListener('action-newline', (event) => {
@@ -231,6 +287,13 @@ templateEditor.innerHTML = `
 
             // This render call loses focus, so we need to re-focus
             // this.render();
+
+            // Send an event to the parent to update the code
+            this.dispatchEvent(new CustomEvent('code-update', {
+                detail: {
+                    code: this.rowData.map(item => item.value).join('\n')
+                }
+            }));
         });
 
         this.addEventListener('action-up', (event) => {
@@ -385,6 +448,7 @@ templateEditor.innerHTML = `
         editorRow.setAttribute("data-index", index.toString());
         editorRow.setAttribute("readonly", data['readonly'] ? "true" : "false");
         editorRow.setAttribute("show-line-numbers", this.getAttribute("show-line-numbers"));
+        editorRow.setAttribute("language", this.getAttribute("language"));
 
         // If the text starts with OB:WASM:SOME_ID_HERE, then show the row as a special case
         if (data.value?.startsWith("OB:WASM:")) {
@@ -405,6 +469,7 @@ templateEditor.innerHTML = `
             editorRowText.setAttribute("line-number", index + 1);
             editorRowText.setAttribute("value", data.value);
             editorRowText.setAttribute("readonly", data['readonly'] ? "true" : "false");
+            editorRowText.setAttribute("language", this.getAttribute("language"));
             editorRow.appendChild(editorRowText);
         }
 
