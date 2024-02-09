@@ -1,5 +1,5 @@
-import './prism/prism.js';
-import './prism/prism-sql.min.js';
+// import './prism/prism.js';
+// import './prism/prism-sql.min.js';
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
@@ -184,7 +184,8 @@ templateEditor.innerHTML = `
 </div>
 `;
 
-export class OuterbaseEditorLite extends HTMLElement {
+// export 
+class OuterbaseEditorLite extends HTMLElement {
     container = null;
     code = "";
     editor = null;
@@ -222,23 +223,21 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         style.textContent = css;
         this.shadow.appendChild(style);
 
-        // setTimeout(() => {
-            this.redrawSyntaxHighlighting();
-        // }, 100);
+        this.redrawSyntaxHighlighting();
 
         // Add Prism JS
-        // const script = document.createElement('script');
-        // script.src = "./universe-editor/prism-lite/prism.js";
-        // script.onload = () => {
-        //     this.redrawSyntaxHighlighting();
-        //     this.updateLineNumbers();
-        // };
-        // this.shadow.appendChild(script);
+        const script = document.createElement('script');
+        script.src = "./universe-editor/prism-lite/prism.js";
+        script.onload = () => {
+            this.redrawSyntaxHighlighting();
+            this.updateLineNumbers();
+        };
+        this.shadow.appendChild(script);
 
-        // // Add Prism SQL
-        // const scriptSQL = document.createElement('script');
-        // scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
-        // this.shadow.appendChild(scriptSQL);
+        // Add Prism SQL
+        const scriptSQL = document.createElement('script');
+        scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
+        this.shadow.appendChild(scriptSQL);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -328,6 +327,35 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
                 // Check for CMD + [ for left indent
                 e.preventDefault(); // Prevent the default action
                 this.indentLine(this.editor, 'left');
+            } 
+            else if (e.metaKey && e.key === '/') {
+                // Check for CMD + / for commenting
+                e.preventDefault(); // Prevent the default action
+                var start = e.target.selectionStart;
+                var end = e.target.selectionEnd;
+                var selectedText = e.target.value.substring(start, end);
+                var beforeText = e.target.value.substring(0, start);
+                var afterText = e.target.value.substring(end);
+
+                // Find the start of the current line
+                var lineStart = beforeText.lastIndexOf("\n") + 1;
+                const commentCharacters = this.getAttribute("language") === "sql" ? "-- " : "// ";
+
+                // Check if the line is already commented out
+                if (beforeText.substring(lineStart).trim().startsWith(commentCharacters)) {
+                    // Remove comment characters at the start of the line
+                    e.target.value = beforeText.substring(0, lineStart) + beforeText.substring(lineStart + commentCharacters.length) + selectedText + afterText;
+                } else {
+                    // Add comment characters at the start of the line
+                    e.target.value = beforeText.substring(0, lineStart) + commentCharacters + beforeText.substring(lineStart) + selectedText + afterText;
+                }
+
+                // Adjust the cursor position
+                e.target.selectionStart = start + 3; // Assuming 3 characters for the comment
+                e.target.selectionEnd = end + 3;
+
+                // After updating the textarea's value, manually trigger Prism highlighting
+                this.redrawSyntaxHighlighting();
             }
 
             setTimeout(() => {
@@ -359,16 +387,13 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         textarea.style.height = 'auto';
         // Adjust the height to match the scroll height of the content
         textarea.style.height = textarea.scrollHeight + 'px';
-
-        // Adjust the height of the widthMeasure span to match the textarea's height
-        this.widthMeasure.style.height = textarea.style.height;
     }
 
     adjustTextareaWidth(textarea) {
         // Copy textarea content into the widthMeasure span
         this.widthMeasure.textContent = textarea.value || textarea.placeholder;
         // Adjust the textarea width based on the widthMeasure span's width
-        textarea.style.width = Math.max(this.widthMeasure.offsetWidth + 1, textarea.scrollWidth) + 'px';
+        textarea.style.width = Math.max(this.widthMeasure.offsetWidth + 1, textarea.scrollWidth) + 'px';    
     }
 
     indentLine(textarea, direction) {
@@ -405,7 +430,10 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
     redrawSyntaxHighlighting() {
         // After updating the textarea's value, manually trigger Prism highlighting
         this.visualizer.innerHTML = this.editor.value;
-        Prism.highlightElement(this.visualizer);
+        
+        try {
+            Prism.highlightElement(this.visualizer);
+        } catch (error) { }
     }
 }
 
