@@ -55,6 +55,11 @@ templateEditor.innerHTML = `
         line-height: 18px !important;
     }
 
+    .editor, pre, code {
+        // position: relative;
+        z-index: 2; /* Ensures text is above the highlight layer */
+    }
+
     .editor {
         color: transparent;
         caret-color: black;
@@ -78,6 +83,28 @@ templateEditor.innerHTML = `
         width: calc(100% - 20px) !important;
         height: 100%;
         color: black;
+    }
+
+    .background-highlight {
+        position: absolute;
+        width: 100%;
+        height: 18px;
+        background-color: #e5e5e5;
+        opacity: 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .dark .background-highlight {
+        background-color: #262626;
+    }
+
+    .active-line-number {
+        color: #262626;
+    }
+
+    .dark .active-line-number {
+        color: #fafafa;
     }
 
     .width-measure {
@@ -115,7 +142,7 @@ templateEditor.innerHTML = `
     }
     
     .token.comment {
-        color: #808080 !important;
+        color: #a3a3a3 !important;
     }
     
     .token.variable,
@@ -150,7 +177,7 @@ templateEditor.innerHTML = `
     }
 
     .dark .token.comment {
-        color: #6272A4 !important;
+        color: #525252 !important;
     }
 
     .dark .token.variable,
@@ -177,6 +204,7 @@ templateEditor.innerHTML = `
     </div>
 
     <div id="code-container">
+        <div class="background-highlight"></div>
         <textarea class="editor"></textarea>
         <pre><code></code></pre>
         <span class="width-measure"></span>
@@ -266,9 +294,16 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
     connectedCallback() {
         this.editor.addEventListener("input", (e) => {
             this.visualizer.innerHTML = e.target.value;
+
+            // Highlight the active line, line number, and code syntax
+            this.highlightItems();
             Prism.highlightElement(this.visualizer);
+
+            // Update the height & width of the textarea to match the content
             this.adjustTextareaHeight(this.editor);
             this.adjustTextareaWidth(this.editor);
+
+            // Update the line numbers
             this.updateLineNumbers(); 
         });
 
@@ -357,12 +392,22 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
                 // After updating the textarea's value, manually trigger Prism highlighting
                 this.redrawSyntaxHighlighting();
             }
-
+            
             setTimeout(() => {
                 this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: this.editor.value } }));
             }, 50);
             
             this.redrawSyntaxHighlighting();
+        });
+
+        this.editor.addEventListener("click", (e) => {
+            this.highlightItems();
+        });
+        
+        this.editor.addEventListener("keyup", (e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
+                this.highlightItems();
+            }
         });
 
         // Initial adjustment in case of any pre-filled content
@@ -426,6 +471,37 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         // After updating the textarea's value, manually trigger Prism highlighting
         this.redrawSyntaxHighlighting();
     }
+
+    // Method to highlight the active line
+    highlightItems() {
+        this.highlightActiveLine();
+        this.highlightActiveLineNumber();
+    }
+    
+    highlightActiveLine() {
+        const lineHeight = 18; // Match this to your actual line height
+        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
+        const highlightPosition = (lineNumber - 1) * lineHeight;
+        const backgroundHighlight = this.shadow.querySelector('.background-highlight');
+        backgroundHighlight.style.top = `${highlightPosition}px`;
+        backgroundHighlight.style.opacity = 1;
+    }
+
+    highlightActiveLineNumber() {
+        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
+        const lineNumbers = this.shadow.querySelectorAll("#line-number-container div");
+    
+        // Remove the active class from all line numbers
+        lineNumbers.forEach(line => {
+            line.classList.remove('active-line-number');
+        });
+    
+        // Add the active class to the current line number
+        if (lineNumbers[lineNumber - 1]) {
+            lineNumbers[lineNumber - 1].classList.add('active-line-number');
+        }
+    }
+    
 
     redrawSyntaxHighlighting() {
         // After updating the textarea's value, manually trigger Prism highlighting
