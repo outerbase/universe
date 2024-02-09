@@ -1,5 +1,5 @@
-// import './prism/prism.js';
-// import './prism/prism-sql.min.js';
+import './prism/prism.js';
+import './prism/prism-sql.min.js';
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
@@ -212,8 +212,7 @@ templateEditor.innerHTML = `
 </div>
 `;
 
-// export 
-class OuterbaseEditorLite extends HTMLElement {
+export class OuterbaseEditorLite extends HTMLElement {
     container = null;
     code = "";
     editor = null;
@@ -254,18 +253,18 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.redrawSyntaxHighlighting();
 
         // Add Prism JS
-        const script = document.createElement('script');
-        script.src = "./universe-editor/prism-lite/prism.js";
-        script.onload = () => {
-            this.redrawSyntaxHighlighting();
-            this.updateLineNumbers();
-        };
-        this.shadow.appendChild(script);
+        // const script = document.createElement('script');
+        // script.src = "./universe-editor/prism-lite/prism.js";
+        // script.onload = () => {
+        //     this.redrawSyntaxHighlighting();
+        //     this.updateLineNumbers();
+        // };
+        // this.shadow.appendChild(script);
 
-        // Add Prism SQL
-        const scriptSQL = document.createElement('script');
-        scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
-        this.shadow.appendChild(scriptSQL);
+        // // Add Prism SQL
+        // const scriptSQL = document.createElement('script');
+        // scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
+        // this.shadow.appendChild(scriptSQL);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -295,16 +294,18 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.editor.addEventListener("input", (e) => {
             this.visualizer.innerHTML = e.target.value;
 
+            // Update the line numbers
+            this.updateLineNumbers(); 
+
             // Highlight the active line, line number, and code syntax
-            this.highlightItems();
             Prism.highlightElement(this.visualizer);
+            this.highlightItems();
 
             // Update the height & width of the textarea to match the content
             this.adjustTextareaHeight(this.editor);
             this.adjustTextareaWidth(this.editor);
 
-            // Update the line numbers
-            this.updateLineNumbers(); 
+            
         });
 
         // Use arrow function here to ensure `this` refers to the class instance
@@ -425,6 +426,8 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             lineNumberDiv.textContent = i;
             lineNumberContainer.appendChild(lineNumberDiv);
         }
+
+        this.highlightItems();
     }    
 
     adjustTextareaHeight(textarea) {
