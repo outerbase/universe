@@ -1,5 +1,12 @@
-import './prism/prism.js';
-import './prism/prism-sql.min.js';
+// import './prism/prism.js';
+// import './prism/prism-sql.min.js';
+
+/**
+ * TODO:
+ * - Add support for database schema syntax highlighting
+ * - Eliminate as many `querySelector` calls as possible by using the stored reference instead
+ * - Try importing a lighter JS and CSS from Prism
+ */
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
@@ -56,8 +63,7 @@ templateEditor.innerHTML = `
     }
 
     .editor, pre, code {
-        // position: relative;
-        z-index: 2; /* Ensures text is above the highlight layer */
+        z-index: 2;
     }
 
     .editor {
@@ -196,35 +202,81 @@ templateEditor.innerHTML = `
     .dark .token.string {
         color: #50FA7B !important;
     }
+
+
+
+
+
+    /* Define styles for "user_profile" */
+    .token.db-schema {
+        color: #ff79c6; /* Pink color; change as needed */
+        font-weight: bold;
+    }
 </style>
 
 <div id="container" class="dark">
+    <!-- The line number container to draw a new number for each line -->
     <div id="line-number-container">
         <div>1</div>
     </div>
 
     <div id="code-container">
+        <!-- The div is used to highlight the active line -->
         <div class="background-highlight"></div>
+
+        <!-- The textarea is used to capture user input -->
         <textarea class="editor"></textarea>
+
+        <!-- The code element is used to display the syntax highlighted code -->
         <pre><code></code></pre>
+
+        <!-- The span is used to measure the width of the textarea's content -->
         <span class="width-measure"></span>
     </div>
 </div>
 `;
 
-export class OuterbaseEditorLite extends HTMLElement {
-    container = null;
+// export 
+class OuterbaseEditorLite extends HTMLElement {
+    // The text to display in the editor
     code = "";
+    // The DOM element of the textarea
     editor = null;
+    // The DOM element where the syntax highlighted code is displayed
     visualizer = null;
+    // The DOM element used to measure the width of the textarea's content
     widthMeasure = null;
+
+    /**
+        Database schema should maintain a structure such as:
+        {
+            "public": [
+                "user": {
+                    "id": "int",
+                    "name": "string",
+                },
+                "session": {
+                    "id": "int",
+                    "user_id": "int",
+                    "token": "string",
+                }
+            ]
+        }
+    */
+    schema = {}
 
     static get observedAttributes() {
         return [
+            // The text to display in the editor
             "code",
+            // The code language to use for syntax highlighting
             "language",
+            // The theme to use for syntax highlighting, "light" or "dark"
             "theme",
-            "height"
+            // The height of the editors parent container
+            "height",
+            // The database schema to use for syntax highlighting
+            "schema",
         ];
     }
 
@@ -253,18 +305,39 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.redrawSyntaxHighlighting();
 
         // Add Prism JS
-        // const script = document.createElement('script');
-        // script.src = "./universe-editor/prism-lite/prism.js";
-        // script.onload = () => {
-        //     this.redrawSyntaxHighlighting();
-        //     this.updateLineNumbers();
-        // };
-        // this.shadow.appendChild(script);
+        const script = document.createElement('script');
+        script.src = "./universe-editor/prism-lite/prism.js";
+        script.onload = () => {
+            this.redrawSyntaxHighlighting();
+            this.updateLineNumbers();
 
-        // // Add Prism SQL
-        // const scriptSQL = document.createElement('script');
-        // scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
-        // this.shadow.appendChild(scriptSQL);
+            if (typeof Prism !== 'undefined') {
+                console.log("Prism is loaded: ", Prism.languages);
+                // Ensure Prism and its languages are loaded
+                // if (Prism.languages.javascript && Prism.languages.sql) {
+                    console.log("Prism languages are loaded");
+                    // Define a new token for highlighting "user_profile"
+                    const schemaPattern = {
+                        'db-schema': { // This is the token name
+                            pattern: /\buser_profile\b/, // Matches "user_profile" as a whole word
+                            // alias: 'special-class' // Use 'alias' to apply a special CSS class
+                        }
+                    };
+        
+                    // Insert the new token in JavaScript and SQL languages before 'keyword', or another suitable token
+                    Prism.languages.insertBefore('javascript', 'keyword', schemaPattern);
+                    Prism.languages.insertBefore('sql', 'keyword', schemaPattern);
+                // }
+        
+                Prism.highlightAllUnder(this.shadow);
+            }
+        };
+        this.shadow.appendChild(script);
+
+        // Add Prism SQL
+        const scriptSQL = document.createElement('script');
+        scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
+        this.shadow.appendChild(scriptSQL);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -272,9 +345,9 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             this.editor.value = newValue;
             this.updateLineNumbers();
             
-            setTimeout(() => {
+            // setTimeout(() => {
                 this.redrawSyntaxHighlighting();
-            }, 0);
+            // }, 0);
         }
 
         if (name === "language") {
@@ -291,6 +364,18 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
     }
 
     connectedCallback() {
+        this.editor.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
+                // For an instant reflection of the active line and line number on key press
+                // we use the `keydown` event instead of `keyup` or `input`. It won't be able
+                // to calculate the correct details immediately because of `keydown`, so we
+                // defer the calculation to the next tick using `setTimeout`.
+                setTimeout(() => {
+                    this.highlightItems();
+                }, 0);
+            }
+        });
+
         this.editor.addEventListener("input", (e) => {
             this.visualizer.innerHTML = e.target.value;
 
@@ -302,10 +387,7 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             this.highlightItems();
 
             // Update the height & width of the textarea to match the content
-            this.adjustTextareaHeight(this.editor);
-            this.adjustTextareaWidth(this.editor);
-
-            
+            this.adjustTextAreaSize();
         });
 
         // Use arrow function here to ensure `this` refers to the class instance
@@ -326,7 +408,6 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             }  
             else if (e.metaKey && e.key === "Enter") {
                 e.preventDefault(); // Prevent the default action
-                this.updateLineNumbers(); 
                 this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { execute: true, code: this.editor.value } }));
             }
             else if (e.key === "Enter") {
@@ -350,9 +431,7 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
                 e.target.selectionStart = e.target.selectionEnd = newPos;
 
                 // Defer the update of line numbers, required or the line number will be off by 1
-                setTimeout(() => {
-                    this.updateLineNumbers();
-                }, 0); // Timeout set to 0 to defer the execution until after the current call stack clears
+                this.updateLineNumbers();
             }
             else  if (e.metaKey && e.key === ']') {
                 // Check for CMD + ] for right indent
@@ -389,31 +468,22 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
                 // Adjust the cursor position
                 e.target.selectionStart = start + 3; // Assuming 3 characters for the comment
                 e.target.selectionEnd = end + 3;
-
-                // After updating the textarea's value, manually trigger Prism highlighting
-                this.redrawSyntaxHighlighting();
             }
             
             setTimeout(() => {
                 this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: this.editor.value } }));
             }, 50);
             
+            // After updating the textarea's value, manually trigger Prism highlighting
             this.redrawSyntaxHighlighting();
         });
 
         this.editor.addEventListener("click", (e) => {
             this.highlightItems();
         });
-        
-        this.editor.addEventListener("keyup", (e) => {
-            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
-                this.highlightItems();
-            }
-        });
 
         // Initial adjustment in case of any pre-filled content
-        this.adjustTextareaHeight(this.editor);
-        this.adjustTextareaWidth(this.editor);
+        this.adjustTextAreaSize();
     }
 
     updateLineNumbers() {
@@ -475,20 +545,41 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.redrawSyntaxHighlighting();
     }
 
+    adjustTextAreaSize() {
+        // Update the height & width of the textarea to match the content
+        requestAnimationFrame(() => {
+            this.adjustTextareaHeight(this.editor);
+            this.adjustTextareaWidth(this.editor);
+        });
+    }
+
     // Method to highlight the active line
     highlightItems() {
         this.highlightActiveLine();
         this.highlightActiveLineNumber();
     }
     
+    // highlightActiveLine() {
+    //     const lineHeight = 18; // Match this to your actual line height
+    //     const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
+    //     const highlightPosition = (lineNumber - 1) * lineHeight;
+    //     const backgroundHighlight = this.shadow.querySelector('.background-highlight');
+    //     backgroundHighlight.style.top = `${highlightPosition}px`;
+    //     backgroundHighlight.style.opacity = 1;
+    // }
+
     highlightActiveLine() {
         const lineHeight = 18; // Match this to your actual line height
         const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
         const highlightPosition = (lineNumber - 1) * lineHeight;
         const backgroundHighlight = this.shadow.querySelector('.background-highlight');
-        backgroundHighlight.style.top = `${highlightPosition}px`;
-        backgroundHighlight.style.opacity = 1;
+        
+        requestAnimationFrame(() => {
+            backgroundHighlight.style.top = `${highlightPosition}px`;
+            backgroundHighlight.style.opacity = 1;
+        });
     }
+    
 
     highlightActiveLineNumber() {
         const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
