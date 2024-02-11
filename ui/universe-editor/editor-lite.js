@@ -1,17 +1,36 @@
-// import './prism/prism.js';
-// import './prism/prism-sql.min.js';
+import './prism-lite/prism.js';
+import './prism-lite/prism-sql.min.js';
+import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
+// import './prism-lite/keyboard-actions.js';
 
 /**
  * TODO:
+ * - Break logical parts of the code into separate files
  * - Add support for database schema syntax highlighting
- * - Eliminate as many `querySelector` calls as possible by using the stored reference instead
- * - Try importing a lighter JS and CSS from Prism
+ * - When width is detected, also change the width of the selected line background div
  */
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <style>
+    :host {
+        --font-family-mono: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+        --font-size: 13px;
+        --line-height: 18px;
+        --padding-horizontal: 0 10px;
+        
+        --color-neutral-50: #fafafa;
+        --color-neutral-200: #e5e5e5;
+        --color-neutral-400: #a3a3a3;
+        --color-neutral-600: #525252;
+        --color-neutral-700: #404040;
+        --color-neutral-800: #262626;
+        --color-primary-dark: white;
+        --color-primary-light: black;
+    }
+
     #container {
+        position: relative;
         height: 100%;
         width: 100%;
         margin: 0;
@@ -21,26 +40,33 @@ templateEditor.innerHTML = `
     }
 
     #line-number-container {
-        padding: 0 10px;
-        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-        font-size: 13px  !important;
-        line-height: 18px !important;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
+
+
+        padding: var(--padding-horizontal);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size);
+        line-height: var(--line-height);
+        color: var(--color-neutral-700);
         text-align: right;
-        color: #434684;
     }
 
     .dark #line-number-container {
-        color: #a6a6a6;
+        color: var(--color-neutral-400);
     }
 
     #code-container {
         flex: 1;
         position: relative;
-        height: 100%;
+        height: 100%; /* TODO: Do we need this? */
+
+        overflow: hidden;
     }
 
-    textarea, code {
-        padding: 0 10px !important;
+    textarea, code, .width-measure {
+        padding: var(--padding-horizontal) !important;
         white-space: pre;
         overflow-wrap: normal;
         word-wrap: normal;
@@ -57,9 +83,9 @@ templateEditor.innerHTML = `
         min-height: 100%;
         min-width: calc(100% - 20px) !important;
         background-color: transparent !important;
-        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-        font-size: 13px  !important;
-        line-height: 18px !important;
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size)  !important;
+        line-height: var(--line-height) !important;
     }
 
     .editor, pre, code {
@@ -68,13 +94,15 @@ templateEditor.innerHTML = `
 
     .editor {
         color: transparent;
-        caret-color: black;
+        caret-color: var(--color-primary-light);
         width: 100%;
         height: 100%;
         border: none;
         position: absolute;
         left: 0;
         top: 0;
+
+        overflow-x: hidden;
     }
     
     pre {
@@ -88,48 +116,48 @@ templateEditor.innerHTML = `
         left: 0px;
         width: calc(100% - 20px) !important;
         height: 100%;
-        color: black;
+        color: var(--color-primary-light);
     }
 
     .background-highlight {
         position: absolute;
         width: 100%;
-        height: 18px;
-        background-color: #e5e5e5;
+        height: var(--line-height);
+        background-color: var(--color-neutral-200);
         opacity: 0;
         z-index: 1;
         pointer-events: none;
     }
 
     .dark .background-highlight {
-        background-color: #262626;
+        background-color: var(--color-neutral-800);
     }
 
     .active-line-number {
-        color: #262626;
+        color: var(--color-neutral-800);
     }
 
     .dark .active-line-number {
-        color: #fafafa;
+        color: var(--color-neutral-50);
     }
 
     .width-measure {
-        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-        font-size: 13px  !important;
-        line-height: 18px !important;
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size) !important;
+        line-height: var(--line-height) !important;
         visibility: hidden;
-        white-space: pre;
+        /*white-space: pre;*/
         position: absolute;
         top: 0;
         left: 0;
     }
 
     .dark .editor {
-        caret-color: white;
+        caret-color: var(--color-primary-dark);
     }
 
     .dark code {
-        color: white;
+        color: #FF0000;
     }
 
     code[class*="language-"],
@@ -157,7 +185,7 @@ templateEditor.innerHTML = `
     }
     
     .token.punctuation {
-        color: black !important;
+        color: var(--color-primary-light) !important;
     }
     
     .token.number {
@@ -183,7 +211,7 @@ templateEditor.innerHTML = `
     }
 
     .dark .token.comment {
-        color: #525252 !important;
+        color: var(--color-neutral-600) !important;
     }
 
     .dark .token.variable,
@@ -192,7 +220,7 @@ templateEditor.innerHTML = `
     }
 
     .dark .token.punctuation {
-        color: white !important;
+        color: var(--color-primary-dark) !important;
     }
 
     .dark .token.number {
@@ -207,37 +235,43 @@ templateEditor.innerHTML = `
 
 
 
-    /* Define styles for "user_profile" */
+    /* Define styles for database schemas */
     .token.db-schema {
-        color: #ff79c6; /* Pink color; change as needed */
+        color: #ff79c6;
         font-weight: bold;
     }
 </style>
 
-<div id="container" class="dark">
-    <!-- The line number container to draw a new number for each line -->
-    <div id="line-number-container">
-        <div>1</div>
+<div style="display: flex; flex-direction: column; overflow: hidden; position: relative;">
+    <div id="container" class="dark">
+        <!-- The line number container to draw a new number for each line -->
+        <div id="line-number-container">
+            <div>1</div>
+        </div>
+
+        <div id="code-container">
+            <!-- The div is used to highlight the active line -->
+            <div class="background-highlight"></div>
+
+            <!-- The textarea is used to capture user input -->
+            <textarea class="editor"></textarea>
+
+            <!-- The code element is used to display the syntax highlighted code -->
+            <pre><code></code></pre>
+
+            <!-- The span is used to measure the width of the textarea's content -->
+            <span class="width-measure"></span>
+        </div>
     </div>
 
-    <div id="code-container">
-        <!-- The div is used to highlight the active line -->
-        <div class="background-highlight"></div>
-
-        <!-- The textarea is used to capture user input -->
-        <textarea class="editor"></textarea>
-
-        <!-- The code element is used to display the syntax highlighted code -->
-        <pre><code></code></pre>
-
-        <!-- The span is used to measure the width of the textarea's content -->
-        <span class="width-measure"></span>
-    </div>
+    <!-- Custom scroll bar -->
+    <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
 </div>
 `;
 
-// export 
-class OuterbaseEditorLite extends HTMLElement {
+export class OuterbaseEditorLite extends HTMLElement {
+    // The DOM element of the parent container
+    container = null;
     // The text to display in the editor
     code = "";
     // The DOM element of the textarea
@@ -283,20 +317,20 @@ class OuterbaseEditorLite extends HTMLElement {
     constructor() {
         super();
 
+        // Default web component setup
         this.shadow = this.attachShadow({ mode: "open" });
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
 
+        // Preserve the references to the textarea and code elements
+        this.container = this.shadow.querySelector("#container");
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
         this.widthMeasure = this.shadow.querySelector(".width-measure");
 
         const css = `
         /* PrismJS 1.29.0
-https://prismjs.com/download.html#themes=prism-tomorrow&languages=clike+javascript+sql&plugins=line-numbers+keep-markup+unescaped-markup+normalize-whitespace */
-code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
-pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}pre[class*=language-].line-numbers>code{position:relative;white-space:inherit}.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:0;font-size:100%;left:-3.8em;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.line-numbers-rows>span{display:block;counter-increment:linenumber}.line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}
-[class*=lang-] script[type='text/plain'],[class*=language-] script[type='text/plain'],script[type='text/plain'][class*=lang-],script[type='text/plain'][class*=language-]{display:block;font:100% Consolas,Monaco,monospace;white-space:pre;overflow:auto}
-`;
+https://prismjs.com/download.html#themes=prism-tomorrow&languages=clike+javascript+sql */
+code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}`;
 
         const style = document.createElement('style');
         style.textContent = css;
@@ -305,39 +339,41 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.redrawSyntaxHighlighting();
 
         // Add Prism JS
-        const script = document.createElement('script');
-        script.src = "./universe-editor/prism-lite/prism.js";
-        script.onload = () => {
-            this.redrawSyntaxHighlighting();
-            this.updateLineNumbers();
+        // const script = document.createElement('script');
+        // script.src = "./universe-editor/prism-lite/prism.js";
+        // script.onload = () => {
+        //     setTimeout(() => {
+        //         this.redrawSyntaxHighlighting();
+        //         this.updateLineNumbers();
+        //     }, 0);
 
-            if (typeof Prism !== 'undefined') {
-                console.log("Prism is loaded: ", Prism.languages);
-                // Ensure Prism and its languages are loaded
-                // if (Prism.languages.javascript && Prism.languages.sql) {
-                    console.log("Prism languages are loaded");
-                    // Define a new token for highlighting "user_profile"
-                    const schemaPattern = {
-                        'db-schema': { // This is the token name
-                            pattern: /\buser_profile\b/, // Matches "user_profile" as a whole word
-                            // alias: 'special-class' // Use 'alias' to apply a special CSS class
-                        }
-                    };
+        //     // if (typeof Prism !== 'undefined') {
+        //     //     console.log("Prism is loaded: ", Prism.languages);
+        //     //     // Ensure Prism and its languages are loaded
+        //     //     // if (Prism.languages.javascript && Prism.languages.sql) {
+        //     //         console.log("Prism languages are loaded");
+        //     //         // Define a new token for highlighting "user_profile"
+        //     //         const schemaPattern = {
+        //     //             'db-schema': { // This is the token name
+        //     //                 pattern: /\buser_profile\b/, // Matches "user_profile" as a whole word
+        //     //                 // alias: 'special-class' // Use 'alias' to apply a special CSS class
+        //     //             }
+        //     //         };
         
-                    // Insert the new token in JavaScript and SQL languages before 'keyword', or another suitable token
-                    Prism.languages.insertBefore('javascript', 'keyword', schemaPattern);
-                    Prism.languages.insertBefore('sql', 'keyword', schemaPattern);
-                // }
+        //     //         // Insert the new token in JavaScript and SQL languages before 'keyword', or another suitable token
+        //     //         Prism.languages.insertBefore('javascript', 'keyword', schemaPattern);
+        //     //         Prism.languages.insertBefore('sql', 'keyword', schemaPattern);
+        //     //     // }
         
-                Prism.highlightAllUnder(this.shadow);
-            }
-        };
-        this.shadow.appendChild(script);
+        //     //     Prism.highlightAllUnder(this.shadow);
+        //     // }
+        // };
+        // this.shadow.appendChild(script);
 
-        // Add Prism SQL
-        const scriptSQL = document.createElement('script');
-        scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
-        this.shadow.appendChild(scriptSQL);
+        // // Add Prism SQL
+        // const scriptSQL = document.createElement('script');
+        // scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
+        // this.shadow.appendChild(scriptSQL);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -345,141 +381,55 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             this.editor.value = newValue;
             this.updateLineNumbers();
             
-            // setTimeout(() => {
+            // This timeout is necessary to ensure that the syntax highlighting is applied
+            // after the web component has initially rendered.
+            setTimeout(() => {
                 this.redrawSyntaxHighlighting();
-            // }, 0);
+            }, 0);
         }
 
         if (name === "language") {
-            this.shadow.querySelector("code").className = `language-${newValue}`;
+            this.visualizer.className = `language-${newValue}`;
         }
 
         if (name === "theme") {
-            this.shadow.querySelector("#container").className = newValue;
+            this.container.className = newValue;
         }
 
         if (name === "height") {
-            this.shadow.querySelector("#container").style.height = `${newValue}px`;
+            let scrollBarHeight = 10;
+            let totalHeight = parseInt(newValue) + scrollBarHeight;
+            this.container.style.height = `${totalHeight}px`;
         }
     }
 
     connectedCallback() {
-        this.editor.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
-                // For an instant reflection of the active line and line number on key press
-                // we use the `keydown` event instead of `keyup` or `input`. It won't be able
-                // to calculate the correct details immediately because of `keydown`, so we
-                // defer the calculation to the next tick using `setTimeout`.
-                setTimeout(() => {
-                    this.highlightItems();
-                }, 0);
-            }
+        this.container.addEventListener('scroll', () => {
+            // Synchronize vertical scroll between line numbers and code editor
+            const lineNumberContainer = this.shadow.querySelector('#line-number-container');
+            lineNumberContainer.style.top = `${-this.container.scrollTop}px`;
         });
 
-        this.editor.addEventListener("input", (e) => {
-            this.visualizer.innerHTML = e.target.value;
+        // Keyboard shortcuts, see `keyboard-actions.js` for details
+        attachKeyboardShortcuts(
+            this.editor,
+            this.container,
+            this.visualizer,
+            this.getAttribute("language"),
+            () => this.redrawSyntaxHighlighting(),
+            () => this.updateLineNumbers(),
+            () => this.highlightItems(),
+            () => this.adjustTextAreaSize(),
+            (detail) => this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail }))
+        );
 
-            // Update the line numbers
-            this.updateLineNumbers(); 
-
-            // Highlight the active line, line number, and code syntax
-            Prism.highlightElement(this.visualizer);
-            this.highlightItems();
-
-            // Update the height & width of the textarea to match the content
-            this.adjustTextAreaSize();
-        });
-
-        // Use arrow function here to ensure `this` refers to the class instance
-        this.editor.addEventListener("keydown", (e) => {
-            if (e.key === "Tab") {
-                e.preventDefault(); // Stop the default tab behavior
-                var start = e.target.selectionStart;
-                var end = e.target.selectionEnd;
-
-                // Set textarea value to: text before caret + tab + text after caret
-                e.target.value = e.target.value.substring(0, start) +
-                                    "    " + // This is where the tab character or spaces go
-                                    e.target.value.substring(end);
-
-                // Put caret at right position again
-                e.target.selectionStart =
-                e.target.selectionEnd = start + 4; // Move the caret after the tab
-            }  
-            else if (e.metaKey && e.key === "Enter") {
-                e.preventDefault(); // Prevent the default action
-                this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { execute: true, code: this.editor.value } }));
-            }
-            else if (e.key === "Enter") {
-                e.preventDefault(); // Prevent the default enter behavior
-
-                var start = e.target.selectionStart;
-                var end = e.target.selectionEnd;
-                var beforeText = e.target.value.substring(0, start);
-                var afterText = e.target.value.substring(end);
-
-                // Find the start of the current line
-                var lineStart = beforeText.lastIndexOf("\n") + 1;
-                // Calculate the indentation of the current line
-                var indentation = beforeText.substring(lineStart).match(/^(\s*)/)[0];
-
-                // Insert newline and the same indentation
-                e.target.value = beforeText + "\n" + indentation + afterText;
-
-                // Update cursor position
-                var newPos = start + 1 + indentation.length; // Move cursor after the new line and indentation
-                e.target.selectionStart = e.target.selectionEnd = newPos;
-
-                // Defer the update of line numbers, required or the line number will be off by 1
-                this.updateLineNumbers();
-            }
-            else  if (e.metaKey && e.key === ']') {
-                // Check for CMD + ] for right indent
-                e.preventDefault(); // Prevent the default action
-                this.indentLine(this.editor, 'right');
-            }
-            else if (e.metaKey && e.key === '[') {
-                // Check for CMD + [ for left indent
-                e.preventDefault(); // Prevent the default action
-                this.indentLine(this.editor, 'left');
-            } 
-            else if (e.metaKey && e.key === '/') {
-                // Check for CMD + / for commenting
-                e.preventDefault(); // Prevent the default action
-                var start = e.target.selectionStart;
-                var end = e.target.selectionEnd;
-                var selectedText = e.target.value.substring(start, end);
-                var beforeText = e.target.value.substring(0, start);
-                var afterText = e.target.value.substring(end);
-
-                // Find the start of the current line
-                var lineStart = beforeText.lastIndexOf("\n") + 1;
-                const commentCharacters = this.getAttribute("language") === "sql" ? "-- " : "// ";
-
-                // Check if the line is already commented out
-                if (beforeText.substring(lineStart).trim().startsWith(commentCharacters)) {
-                    // Remove comment characters at the start of the line
-                    e.target.value = beforeText.substring(0, lineStart) + beforeText.substring(lineStart + commentCharacters.length) + selectedText + afterText;
-                } else {
-                    // Add comment characters at the start of the line
-                    e.target.value = beforeText.substring(0, lineStart) + commentCharacters + beforeText.substring(lineStart) + selectedText + afterText;
-                }
-
-                // Adjust the cursor position
-                e.target.selectionStart = start + 3; // Assuming 3 characters for the comment
-                e.target.selectionEnd = end + 3;
-            }
-            
+        this.editor.addEventListener("mousedown", (e) => {
+            // When a user clicks on a row, we want to highlight the active line. A slight
+            // delay is required to ensure the active line is highlighted after the click event.
+            // Using `click` event instead of `mousedown` will add additional render delay.
             setTimeout(() => {
-                this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: this.editor.value } }));
-            }, 50);
-            
-            // After updating the textarea's value, manually trigger Prism highlighting
-            this.redrawSyntaxHighlighting();
-        });
-
-        this.editor.addEventListener("click", (e) => {
-            this.highlightItems();
+                this.highlightItems();
+            }, 0);
         });
 
         // Initial adjustment in case of any pre-filled content
@@ -497,6 +447,10 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             lineNumberContainer.appendChild(lineNumberDiv);
         }
 
+        // Change the left margin of the `code-container` to match the width of the line numbers
+        // const lineNumberWidth = lineNumberContainer.offsetWidth;
+        // this.shadow.querySelector("#code-container").style.marginLeft = `${lineNumberWidth}px`;
+
         this.highlightItems();
     }    
 
@@ -504,7 +458,24 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         // Reset the height to ensure we're not measuring the old content
         textarea.style.height = 'auto';
         // Adjust the height to match the scroll height of the content
-        textarea.style.height = textarea.scrollHeight + 'px';
+        // textarea.style.height = textarea.scrollHeight + 'px';
+
+        console.log('Changing textarea height to: ', textarea.scrollHeight)
+
+        // Height is number of lines * line height
+        const lineHeight = 18; // Match this to your actual line height
+        const lineCount = textarea.value.split("\n").length;
+        const height = lineCount * lineHeight;
+
+        textarea.style.height = `${height}px`;
+        this.shadow.querySelector("#line-number-container").style.height = `${height}px`;
+        this.shadow.querySelector("#code-container").style.height = `${height}px`;
+
+        // Set textarea height to height of line numbers container
+        // textarea.style.height = this.shadow.querySelector("#line-number-container").style.height + 'px';
+
+        // // Set same height for the code container
+        // this.shadow.querySelector("#code-container").style.height = textarea.scrollHeight + 'px';
     }
 
     adjustTextareaWidth(textarea) {
@@ -512,6 +483,9 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.widthMeasure.textContent = textarea.value || textarea.placeholder;
         // Adjust the textarea width based on the widthMeasure span's width
         textarea.style.width = Math.max(this.widthMeasure.offsetWidth + 1, textarea.scrollWidth) + 'px';    
+
+        // Adjust width of `background-highlight` div to match the width of the textarea
+        this.shadow.querySelector(".background-highlight").style.width = textarea.style.width;
     }
 
     indentLine(textarea, direction) {
@@ -558,15 +532,6 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
         this.highlightActiveLine();
         this.highlightActiveLineNumber();
     }
-    
-    // highlightActiveLine() {
-    //     const lineHeight = 18; // Match this to your actual line height
-    //     const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
-    //     const highlightPosition = (lineNumber - 1) * lineHeight;
-    //     const backgroundHighlight = this.shadow.querySelector('.background-highlight');
-    //     backgroundHighlight.style.top = `${highlightPosition}px`;
-    //     backgroundHighlight.style.opacity = 1;
-    // }
 
     highlightActiveLine() {
         const lineHeight = 18; // Match this to your actual line height
@@ -579,7 +544,6 @@ pre[class*=language-].line-numbers{position:relative;padding-left:3.8em;counter-
             backgroundHighlight.style.opacity = 1;
         });
     }
-    
 
     highlightActiveLineNumber() {
         const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
