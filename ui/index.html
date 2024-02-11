@@ -37,37 +37,47 @@
 </head>
 
 <body>
-    <!-- <div class='code-editor'>
-        <textarea></textarea>
-        <pre><code></code></pre>
-    </div> -->
+    <div style="height: 100%; display: flex; flex-direction: column;">
+        <div style="flex: 1; display: flex; flex-direction: column;">
+            <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
+            <div style="height: 300px;">
+                <outerbase-editor-lite
+                    id="sql-editor"
+                    language="sql"
+                ></outerbase-editor-lite>
+            </div>
+        </div>
 
-    <outerbase-editor-lite
-        language="javascript"
-    ></outerbase-editor-lite>
-
-    <!-- <outerbase-editor 
-        readonly="false" 
-        show-line-numbers="true" 
-        language="javascript"
-    ></outerbase-editor> -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+            <p style="color: white; font-weight: bold; padding-left: 8px;">Javascript</p>
+            <div style="flex: 1;">
+                <outerbase-editor-lite
+                    id="js-editor"
+                    language="javascript"
+                ></outerbase-editor-lite>
+            </div>
+        </div>
+    </div>
 </body>
 
 <script>
-    var code = "function test() {\n\u00A0\u00A0\u00A0\u00A0// Comment here...\n}"
-    const editor = document.querySelector('outerbase-editor-lite');
+    var sql = "-- Comment here...\nSELECT * FROM table_name WHERE id > 50 LIMIT 100; -- Comment goes at the end of the line too\n\n\n\n\n\n\n\n\n\n\n\n\ntodo\n\n\nokay"
+    const sqlEditor = document.querySelector('#sql-editor');
+    sqlEditor.setAttribute('code', sql);
 
-    // Change the `code` attribute to change the code in the editor
+    var code = "function test() {\n\u00A0\u00A0\u00A0\u00A0// Comment here...\n}"
+    const editor = document.querySelector('#js-editor');
     editor.setAttribute('code', code);
+    
 
     // Add an event listener for the 'code-update' event
-    editor.addEventListener('code-update', (event) => {
+    // editor.addEventListener('code-update', (event) => {
         // Access the code from the event detail
         // console.log('Code updated:', event.detail.code);
 
         // You can now use event.detail.code as needed
         // For example, display it in another element, store it, etc.
-    });
+    // });
 </script>
 
 
