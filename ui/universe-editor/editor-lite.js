@@ -1,13 +1,16 @@
 import './prism-lite/prism.js';
+// Styles seem to work appropriate without this included?
+// import './prism-lite/prism.css';
 import './prism-lite/prism-sql.min.js';
 import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
-// import './prism-lite/keyboard-actions.js';
 
 /**
  * TODO:
  * - Break logical parts of the code into separate files
+ * - Width is not properly calculating leaving horizontal scrolling when no long text exists
+ * - Try to remove the dependency for parent to pass in the height
+ * - Custom scrollbar in our code-editor component
  * - Add support for database schema syntax highlighting
- * - When width is detected, also change the width of the selected line background div
  */
 
 var templateEditor = document.createElement("template");
@@ -21,12 +24,32 @@ templateEditor.innerHTML = `
         
         --color-neutral-50: #fafafa;
         --color-neutral-200: #e5e5e5;
+        --color-neutral-300: #d4d4d4;
         --color-neutral-400: #a3a3a3;
         --color-neutral-600: #525252;
         --color-neutral-700: #404040;
         --color-neutral-800: #262626;
         --color-primary-dark: white;
         --color-primary-light: black;
+
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-moz-selection {
+        background: var(--color-neutral-300);
+    }
+
+    ::selection {
+        background: var(--color-neutral-300);
+    }
+
+    .dark ::-moz-selection {
+        background: var(--color-neutral-700);
+    }
+
+    .dark ::selection {
+        background: var(--color-neutral-700);
     }
 
     #container {
@@ -40,17 +63,15 @@ templateEditor.innerHTML = `
     }
 
     #line-number-container {
-        -webkit-user-select: none; /* Safari */
-        -ms-user-select: none; /* IE 10 and IE 11 */
-        user-select: none; /* Standard syntax */
-
-
         padding: var(--padding-horizontal);
         font-family: var(--font-family-mono);
         font-size: var(--font-size);
         line-height: var(--line-height);
         color: var(--color-neutral-700);
         text-align: right;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 
     .dark #line-number-container {
@@ -60,9 +81,8 @@ templateEditor.innerHTML = `
     #code-container {
         flex: 1;
         position: relative;
-        height: 100%; /* TODO: Do we need this? */
-
-        overflow: hidden;
+        overflow: scroll;
+        min-height: 100%;
     }
 
     textarea, code, .width-measure {
@@ -242,7 +262,7 @@ templateEditor.innerHTML = `
     }
 </style>
 
-<div style="display: flex; flex-direction: column; overflow: hidden; position: relative;">
+<div style="height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;">
     <div id="container" class="dark">
         <!-- The line number container to draw a new number for each line -->
         <div id="line-number-container">
@@ -263,15 +283,17 @@ templateEditor.innerHTML = `
             <span class="width-measure"></span>
         </div>
     </div>
-
-    <!-- Custom scroll bar -->
-    <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
+    
+    <div style="height: 16px; width: 100%;"></div>
 </div>
 `;
+// <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
 
 export class OuterbaseEditorLite extends HTMLElement {
     // The DOM element of the parent container
     container = null;
+
+    codeContainer = null;
     // The text to display in the editor
     code = "";
     // The DOM element of the textarea
@@ -280,23 +302,7 @@ export class OuterbaseEditorLite extends HTMLElement {
     visualizer = null;
     // The DOM element used to measure the width of the textarea's content
     widthMeasure = null;
-
-    /**
-        Database schema should maintain a structure such as:
-        {
-            "public": [
-                "user": {
-                    "id": "int",
-                    "name": "string",
-                },
-                "session": {
-                    "id": "int",
-                    "user_id": "int",
-                    "token": "string",
-                }
-            ]
-        }
-    */
+    // TODO: Needs to be implemented
     schema = {}
 
     static get observedAttributes() {
@@ -323,18 +329,15 @@ export class OuterbaseEditorLite extends HTMLElement {
 
         // Preserve the references to the textarea and code elements
         this.container = this.shadow.querySelector("#container");
+        this.codeContainer = this.shadow.querySelector("#code-container");
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
         this.widthMeasure = this.shadow.querySelector(".width-measure");
 
-        const css = `
-        /* PrismJS 1.29.0
-https://prismjs.com/download.html#themes=prism-tomorrow&languages=clike+javascript+sql */
-code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}`;
-
-        const style = document.createElement('style');
-        style.textContent = css;
-        this.shadow.appendChild(style);
+        // const link = document.createElement('link');
+        // link.setAttribute('rel', 'stylesheet');
+        // link.setAttribute('href', './universe-editor/prism-lite/prism.css');
+        // this.shadow.appendChild(link);
 
         this.redrawSyntaxHighlighting();
 
@@ -396,11 +399,11 @@ code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-fami
             this.container.className = newValue;
         }
 
-        if (name === "height") {
-            let scrollBarHeight = 10;
-            let totalHeight = parseInt(newValue) + scrollBarHeight;
-            this.container.style.height = `${totalHeight}px`;
-        }
+        // if (name === "height") {
+        //     let scrollBarHeight = 10;
+        //     let totalHeight = parseInt(newValue) + scrollBarHeight;
+        //     this.container.style.height = `${totalHeight}px`;
+        // }
     }
 
     connectedCallback() {
@@ -408,12 +411,15 @@ code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-fami
             // Synchronize vertical scroll between line numbers and code editor
             const lineNumberContainer = this.shadow.querySelector('#line-number-container');
             lineNumberContainer.style.top = `${-this.container.scrollTop}px`;
+
+            console.log('Scroll Left: ', this.container.scrollTop)
         });
 
         // Keyboard shortcuts, see `keyboard-actions.js` for details
         attachKeyboardShortcuts(
             this.editor,
             this.container,
+            this.codeContainer,
             this.visualizer,
             this.getAttribute("language"),
             () => this.redrawSyntaxHighlighting(),
