@@ -2,16 +2,13 @@
 <head>
     <title>Test</title>
 
-    <!-- <script type="module" src="http://127.0.0.1:8080/dist/bundle.js"></script> -->
+    <script type="module" src="./universe-editor/editor-lite.js" defer></script>
 
-    <!-- <script type="module" src="./universe-editor/editor-lite.js" defer></script> -->
-    <script src="./universe-editor/editor-lite.js" defer></script>
-
-    <script src="./universe-editor/editor.js" defer></script>
+    <!-- <script src="./universe-editor/editor.js" defer></script>
     <script src="./universe-editor/row.js" defer></script>
     <script src="./universe-editor/row-text-content.js" defer></script>
     <script src="./universe-editor/console.js" defer></script>
-    <script src="./universe-editor/action-bar.js" defer></script>
+    <script src="./universe-editor/action-bar.js" defer></script> -->
     
 
     <!-- <link href="./universe-editor/prism/prism.css" rel="stylesheet" />
@@ -38,12 +35,15 @@
 
 <body>
     <div style="height: 100%; display: flex; flex-direction: column;">
+        <button onclick="changeTheme()">Change Theme</button>
+
         <div style="flex: 1; display: flex; flex-direction: column;">
             <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
-            <div style="height: 300px;">
+            <div style="height: 300px; position: relative; overflow: hidden;">
                 <outerbase-editor-lite
                     id="sql-editor"
                     language="sql"
+                    theme="dark"
                 ></outerbase-editor-lite>
             </div>
         </div>
@@ -54,6 +54,7 @@
                 <outerbase-editor-lite
                     id="js-editor"
                     language="javascript"
+                    theme="dark"
                 ></outerbase-editor-lite>
             </div>
         </div>
@@ -68,6 +69,18 @@
     var code = "function test() {\n\u00A0\u00A0\u00A0\u00A0// Comment here...\n}"
     const editor = document.querySelector('#js-editor');
     editor.setAttribute('code', code);
+
+    onload = function() {
+        document.body.style.backgroundColor = 'black'
+    }
+
+    function changeTheme() {
+        const sqlEditor = document.querySelector('#sql-editor');
+        const jsEditor = document.querySelector('#js-editor');
+        sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'dark' ? 'light' : 'dark');
+        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'dark' ? 'light' : 'dark');
+        document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
+    }
     
 
     // Add an event listener for the 'code-update' event

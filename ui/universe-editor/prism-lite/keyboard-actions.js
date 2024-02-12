@@ -1,4 +1,4 @@
-export function attachKeyboardShortcuts(editor, container, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, dispatchCustomEvent) {
+export function attachKeyboardShortcuts(editor, container, codeContainer, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, dispatchCustomEvent) {
     editor.addEventListener("keydown", (e) => {
         if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
             // For an instant reflection of the active line and line number on key press
@@ -45,7 +45,6 @@ export function attachKeyboardShortcuts(editor, container, visualizer, language,
         }
         else if (e.metaKey && e.key === "Enter") {
             e.preventDefault(); // Prevent the default action
-            if (!editor) return
             dispatchCustomEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { execute: true, code: editor.value } }));
         }
         else if (e.key === "Enter") {
@@ -69,8 +68,35 @@ export function attachKeyboardShortcuts(editor, container, visualizer, language,
             e.target.selectionStart = e.target.selectionEnd = newPos;
 
             // Scroll code container to the far left
-            container.scrollLeft = 0;
-            editor.scrollLeft = 0;
+            codeContainer.scrollLeft = 0;
+            
+            // Scroll container down 18 pixels to show the new line
+            // setTimeout(() => {
+            //     container.scrollTop = container.scrollHeight;
+            //   }, 0);
+
+            // const beforeHeight = container.scrollHeight;
+
+            // Use setTimeout to check the scrollHeight after the key action
+            // setTimeout(() => {
+            //     const afterHeight = container.scrollHeight;
+
+            //     // Compare before and after heights to determine if a change occurred
+            //     if (afterHeight > beforeHeight) {
+            //         // Scroll the parent container to the bottom if there was a change
+            //         container.scrollTop = container.scrollHeight;
+            //     }
+            // }, 0);
+
+            const cursorPosition = editor.selectionStart;
+            // Check if the cursor is at the end of the text (or on the last line)
+            if (cursorPosition === editor.value.length) {
+                // Use setTimeout to allow the textarea to update
+                setTimeout(() => {
+                // Scroll the parent container to the bottom
+                    container.scrollTop = container.scrollHeight;
+                }, 0);
+            }
 
             // Defer the update of line numbers, required or the line number will be off by 1
             updateLineNumbers();
