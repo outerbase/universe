@@ -1,4 +1,4 @@
-export function attachKeyboardShortcuts(editor, container, codeContainer, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, dispatchCustomEvent) {
+export function attachKeyboardShortcuts(editor, container, codeContainer, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, indentLine, dispatchCustomEvent) {
     editor.addEventListener("keydown", (e) => {
         if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
             // For an instant reflection of the active line and line number on key press
@@ -105,12 +105,12 @@ export function attachKeyboardShortcuts(editor, container, codeContainer, visual
         else  if (e.metaKey && e.key === ']') {
             // Check for CMD + ] for right indent
             e.preventDefault(); // Prevent the default action
-            indentLine(editor, 'right');
+            indentLine('right');
         }
         else if (e.metaKey && e.key === '[') {
             // Check for CMD + [ for left indent
             e.preventDefault(); // Prevent the default action
-            indentLine(editor, 'left');
+            indentLine('left');
         } 
         else if (e.metaKey && e.key === '/') {
             e.preventDefault(); // Prevent the default action

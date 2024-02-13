@@ -62,7 +62,19 @@
 </body>
 
 <script>
-    var sql = "-- Comment here...\nSELECT * FROM table_name WHERE id > 50 LIMIT 100; -- Comment goes at the end of the line too\n\n\n\n\n\n\n\n\n\n\n\n\ntodo\n\n\nokay"
+    // var sql = "-- Comment here...\nSELECT * FROM table_name WHERE id > 50 LIMIT 100; -- Comment goes at the end of the line too\n\n\n\n\n\n\n\n\n\n\n\n\ntodo\n\n\nokay"
+    var sql = `-- Comment this line out
+CREATE TABLE video_games (
+    game_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100),
+    platform VARCHAR(100),
+    release_date DATE,
+    developer VARCHAR(255)
+);
+
+SELECT * FROM user WHERE id='123'
+    `
     const sqlEditor = document.querySelector('#sql-editor');
     sqlEditor.setAttribute('code', sql);
 
