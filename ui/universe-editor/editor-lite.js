@@ -6,9 +6,6 @@ import defaultStyles from './themes/default.js';
 import moondustStyles from './themes/moondust.js';
 import invasionStyles from './themes/invasion.js';
 
-// import './themes/moondust.css';
-// import './themes/invasion.css';
-
 /**
  * TODO:
  * - Break logical parts of the code into separate files
@@ -40,12 +37,6 @@ templateEditor.innerHTML = `
             <span class="width-measure"></span>
         </div>
     </div>
-    
-    <!--
-    <div style="height: 24px; width: 100%;">
-        <button style="width: 24px; height: 24px; border-radius: 12px;">Change Theme</button>
-    </div>
-    -->
 </div>
 `;
 // <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
@@ -100,18 +91,6 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.visualizer = this.shadow.querySelector("code");
         this.widthMeasure = this.shadow.querySelector(".width-measure");
 
-        // Include the Moondust theme
-        // const moondust = document.createElement('link');
-        // moondust.setAttribute('rel', 'stylesheet');
-        // moondust.setAttribute('href', './universe-editor/themes/moondust.css');
-        // this.shadow.appendChild(moondust);
-
-        // // Include the Invasion theme
-        // const invasion = document.createElement('link');
-        // invasion.setAttribute('rel', 'stylesheet');
-        // invasion.setAttribute('href', './universe-editor/themes/invasion.css');
-        // this.shadow.appendChild(invasion);
-
         this.redrawSyntaxHighlighting();
 
         // Add Prism JS
@@ -146,21 +125,15 @@ export class OuterbaseEditorLite extends HTMLElement {
         // };
         // this.shadow.appendChild(script);
 
-        // // Add Prism SQL
-        // const scriptSQL = document.createElement('script');
-        // scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
-        // this.shadow.appendChild(scriptSQL);
-
         const styleSheet = new CSSStyleSheet();
-        styleSheet.replaceSync(defaultStyles); // Assuming defaultStyles is a string containing CSS
+        styleSheet.replaceSync(defaultStyles);
 
         const styleMoondust = new CSSStyleSheet();
-        styleMoondust.replaceSync(moondustStyles); // Assuming moondustStyles is another string containing CSS
+        styleMoondust.replaceSync(moondustStyles);
 
         const styleInvasion = new CSSStyleSheet();
-        styleInvasion.replaceSync(invasionStyles); // Assuming moondustStyles is another string containing CSS
+        styleInvasion.replaceSync(invasionStyles);
 
-        // Use the CSSStyleSheet objects, not the style strings
         this.shadow.adoptedStyleSheets = [styleSheet, styleMoondust, styleInvasion];
     }
 
