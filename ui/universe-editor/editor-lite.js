@@ -9,9 +9,10 @@ import invasionStyles from './themes/invasion.js';
 
 /**
  * TODO:
+ * - Custom scrollbar in our code-editor component
+ * - No lines should have the background selected row active by default, currently last line is active on load
  * - Break logical parts of the code into separate files
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
- * - Custom scrollbar in our code-editor component
  * - Add support for database schema syntax highlighting
  */
 
@@ -38,9 +39,12 @@ templateEditor.innerHTML = `
             <span class="width-measure"></span>
         </div>
     </div>
+
+    <div id="scrollbar-bottom">
+        <div id="scrollbar-bottom-thumb"></div>
+    </div>
 </div>
 `;
-// <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
 
 export class OuterbaseEditorLite extends HTMLElement {
     // The DOM element of the outer parent container
@@ -164,14 +168,18 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     connectedCallback() {
-        // setTimeout(() => {
-        //     this.style.setProperty('--color-primary-dark', '#ff0000')
-        // }, 5000);
+        // this.container.addEventListener('scroll', () => {
+        //     // Synchronize vertical scroll between line numbers and code editor
+        //     const lineNumberContainer = this.shadow.querySelector('#line-number-container');
+        //     lineNumberContainer.style.top = `${-this.container.scrollTop}px`;
+        // });
 
-        this.container.addEventListener('scroll', () => {
+        this.codeContainer.addEventListener('scroll', () => {
+            console.log('Scroll: ', this.codeContainer.scrollTop);
+
             // Synchronize vertical scroll between line numbers and code editor
             const lineNumberContainer = this.shadow.querySelector('#line-number-container');
-            lineNumberContainer.style.top = `${-this.container.scrollTop}px`;
+            lineNumberContainer.style.marginTop = `${-this.codeContainer.scrollTop}px`;
         });
 
         // Keyboard shortcuts, see `keyboard-actions.js` for details
@@ -213,18 +221,12 @@ export class OuterbaseEditorLite extends HTMLElement {
             lineNumberContainer.appendChild(lineNumberDiv);
         }
 
-        // Change the left margin of the `code-container` to match the width of the line numbers
-        // const lineNumberWidth = lineNumberContainer.offsetWidth;
-        // this.shadow.querySelector("#code-container").style.marginLeft = `${lineNumberWidth}px`;
-
         this.highlightItems();
     }    
 
     adjustTextareaHeight(textarea) {
         // Reset the height to ensure we're not measuring the old content
         textarea.style.height = 'auto';
-        // Adjust the height to match the scroll height of the content
-        // textarea.style.height = textarea.scrollHeight + 'px';
 
         // Height is number of lines * line height
         const lineHeight = 18; // Match this to your actual line height
@@ -233,13 +235,7 @@ export class OuterbaseEditorLite extends HTMLElement {
 
         textarea.style.height = `${height}px`;
         this.shadow.querySelector("#line-number-container").style.height = `${height}px`;
-        this.shadow.querySelector("#code-container").style.height = `${height}px`;
-
-        // Set textarea height to height of line numbers container
-        // textarea.style.height = this.shadow.querySelector("#line-number-container").style.height + 'px';
-
-        // // Set same height for the code container
-        // this.shadow.querySelector("#code-container").style.height = textarea.scrollHeight + 'px';
+        // this.codeContainer.style.height = `${height}px`;
     }
 
     adjustTextareaWidth(textarea) {
