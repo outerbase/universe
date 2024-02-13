@@ -8,7 +8,6 @@ import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
  * TODO:
  * - Break logical parts of the code into separate files
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
- * - Try to remove the dependency for parent to pass in the height
  * - Custom scrollbar in our code-editor component
  * - Add support for database schema syntax highlighting
  */
@@ -26,6 +25,7 @@ templateEditor.innerHTML = `
         --color-neutral-200: #e5e5e5;
         --color-neutral-300: #d4d4d4;
         --color-neutral-400: #a3a3a3;
+        --color-neutral-500: #737373;
         --color-neutral-600: #525252;
         --color-neutral-700: #404040;
         --color-neutral-800: #262626;
@@ -147,6 +147,7 @@ templateEditor.innerHTML = `
         opacity: 0;
         z-index: 1;
         pointer-events: none;
+        border-radius: 4px;
     }
 
     .dark .background-highlight {
@@ -176,32 +177,28 @@ templateEditor.innerHTML = `
         caret-color: var(--color-primary-dark);
     }
 
-    .dark code {
-        color: #FF0000;
-    }
 
     code[class*="language-"],
     pre[class*="language-"],
     .token.operator {
-        color: #24292e !important;
+        color: var(--color-primary-light) !important;
     }
 
-    /* Token Colors */
     .token.invalid {
         color: #ff0000 !important;
     }
     
     .token.keyword {
-        color: #7f00ff !important;
+        color: var(--color-neutral-500) !important;
     }
     
     .token.comment {
-        color: #a3a3a3 !important;
+        color: var(--color-neutral-400) !important;
     }
     
     .token.variable,
     .token.function {
-        color: #000000 !important;
+        color: #111111 !important;
     }
     
     .token.punctuation {
@@ -209,14 +206,137 @@ templateEditor.innerHTML = `
     }
     
     .token.number {
-        color: #0000FF !important;
+        color: var(--color-primary-light) !important;
     }
     
     .token.string {
-        color: #228B22 !important;
+        color: var(--color-neutral-500) !important;
     }
 
+
+    
+
     .dark code[class*="language-"],
+    .dark pre[class*="language-"],
+    .dark .token.operator {
+        color: var(--color-primary-dark) !important;
+    }
+
+    .dark .token.invalid {
+        color: #ff0000 !important;
+    }
+
+    .dark .token.keyword {
+        color: var(--color-neutral-400) !important;
+    }
+
+    .dark .token.comment {
+        color: var(--color-neutral-500) !important;
+    }
+
+    .dark .token.variable,
+    .dark .token.function {
+        color: var(--color-primary-dark) !important;
+    }
+
+    .dark .token.punctuation {
+        color: var(--color-primary-dark) !important;
+    }
+
+    .dark .token.number {
+        color: var(--color-primary-dark) !important;
+    }
+
+    .dark .token.string {
+        color: var(--color-neutral-400) !important;
+    }
+
+
+
+
+
+    /* Define styles for database schemas */
+    .token.db-schema {
+        color: #ff79c6;
+        font-weight: bold;
+    }
+</style>
+
+<div style="height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+    <div id="container" class="dark">
+        <!-- The line number container to draw a new number for each line -->
+        <div id="line-number-container">
+            <div>1</div>
+        </div>
+
+        <div id="code-container">
+            <!-- The div is used to highlight the active line -->
+            <div class="background-highlight"></div>
+
+            <!-- The textarea is used to capture user input -->
+            <textarea class="editor" spellcheck="false"></textarea>
+
+            <!-- The code element is used to display the syntax highlighted code -->
+            <pre><code></code></pre>
+
+            <!-- The span is used to measure the width of the textarea's content -->
+            <span class="width-measure"></span>
+        </div>
+    </div>
+    
+    <!--
+    <div style="height: 24px; width: 100%;">
+        <button style="width: 24px; height: 24px; border-radius: 12px;">Change Theme</button>
+    </div>
+    -->
+</div>
+`;
+
+/**
+ * LIGHT
+ * --editor-padding: 16px 16px 21px 16px; 
+ * --syntax-text: #111111; 
+ * --syntax-background: rgba 0,0,100,0.75; 
+ * --syntax-string: #666666; 
+ * --syntax-comment: #999999; 
+ * --syntax-variable: #111111; 
+ * --syntax-variable-2: #111111; 
+ * --syntax-variable-3: #111111; 
+ * --syntax-number: #111111; 
+ * --syntax-atom: #111111; 
+ * --syntax-keyword: #666666; 
+ * --syntax-property: #666666; 
+ * --syntax-definition: #111111; 
+ * --syntax-meta: #666666; 
+ * --syntax-operator: #666666; 
+ * --syntax-attribute: #666666; 
+ * --syntax-tag: #666666;
+ */
+
+/** 
+ * DARK
+ * --editor-padding: 16px 16px 21px 16px; 
+ * --syntax-text: #ffffff; 
+ * --syntax-background: rgba 0,0,0,0.75; 
+ * --syntax-string: #a7a7a7; 
+ * --syntax-comment: #666666; 
+ * --syntax-variable: #ffffff; 
+ * --syntax-variable-2: #ffffff; 
+ * --syntax-variable-3: #ffffff; 
+ * --syntax-number: #ffffff; 
+ * --syntax-atom: #ffffff; 
+ * --syntax-keyword: #a7a7a7; 
+ * --syntax-property: #a7a7a7; 
+ * --syntax-definition: #ffffff; 
+ * --syntax-meta: #a7a7a7; 
+ * --syntax-operator: #a7a7a7; 
+ * --syntax-attribute: #a7a7a7; 
+ * --syntax-tag: #a7a7a7;
+ */
+
+/**
+ * DARK OLD:
+ .dark code[class*="language-"],
     .dark pre[class*="language-"],
     .dark .token.operator {
         color: #f6f8fa !important;
@@ -250,43 +370,46 @@ templateEditor.innerHTML = `
     .dark .token.string {
         color: #50FA7B !important;
     }
+ */
 
-
-
-
-
-    /* Define styles for database schemas */
-    .token.db-schema {
-        color: #ff79c6;
-        font-weight: bold;
+/**
+ * LIGHT OLD:
+ code[class*="language-"],
+    pre[class*="language-"],
+    .token.operator {
+        color: #24292e !important;
     }
-</style>
 
-<div style="height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;">
-    <div id="container" class="dark">
-        <!-- The line number container to draw a new number for each line -->
-        <div id="line-number-container">
-            <div>1</div>
-        </div>
-
-        <div id="code-container">
-            <!-- The div is used to highlight the active line -->
-            <div class="background-highlight"></div>
-
-            <!-- The textarea is used to capture user input -->
-            <textarea class="editor"></textarea>
-
-            <!-- The code element is used to display the syntax highlighted code -->
-            <pre><code></code></pre>
-
-            <!-- The span is used to measure the width of the textarea's content -->
-            <span class="width-measure"></span>
-        </div>
-    </div>
+    .token.invalid {
+        color: #ff0000 !important;
+    }
     
-    <div style="height: 16px; width: 100%;"></div>
-</div>
-`;
+    .token.keyword {
+        color: #7f00ff !important;
+    }
+    
+    .token.comment {
+        color: #a3a3a3 !important;
+    }
+    
+    .token.variable,
+    .token.function {
+        color: #000000 !important;
+    }
+    
+    .token.punctuation {
+        color: var(--color-primary-light) !important;
+    }
+    
+    .token.number {
+        color: #0000FF !important;
+    }
+    
+    .token.string {
+        color: #228B22 !important;
+    }
+ */
+
 // <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
 
 export class OuterbaseEditorLite extends HTMLElement {
@@ -407,12 +530,14 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     connectedCallback() {
+        // setTimeout(() => {
+        //     this.style.setProperty('--color-primary-dark', '#ff0000')
+        // }, 5000);
+
         this.container.addEventListener('scroll', () => {
             // Synchronize vertical scroll between line numbers and code editor
             const lineNumberContainer = this.shadow.querySelector('#line-number-container');
             lineNumberContainer.style.top = `${-this.container.scrollTop}px`;
-
-            console.log('Scroll Left: ', this.container.scrollTop)
         });
 
         // Keyboard shortcuts, see `keyboard-actions.js` for details
@@ -426,7 +551,8 @@ export class OuterbaseEditorLite extends HTMLElement {
             () => this.updateLineNumbers(),
             () => this.highlightItems(),
             () => this.adjustTextAreaSize(),
-            (detail) => this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail }))
+            (direction) => this.indentLine(direction),
+            (event) => this.dispatchEvent(event)
         );
 
         this.editor.addEventListener("mousedown", (e) => {
@@ -466,8 +592,6 @@ export class OuterbaseEditorLite extends HTMLElement {
         // Adjust the height to match the scroll height of the content
         // textarea.style.height = textarea.scrollHeight + 'px';
 
-        console.log('Changing textarea height to: ', textarea.scrollHeight)
-
         // Height is number of lines * line height
         const lineHeight = 18; // Match this to your actual line height
         const lineCount = textarea.value.split("\n").length;
@@ -494,30 +618,30 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.shadow.querySelector(".background-highlight").style.width = textarea.style.width;
     }
 
-    indentLine(textarea, direction) {
-        var start = textarea.selectionStart;
-        var end = textarea.selectionEnd;
-        var selectedText = textarea.value.substring(start, end);
-        var beforeText = textarea.value.substring(0, start);
-        var afterText = textarea.value.substring(end);
+    indentLine(direction) {
+        var start = this.editor.selectionStart;
+        var end = this.editor.selectionEnd;
+        var selectedText = this.editor.value.substring(start, end);
+        var beforeText = this.editor.value.substring(0, start);
+        var afterText = this.editor.value.substring(end);
 
         // Find the start of the current line
         var lineStart = beforeText.lastIndexOf("\n") + 1;
 
         if (direction === 'right') {
             // Add a tab (or spaces) at the start of the line
-            textarea.value = beforeText.substring(0, lineStart) + "    " + beforeText.substring(lineStart) + selectedText + afterText;
+            this.editor.value = beforeText.substring(0, lineStart) + "    " + beforeText.substring(lineStart) + selectedText + afterText;
             // Adjust the cursor position
-            textarea.selectionStart = start + 4; // Assuming 4 spaces or 1 tab
-            textarea.selectionEnd = end + 4;
+            this.editor.selectionStart = start + 4; // Assuming 4 spaces or 1 tab
+            this.editor.selectionEnd = end + 4;
         } else if (direction === 'left') {
             // Remove a tab (or spaces) from the start of the line if present
             var lineIndent = beforeText.substring(lineStart);
             if (lineIndent.startsWith("    ")) { // Assuming 4 spaces or 1 tab
-                textarea.value = beforeText.substring(0, lineStart) + beforeText.substring(lineStart + 4) + selectedText + afterText;
+                this.editor.value = beforeText.substring(0, lineStart) + beforeText.substring(lineStart + 4) + selectedText + afterText;
                 // Adjust the cursor position
-                textarea.selectionStart = start - 4 > lineStart ? start - 4 : lineStart;
-                textarea.selectionEnd = end - 4 > lineStart ? end - 4 : lineStart;
+                this.editor.selectionStart = start - 4 > lineStart ? start - 4 : lineStart;
+                this.editor.selectionEnd = end - 4 > lineStart ? end - 4 : lineStart;
             }
         }
 
