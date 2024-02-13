@@ -43,7 +43,8 @@
                 <outerbase-editor-lite
                     id="sql-editor"
                     language="sql"
-                    theme="dark"
+                    theme="moondust"
+                    mode="dark"
                 ></outerbase-editor-lite>
             </div>
         </div>
@@ -54,7 +55,8 @@
                 <outerbase-editor-lite
                     id="js-editor"
                     language="javascript"
-                    theme="dark"
+                    theme="invasion"
+                    mode="dark"
                 ></outerbase-editor-lite>
             </div>
         </div>
@@ -89,8 +91,8 @@ SELECT * FROM user WHERE id='123'
     function changeTheme() {
         const sqlEditor = document.querySelector('#sql-editor');
         const jsEditor = document.querySelector('#js-editor');
-        sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'dark' ? 'light' : 'dark');
-        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'dark' ? 'light' : 'dark');
+        sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
+        jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
         document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
     }
     

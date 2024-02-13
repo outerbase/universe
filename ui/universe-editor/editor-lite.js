@@ -1,8 +1,13 @@
 import './prism-lite/prism.js';
-// Styles seem to work appropriate without this included?
-// import './prism-lite/prism.css';
 import './prism-lite/prism-sql.min.js';
 import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
+
+import defaultStyles from './themes/default.js';
+import moondustStyles from './themes/moondust.js';
+import invasionStyles from './themes/invasion.js';
+
+// import './themes/moondust.css';
+// import './themes/invasion.css';
 
 /**
  * TODO:
@@ -14,256 +19,8 @@ import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
-<style>
-    :host {
-        --font-family-mono: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-        --font-size: 13px;
-        --line-height: 18px;
-        --padding-horizontal: 0 10px;
-        
-        --color-neutral-50: #fafafa;
-        --color-neutral-200: #e5e5e5;
-        --color-neutral-300: #d4d4d4;
-        --color-neutral-400: #a3a3a3;
-        --color-neutral-500: #737373;
-        --color-neutral-600: #525252;
-        --color-neutral-700: #404040;
-        --color-neutral-800: #262626;
-        --color-primary-dark: white;
-        --color-primary-light: black;
-
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-
-    ::-moz-selection {
-        background: var(--color-neutral-300);
-    }
-
-    ::selection {
-        background: var(--color-neutral-300);
-    }
-
-    .dark ::-moz-selection {
-        background: var(--color-neutral-700);
-    }
-
-    .dark ::selection {
-        background: var(--color-neutral-700);
-    }
-
-    #container {
-        position: relative;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        display: flex;
-        flex-direction: row;
-        overflow: scroll;
-    }
-
-    #line-number-container {
-        padding: var(--padding-horizontal);
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size);
-        line-height: var(--line-height);
-        color: var(--color-neutral-700);
-        text-align: right;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-
-    .dark #line-number-container {
-        color: var(--color-neutral-400);
-    }
-
-    #code-container {
-        flex: 1;
-        position: relative;
-        overflow: scroll;
-        min-height: 100%;
-    }
-
-    textarea, code, .width-measure {
-        padding: var(--padding-horizontal) !important;
-        white-space: pre;
-        overflow-wrap: normal;
-        word-wrap: normal;
-    }
-
-    textarea {
-        resize: none;
-        outline: none;
-        overflow: hidden;
-    }
-
-    pre, textarea, code, .width-measure {
-        margin: 0 !important;
-        min-height: 100%;
-        min-width: calc(100% - 20px) !important;
-        background-color: transparent !important;
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size)  !important;
-        line-height: var(--line-height) !important;
-    }
-
-    .editor, pre, code {
-        z-index: 2;
-    }
-
-    .editor {
-        color: transparent;
-        caret-color: var(--color-primary-light);
-        width: 100%;
-        height: 100%;
-        border: none;
-        position: absolute;
-        left: 0;
-        top: 0;
-
-        overflow-x: hidden;
-    }
-    
-    pre {
-        padding: 0 !important;
-    }
-
-    code {
-        pointer-events: none;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: calc(100% - 20px) !important;
-        height: 100%;
-        color: var(--color-primary-light);
-    }
-
-    .background-highlight {
-        position: absolute;
-        width: 100%;
-        height: var(--line-height);
-        background-color: var(--color-neutral-200);
-        opacity: 0;
-        z-index: 1;
-        pointer-events: none;
-        border-radius: 4px;
-    }
-
-    .dark .background-highlight {
-        background-color: var(--color-neutral-800);
-    }
-
-    .active-line-number {
-        color: var(--color-neutral-800);
-    }
-
-    .dark .active-line-number {
-        color: var(--color-neutral-50);
-    }
-
-    .width-measure {
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size) !important;
-        line-height: var(--line-height) !important;
-        visibility: hidden;
-        /*white-space: pre;*/
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
-
-    .dark .editor {
-        caret-color: var(--color-primary-dark);
-    }
-
-
-    code[class*="language-"],
-    pre[class*="language-"],
-    .token.operator {
-        color: var(--color-primary-light) !important;
-    }
-
-    .token.invalid {
-        color: #ff0000 !important;
-    }
-    
-    .token.keyword {
-        color: var(--color-neutral-500) !important;
-    }
-    
-    .token.comment {
-        color: var(--color-neutral-400) !important;
-    }
-    
-    .token.variable,
-    .token.function {
-        color: #111111 !important;
-    }
-    
-    .token.punctuation {
-        color: var(--color-primary-light) !important;
-    }
-    
-    .token.number {
-        color: var(--color-primary-light) !important;
-    }
-    
-    .token.string {
-        color: var(--color-neutral-500) !important;
-    }
-
-
-    
-
-    .dark code[class*="language-"],
-    .dark pre[class*="language-"],
-    .dark .token.operator {
-        color: var(--color-primary-dark) !important;
-    }
-
-    .dark .token.invalid {
-        color: #ff0000 !important;
-    }
-
-    .dark .token.keyword {
-        color: var(--color-neutral-400) !important;
-    }
-
-    .dark .token.comment {
-        color: var(--color-neutral-500) !important;
-    }
-
-    .dark .token.variable,
-    .dark .token.function {
-        color: var(--color-primary-dark) !important;
-    }
-
-    .dark .token.punctuation {
-        color: var(--color-primary-dark) !important;
-    }
-
-    .dark .token.number {
-        color: var(--color-primary-dark) !important;
-    }
-
-    .dark .token.string {
-        color: var(--color-neutral-400) !important;
-    }
-
-
-
-
-
-    /* Define styles for database schemas */
-    .token.db-schema {
-        color: #ff79c6;
-        font-weight: bold;
-    }
-</style>
-
-<div style="height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;">
-    <div id="container" class="dark">
+<div id="outer-container">
+    <div id="container" class="moondust dark">
         <!-- The line number container to draw a new number for each line -->
         <div id="line-number-container">
             <div>1</div>
@@ -291,131 +48,14 @@ templateEditor.innerHTML = `
     -->
 </div>
 `;
-
-/**
- * LIGHT
- * --editor-padding: 16px 16px 21px 16px; 
- * --syntax-text: #111111; 
- * --syntax-background: rgba 0,0,100,0.75; 
- * --syntax-string: #666666; 
- * --syntax-comment: #999999; 
- * --syntax-variable: #111111; 
- * --syntax-variable-2: #111111; 
- * --syntax-variable-3: #111111; 
- * --syntax-number: #111111; 
- * --syntax-atom: #111111; 
- * --syntax-keyword: #666666; 
- * --syntax-property: #666666; 
- * --syntax-definition: #111111; 
- * --syntax-meta: #666666; 
- * --syntax-operator: #666666; 
- * --syntax-attribute: #666666; 
- * --syntax-tag: #666666;
- */
-
-/** 
- * DARK
- * --editor-padding: 16px 16px 21px 16px; 
- * --syntax-text: #ffffff; 
- * --syntax-background: rgba 0,0,0,0.75; 
- * --syntax-string: #a7a7a7; 
- * --syntax-comment: #666666; 
- * --syntax-variable: #ffffff; 
- * --syntax-variable-2: #ffffff; 
- * --syntax-variable-3: #ffffff; 
- * --syntax-number: #ffffff; 
- * --syntax-atom: #ffffff; 
- * --syntax-keyword: #a7a7a7; 
- * --syntax-property: #a7a7a7; 
- * --syntax-definition: #ffffff; 
- * --syntax-meta: #a7a7a7; 
- * --syntax-operator: #a7a7a7; 
- * --syntax-attribute: #a7a7a7; 
- * --syntax-tag: #a7a7a7;
- */
-
-/**
- * DARK OLD:
- .dark code[class*="language-"],
-    .dark pre[class*="language-"],
-    .dark .token.operator {
-        color: #f6f8fa !important;
-    }
-
-    .dark .token.invalid {
-        color: #ff0000 !important;
-    }
-
-    .dark .token.keyword {
-        color: #BD93F9 !important;
-    }
-
-    .dark .token.comment {
-        color: var(--color-neutral-600) !important;
-    }
-
-    .dark .token.variable,
-    .dark .token.function {
-        color: #F8F8F2 !important;
-    }
-
-    .dark .token.punctuation {
-        color: var(--color-primary-dark) !important;
-    }
-
-    .dark .token.number {
-        color: #8BE9FD !important;
-    }
-
-    .dark .token.string {
-        color: #50FA7B !important;
-    }
- */
-
-/**
- * LIGHT OLD:
- code[class*="language-"],
-    pre[class*="language-"],
-    .token.operator {
-        color: #24292e !important;
-    }
-
-    .token.invalid {
-        color: #ff0000 !important;
-    }
-    
-    .token.keyword {
-        color: #7f00ff !important;
-    }
-    
-    .token.comment {
-        color: #a3a3a3 !important;
-    }
-    
-    .token.variable,
-    .token.function {
-        color: #000000 !important;
-    }
-    
-    .token.punctuation {
-        color: var(--color-primary-light) !important;
-    }
-    
-    .token.number {
-        color: #0000FF !important;
-    }
-    
-    .token.string {
-        color: #228B22 !important;
-    }
- */
-
 // <!-- <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 10px; background-color: #ff0000; z-index: 3;"></div> -->
 
 export class OuterbaseEditorLite extends HTMLElement {
+    // The DOM element of the outer parent container
+    outerContainer = null;
     // The DOM element of the parent container
     container = null;
-
+    //
     codeContainer = null;
     // The text to display in the editor
     code = "";
@@ -434,8 +74,10 @@ export class OuterbaseEditorLite extends HTMLElement {
             "code",
             // The code language to use for syntax highlighting
             "language",
-            // The theme to use for syntax highlighting, "light" or "dark"
+            // The theme to use for syntax highlighting, such as "Moondust"
             "theme",
+            // The secondary theme for light/dark mode, "light" or "dark"
+            "mode",
             // The height of the editors parent container
             "height",
             // The database schema to use for syntax highlighting
@@ -451,16 +93,24 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
 
         // Preserve the references to the textarea and code elements
+        this.outerContainer = this.shadow.querySelector("#outer-container");
         this.container = this.shadow.querySelector("#container");
         this.codeContainer = this.shadow.querySelector("#code-container");
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
         this.widthMeasure = this.shadow.querySelector(".width-measure");
 
-        // const link = document.createElement('link');
-        // link.setAttribute('rel', 'stylesheet');
-        // link.setAttribute('href', './universe-editor/prism-lite/prism.css');
-        // this.shadow.appendChild(link);
+        // Include the Moondust theme
+        // const moondust = document.createElement('link');
+        // moondust.setAttribute('rel', 'stylesheet');
+        // moondust.setAttribute('href', './universe-editor/themes/moondust.css');
+        // this.shadow.appendChild(moondust);
+
+        // // Include the Invasion theme
+        // const invasion = document.createElement('link');
+        // invasion.setAttribute('rel', 'stylesheet');
+        // invasion.setAttribute('href', './universe-editor/themes/invasion.css');
+        // this.shadow.appendChild(invasion);
 
         this.redrawSyntaxHighlighting();
 
@@ -500,6 +150,18 @@ export class OuterbaseEditorLite extends HTMLElement {
         // const scriptSQL = document.createElement('script');
         // scriptSQL.src = "./universe-editor/prism-lite/prism-sql.min.js";
         // this.shadow.appendChild(scriptSQL);
+
+        const styleSheet = new CSSStyleSheet();
+        styleSheet.replaceSync(defaultStyles); // Assuming defaultStyles is a string containing CSS
+
+        const styleMoondust = new CSSStyleSheet();
+        styleMoondust.replaceSync(moondustStyles); // Assuming moondustStyles is another string containing CSS
+
+        const styleInvasion = new CSSStyleSheet();
+        styleInvasion.replaceSync(invasionStyles); // Assuming moondustStyles is another string containing CSS
+
+        // Use the CSSStyleSheet objects, not the style strings
+        this.shadow.adoptedStyleSheets = [styleSheet, styleMoondust, styleInvasion];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -519,14 +181,12 @@ export class OuterbaseEditorLite extends HTMLElement {
         }
 
         if (name === "theme") {
-            this.container.className = newValue;
+            this.outerContainer.className = newValue;
         }
 
-        // if (name === "height") {
-        //     let scrollBarHeight = 10;
-        //     let totalHeight = parseInt(newValue) + scrollBarHeight;
-        //     this.container.style.height = `${totalHeight}px`;
-        // }
+        if (name === "mode") {
+            this.container.className = newValue;
+        }
     }
 
     connectedCallback() {
