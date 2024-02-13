@@ -6,16 +6,17 @@ templateRow.innerHTML = `
     }
 
     #max-line-number {
-        background-color: #171717;
+        background-color: transparent;
         font-family: 'Monaco', 'Courier New', monospace;
         font-size: 13px;
         line-height: 1.5;
         text-align: right;
-        padding: 0px 20px;
-        user-select: none;
-        margin-right: 16px;
+        padding: 0px 0px 0px 8px;
         height: 100%;
         color: transparent;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
     }
 
     #line-number:hover {
@@ -25,28 +26,30 @@ templateRow.innerHTML = `
 
     #line-number {
         position: absolute;
-        right: 16px;
         top: 0;
-        width: 100%;
         height: 100%;
         text-align: right;
-        padding-right: 10px;
         color: #4f4f4f;
         font-family: 'Monaco', 'Courier New', monospace;
         font-size: 13px;
         line-height: 1.5;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
+        padding-right: 8px;
     }
 
     #row {
         flex: 1;
         padding: 0 0px;
         position: relative;
+        margin-left: 16px;
     }
 </style>
 
 <div id="container">
     <!-- Max line number is invisible, but serves a purpose of helping define how wide the element should be so all line numbers match up -->
-    <div style="position: relative;">
+    <div id="line-number-container" style="position: relative;">
         <div id="max-line-number">1</div>
         <div id="line-number">1</div>
     </div>
@@ -58,11 +61,15 @@ templateRow.innerHTML = `
 </div>
 `;
 
+// export default 
 class OuterbaseEditorRow extends HTMLElement {
     static get observedAttributes() {
         return [
             "line-number",
-            "max-line-number"
+            "max-line-number",
+            "show-line-numbers",
+            "readonly",
+            "language"
         ];
     }
 
@@ -77,20 +84,39 @@ class OuterbaseEditorRow extends HTMLElement {
         const dragHandle = this.shadowRoot.querySelector('#line-number');
 
         dragHandle.addEventListener('mousedown', () => {
+            if (this.getAttribute('readonly') === 'true') {
+                return;
+            }
+
             this.setAttribute('draggable', 'true');
         });
 
         this.addEventListener('dragend', () => {
             this.removeAttribute('draggable');
         });
+
+        this.render()
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
+    attributeChangedCallback(name, oldValue, newValue) {        
         if (name === "line-number" && this.shadow.querySelector("#line-number")) {
             this.shadow.querySelector("#line-number").innerHTML = newValue;
         } else if (name === "max-line-number" && this.shadow.querySelector("#max-line-number")) {
             this.shadow.querySelector("#max-line-number").innerHTML = newValue;
+        } else if (name === "show-line-numbers" && this.shadow.querySelector("#line-number-container")) {
+            if (newValue === "true") {
+                this.shadow.querySelector("#line-number-container").style.display = "block";
+            } else {
+                this.shadow.querySelector("#line-number-container").style.display = "none";
+            }
         }
+
+        this.render()
+    }
+
+    render() {
+        // Make `line-number` the same width as `max-line-number`
+        this.shadow.querySelector("#line-number").style.width = this.shadow.querySelector("#max-line-number").offsetWidth + "px";
     }
 }
 

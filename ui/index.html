@@ -1,0 +1,129 @@
+<html>
+<head>
+    <title>Test</title>
+
+    <script type="module" src="./universe-editor/editor-lite.js" defer></script>
+
+    <!-- <script src="./universe-editor/editor.js" defer></script>
+    <script src="./universe-editor/row.js" defer></script>
+    <script src="./universe-editor/row-text-content.js" defer></script>
+    <script src="./universe-editor/console.js" defer></script>
+    <script src="./universe-editor/action-bar.js" defer></script> -->
+    
+
+    <!-- <link href="./universe-editor/prism/prism.css" rel="stylesheet" />
+    <script src="./universe-editor/prism/prism.js"></script> -->
+
+    <!-- 
+        To run this example, make sure the three web components have their `export class` lines uncommented.
+        
+        Then, run the following commands in the root directory:
+
+        - npm run build-web-component-bundle 
+        - http-server --cors 
+
+        Then the script import above will work.
+    -->
+
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="height: 100%; display: flex; flex-direction: column;">
+        <button onclick="changeTheme()">Change Theme</button>
+        <button onclick="changeMode()">Change Mode</button>
+
+        <div style="flex: 1; display: flex; flex-direction: column;">
+            <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
+            <div style="height: 300px; position: relative; overflow: hidden;">
+                <outerbase-editor-lite
+                    id="sql-editor"
+                    language="sql"
+                    theme="moondust"
+                    mode="dark"
+                ></outerbase-editor-lite>
+            </div>
+        </div>
+
+        <div style="flex: 1; display: flex; flex-direction: column;">
+            <p style="color: white; font-weight: bold; padding-left: 8px;">Javascript</p>
+            <div style="flex: 1;">
+                <outerbase-editor-lite
+                    id="js-editor"
+                    language="javascript"
+                    theme="moondust"
+                    mode="dark"
+                ></outerbase-editor-lite>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    // var sql = "-- Comment here...\nSELECT * FROM table_name WHERE id > 50 LIMIT 100; -- Comment goes at the end of the line too\n\n\n\n\n\n\n\n\n\n\n\n\ntodo\n\n\nokay"
+    var sql = `-- Comment this line out
+CREATE TABLE video_games (
+    game_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100),
+    platform VARCHAR(100),
+    release_date DATE,
+    developer VARCHAR(255)
+);
+
+SELECT * FROM user WHERE id='123'
+`
+    const sqlEditor = document.querySelector('#sql-editor');
+    sqlEditor.setAttribute('code', sql);
+
+    var js = `function test() {
+    // Comment here...
+    var value = 5;
+    var string = "123";
+
+    if (value > 10) {
+        console.log('Value is greater than 10');
+    } else {
+        console.log('Value is less than 10');
+    }
+}`
+    const editor = document.querySelector('#js-editor');
+    editor.setAttribute('code', js);
+
+    onload = function() {
+        document.body.style.backgroundColor = 'black'
+    }
+
+    function changeTheme() {
+        const sqlEditor = document.querySelector('#sql-editor');
+        const jsEditor = document.querySelector('#js-editor');
+        sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+    }
+
+    function changeMode() {
+        const sqlEditor = document.querySelector('#sql-editor');
+        const jsEditor = document.querySelector('#js-editor');
+        sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
+        jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
+        document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
+    }
+    
+
+    // Add an event listener for the 'code-update' event
+    // editor.addEventListener('code-update', (event) => {
+        // Access the code from the event detail
+        // console.log('Code updated:', event.detail.code);
+
+        // You can now use event.detail.code as needed
+        // For example, display it in another element, store it, etc.
+    // });
+</script>
+
+
+</html>
