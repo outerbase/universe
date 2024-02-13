@@ -1,7 +1,9 @@
 import './prism-lite/prism.js';
 import './prism-lite/prism-sql.min.js';
 
-import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
+import { attachKeyboardShortcuts } from './js/keyboard.js';
+import { setupLineNumbers } from './js/line-number.js';
+import { setupScrollbars } from './js/scrollbar.js';
 
 import defaultStyles from './themes/default.js';
 import moondustStyles from './themes/moondust.js';
@@ -53,6 +55,8 @@ export class OuterbaseEditorLite extends HTMLElement {
     container = null;
     //
     codeContainer = null;
+    // The DOM element of the scrollbar thumb
+    scrollbarBottomThumb = null;
     // The text to display in the editor
     code = "";
     // The DOM element of the textarea
@@ -92,6 +96,7 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.outerContainer = this.shadow.querySelector("#outer-container");
         this.container = this.shadow.querySelector("#container");
         this.codeContainer = this.shadow.querySelector("#code-container");
+        this.scrollbarBottomThumb = this.shadow.querySelector("#scrollbar-bottom-thumb");
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
         this.widthMeasure = this.shadow.querySelector(".width-measure");
@@ -168,19 +173,8 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     connectedCallback() {
-        // this.container.addEventListener('scroll', () => {
-        //     // Synchronize vertical scroll between line numbers and code editor
-        //     const lineNumberContainer = this.shadow.querySelector('#line-number-container');
-        //     lineNumberContainer.style.top = `${-this.container.scrollTop}px`;
-        // });
-
-        this.codeContainer.addEventListener('scroll', () => {
-            console.log('Scroll: ', this.codeContainer.scrollTop);
-
-            // Synchronize vertical scroll between line numbers and code editor
-            const lineNumberContainer = this.shadow.querySelector('#line-number-container');
-            lineNumberContainer.style.marginTop = `${-this.codeContainer.scrollTop}px`;
-        });
+        setupScrollbars(this);
+        setupLineNumbers(this);
 
         // Keyboard shortcuts, see `keyboard-actions.js` for details
         attachKeyboardShortcuts(
@@ -209,6 +203,7 @@ export class OuterbaseEditorLite extends HTMLElement {
         // Initial adjustment in case of any pre-filled content
         this.adjustTextAreaSize();
     }
+    
 
     updateLineNumbers() {
         const lineCount = this.editor.value.split("\n").length;
