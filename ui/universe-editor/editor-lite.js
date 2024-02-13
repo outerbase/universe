@@ -1,5 +1,6 @@
 import './prism-lite/prism.js';
 import './prism-lite/prism-sql.min.js';
+
 import { attachKeyboardShortcuts } from './prism-lite/keyboard-actions.js';
 
 import defaultStyles from './themes/default.js';
