@@ -36,6 +36,7 @@
 <body>
     <div style="height: 100%; display: flex; flex-direction: column;">
         <button onclick="changeTheme()">Change Theme</button>
+        <button onclick="changeMode()">Change Mode</button>
 
         <div style="flex: 1; display: flex; flex-direction: column;">
             <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
@@ -55,7 +56,7 @@
                 <outerbase-editor-lite
                     id="js-editor"
                     language="javascript"
-                    theme="invasion"
+                    theme="moondust"
                     mode="dark"
                 ></outerbase-editor-lite>
             </div>
@@ -76,19 +77,36 @@ CREATE TABLE video_games (
 );
 
 SELECT * FROM user WHERE id='123'
-    `
+`
     const sqlEditor = document.querySelector('#sql-editor');
     sqlEditor.setAttribute('code', sql);
 
-    var code = "function test() {\n\u00A0\u00A0\u00A0\u00A0// Comment here...\n}"
+    var js = `function test() {
+    // Comment here...
+    var value = 5;
+    var string = "123";
+
+    if (value > 10) {
+        console.log('Value is greater than 10');
+    } else {
+        console.log('Value is less than 10');
+    }
+}`
     const editor = document.querySelector('#js-editor');
-    editor.setAttribute('code', code);
+    editor.setAttribute('code', js);
 
     onload = function() {
         document.body.style.backgroundColor = 'black'
     }
 
     function changeTheme() {
+        const sqlEditor = document.querySelector('#sql-editor');
+        const jsEditor = document.querySelector('#js-editor');
+        sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+    }
+
+    function changeMode() {
         const sqlEditor = document.querySelector('#sql-editor');
         const jsEditor = document.querySelector('#js-editor');
         sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
