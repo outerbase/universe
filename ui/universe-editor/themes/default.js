@@ -193,6 +193,7 @@ const css = `
         background-color: var(--color-neutral-900); 
         z-index: var(--z-scroll-bar);
         transition: opacity 0.3s;
+        border-radius: 6px;
     }
     
     #scrollbar-bottom-thumb {

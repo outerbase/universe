@@ -2,28 +2,38 @@ export function setupScrollbars(_this) {
     console.log('Parent: ', _this.codeContainer)
 
     setup();
-    updateScrollbarThumbWidth();
+    updateScrollbarDimensions(_this);
 
-    window.addEventListener('resize', updateScrollbarThumbWidth);
+    window.addEventListener('resize', () => updateScrollbarDimensions(_this));
 
     _this.codeContainer.addEventListener('scroll', () => {
+        updateScrollbarDimensions(_this);
+
         // Synchronize horizontal scroll between code editor and scrollbar thumb
-        const scrollWidth = _this.codeContainer.scrollWidth - _this.codeContainer.clientWidth;
+        const scrollWidth = _this.codeContainer.scrollWidth //- _this.codeContainer.clientWidth;
         const scrollX = _this.codeContainer.scrollLeft;
         const thumbX = (scrollX / scrollWidth) * 100; // Convert scroll position to percentage
+
+        console.log('scrollWidth: ', scrollWidth)
+        console.log('scrollX: ', scrollX)
+        console.log('thumbX: ', thumbX)
+
         _this.scrollbarBottomThumb.style.left = `${thumbX}%`;
     });
 
-    function updateScrollbarThumbWidth() {
-        if (!_this.codeContainer) return
-        // const codeContainer = document.getElementById('code-container');
-        // const scrollbarThumb = document.getElementById('scrollbar-bottom-thumb');
-        const containerWidth = _this.codeContainer.offsetWidth; // Visible width
-        const scrollWidth = _this.codeContainer.scrollWidth; // Total scrollable content width
-        const scrollbarWidth = containerWidth / scrollWidth * 100; // Percentage of visible width to total width
+    // function updateScrollbarThumbWidth() {
+    //     if (!_this.codeContainer) return
+        
+    //     const containerWidth = _this.codeContainer.offsetWidth; // Visible width
+    //     const scrollWidth = _this.codeContainer.scrollWidth; // Total scrollable content width
+    //     const scrollbarWidth = containerWidth / scrollWidth * 100; // Percentage of visible width to total width
+
+    //     console.log('containerWidth: ', containerWidth)
+    //     console.log('scrollWidth: ', scrollWidth)
+    //     console.log('scrollbarWidth: ', scrollbarWidth)
     
-        _this.scrollbarBottomThumb.style.width = `${scrollbarWidth}%`; // Set thumb width as a percentage of its parent
-    }
+    //     _this.scrollbarBottomThumb.style.width = `${scrollbarWidth}%`; // Set thumb width as a percentage of its parent
+    // }
 
     function setup() {
         let isDragging = false;
@@ -55,4 +65,21 @@ export function setupScrollbars(_this) {
         });
 
     }
+}
+
+export function updateScrollbarDimensions(_this) {
+    if (!_this.codeContainer) return
+
+    _this.scrollbarBottom.style.left = `${_this.codeContainer.offsetLeft}px`; // Set scrollbar position to match the code container
+    _this.scrollbarBottom.style.width = `${_this.codeContainer.offsetWidth}px`; // Set scrollbar width to match the code container
+    
+    const containerWidth = _this.codeContainer.offsetWidth; // Visible width
+    const scrollWidth = _this.codeContainer.scrollWidth; // Total scrollable content width
+    const scrollbarWidth = containerWidth / scrollWidth * 100; // Percentage of visible width to total width
+
+    console.log('containerWidth: ', containerWidth)
+    console.log('scrollWidth: ', scrollWidth)
+    console.log('scrollbarWidth: ', scrollbarWidth)
+
+    _this.scrollbarBottomThumb.style.width = `${scrollbarWidth}%`; // Set thumb width as a percentage of its parent
 }
