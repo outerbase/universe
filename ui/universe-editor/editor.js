@@ -2,7 +2,7 @@ import './prism/prism.js';          // Defines the Prism object
 import './prism/prism-sql.min.js';  // Defines tokens for SQL langauge
 
 // Plugins
-import { registerKeyboardShortcuts, indentLine } from './js/keyboard.js';
+import { registerKeyboardShortcuts } from './js/keyboard.js';
 import { registerLineNumbers, updateLineNumbersHeight } from './js/line-number.js';
 import { registerScrollbars } from './js/scrollbar.js';
 
@@ -21,7 +21,6 @@ import invasionTheme from './themes/invasion.js';
  * - Can we get rid of `widthMeasure` and instead use the `editor` element to measure the width?
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
  * - Rename scrollbar to be horizontalScrollbar
- * - Cleanup the themes styles to be more condensed with overlapping values
  * - Add support for database schema syntax highlighting
  */
 
@@ -158,10 +157,6 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     connectedCallback() {
-        // Keyboard shortcuts, see `keyboard-actions.js` for details
-        registerKeyboardShortcuts(this
-        );
-
         this.editor.addEventListener("mousedown", (e) => {
             requestAnimationFrame(() => {
                 this.render(["line"]);
@@ -182,8 +177,9 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.render(["syntax"]);
 
         // Register all plugins
-        registerScrollbars(this);
+        registerKeyboardShortcuts(this);
         registerLineNumbers(this);
+        registerScrollbars(this);
     }
 
     /**
@@ -217,7 +213,9 @@ export class OuterbaseEditorLite extends HTMLElement {
     
         // Set width of elements based on contents
         this.widthMeasure.textContent = this.editor.value || this.editor.placeholder;
-        this.editor.style.width = Math.max(this.widthMeasure.offsetWidth + 1, this.editor.scrollWidth) + 'px';    
+        this.editor.style.width = Math.max(this.widthMeasure.offsetWidth + 1, this.editor.scrollWidth) + 'px'; 
+
+        // this.editor.style.width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px';    
         this.shadow.querySelector(".background-highlight").style.width = this.editor.style.width;
     }
 

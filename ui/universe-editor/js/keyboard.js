@@ -143,7 +143,7 @@ export function registerKeyboardShortcuts(_this) {
     });
 }
 
-export function indentLine(_this, direction) {
+function indentLine(_this, direction) {
     var start = _this.editor.selectionStart;
     var end = _this.editor.selectionEnd;
     var selectedText = _this.editor.value.substring(start, end);

@@ -1,4 +1,5 @@
 const css = `
+    /* Light theme */
     code[class*="language-"],
     pre[class*="language-"],
     .invasion .token.operator {
@@ -34,6 +35,8 @@ const css = `
         color: #228B22 !important;
     }
 
+    
+    /* Dark theme */
     .invasion .dark code[class*="language-"],
     .invasion .dark pre[class*="language-"],
     .invasion .dark .token.operator {
