@@ -4,7 +4,7 @@ import './prism/prism-sql.min.js';
 // Plugins
 import { attachKeyboardShortcuts } from './js/keyboard.js';
 import { setupLineNumbers } from './js/line-number.js';
-import { setupScrollbars, updateScrollbarDimensions } from './js/scrollbar.js';
+import { setupScrollbars } from './js/scrollbar.js';
 
 // Styles
 import defaultStyles from './styles/default.js';
