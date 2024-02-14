@@ -14,10 +14,6 @@ export function setupScrollbars(_this) {
         const scrollX = _this.codeContainer.scrollLeft;
         const thumbX = (scrollX / scrollWidth) * 100; // Convert scroll position to percentage
 
-        console.log('scrollWidth: ', scrollWidth)
-        console.log('scrollX: ', scrollX)
-        console.log('thumbX: ', thumbX)
-
         _this.scrollbarBottomThumb.style.left = `${thumbX}%`;
     });
 
@@ -45,6 +41,8 @@ export function setupScrollbars(_this) {
             startX = e.pageX; // Starting X position of the mouse
             scrollStartX = _this.codeContainer.scrollLeft; // Starting scroll position
             document.body.classList.add('user-select-none'); // Optional: Disable text selection during drag
+            
+            _this.scrollbarBottomThumb.classList.add('scrollbar-active'); // Optional: Show scrollbar thumb as active
 
             e.preventDefault(); // Prevent text selection/dragging behavior
         });
@@ -52,6 +50,7 @@ export function setupScrollbars(_this) {
         document.addEventListener('mouseup', (e) => {
             isDragging = false;
             document.body.classList.remove('user-select-none'); // Re-enable text selection after dragging
+            _this.scrollbarBottomThumb.classList.remove('scrollbar-active'); // Optional: Show scrollbar thumb as active
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -76,10 +75,6 @@ export function updateScrollbarDimensions(_this) {
     const containerWidth = _this.codeContainer.offsetWidth; // Visible width
     const scrollWidth = _this.codeContainer.scrollWidth; // Total scrollable content width
     const scrollbarWidth = containerWidth / scrollWidth * 100; // Percentage of visible width to total width
-
-    console.log('containerWidth: ', containerWidth)
-    console.log('scrollWidth: ', scrollWidth)
-    console.log('scrollbarWidth: ', scrollbarWidth)
 
     _this.scrollbarBottomThumb.style.width = `${scrollbarWidth}%`; // Set thumb width as a percentage of its parent
 }

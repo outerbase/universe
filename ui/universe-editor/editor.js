@@ -1,11 +1,16 @@
 import './prism/prism.js';
 import './prism/prism-sql.min.js';
 
+// Plugins
 import { attachKeyboardShortcuts } from './js/keyboard.js';
 import { setupLineNumbers } from './js/line-number.js';
 import { setupScrollbars, updateScrollbarDimensions } from './js/scrollbar.js';
 
-import defaultStyles from './themes/default.js';
+// Styles
+import defaultStyles from './styles/default.js';
+import scrollbarStyles from './styles/scrollbar.js';
+
+// Themes
 import moondustStyles from './themes/moondust.js';
 import invasionStyles from './themes/invasion.js';
 
@@ -141,13 +146,16 @@ export class OuterbaseEditorLite extends HTMLElement {
         const styleSheet = new CSSStyleSheet();
         styleSheet.replaceSync(defaultStyles);
 
+        const styleScrollbar = new CSSStyleSheet();
+        styleScrollbar.replaceSync(scrollbarStyles);
+
         const styleMoondust = new CSSStyleSheet();
         styleMoondust.replaceSync(moondustStyles);
 
         const styleInvasion = new CSSStyleSheet();
         styleInvasion.replaceSync(invasionStyles);
 
-        this.shadow.adoptedStyleSheets = [styleSheet, styleMoondust, styleInvasion];
+        this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleMoondust, styleInvasion];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -176,9 +184,6 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     connectedCallback() {
-        setupScrollbars(this);
-        setupLineNumbers(this);
-
         // Keyboard shortcuts, see `keyboard-actions.js` for details
         attachKeyboardShortcuts(
             this.editor,
@@ -205,6 +210,13 @@ export class OuterbaseEditorLite extends HTMLElement {
 
         // Initial adjustment in case of any pre-filled content
         this.adjustTextAreaSize();
+        
+        // TODO: This should be optimized with logic rather than lazily using a timeout
+        // to give time for the `adjustTextAreaSize` method to calculate the correct width.
+        setTimeout(() => {
+            setupScrollbars(this);
+            setupLineNumbers(this);
+        }, 100);
     }
     
 
