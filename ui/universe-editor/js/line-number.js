@@ -5,3 +5,8 @@ export function registerLineNumbers(_this) {
         lineNumberContainer.style.marginTop = `${-_this.codeContainer.scrollTop}px`;
     });
 }
+
+export function updateLineNumbersHeight(_this, value) {
+    const lineNumberContainer = _this.shadow.getElementById('line-number-container');
+    lineNumberContainer.style.height = `${value}px`;
+}

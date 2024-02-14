@@ -159,3 +159,34 @@ export function registerKeyboardShortcuts(editor, container, codeContainer, visu
         redrawSyntaxHighlighting();
     });
 }
+
+export function indentLine(_this, direction) {
+    var start = _this.editor.selectionStart;
+    var end = _this.editor.selectionEnd;
+    var selectedText = _this.editor.value.substring(start, end);
+    var beforeText = _this.editor.value.substring(0, start);
+    var afterText = _this.editor.value.substring(end);
+
+    // Find the start of the current line
+    var lineStart = beforeText.lastIndexOf("\n") + 1;
+
+    if (direction === 'right') {
+        // Add a tab (or spaces) at the start of the line
+        _this.editor.value = beforeText.substring(0, lineStart) + "    " + beforeText.substring(lineStart) + selectedText + afterText;
+        // Adjust the cursor position
+        _this.editor.selectionStart = start + 4; // Assuming 4 spaces or 1 tab
+        _this.editor.selectionEnd = end + 4;
+    } else if (direction === 'left') {
+        // Remove a tab (or spaces) from the start of the line if present
+        var lineIndent = beforeText.substring(lineStart);
+        if (lineIndent.startsWith("    ")) { // Assuming 4 spaces or 1 tab
+            _this.editor.value = beforeText.substring(0, lineStart) + beforeText.substring(lineStart + 4) + selectedText + afterText;
+            // Adjust the cursor position
+            _this.editor.selectionStart = start - 4 > lineStart ? start - 4 : lineStart;
+            _this.editor.selectionEnd = end - 4 > lineStart ? end - 4 : lineStart;
+        }
+    }
+
+    // After updating the textarea's value, manually trigger Prism highlighting
+    _this.render(["syntax"]);
+}
