@@ -18,7 +18,7 @@ const css = `
         background-color: var(--scroll-bar-active-color) !important;
     }
 
-    .dark ~ .scrollbar-active {
+    .dark ~ #scrollbar-bottom > .scrollbar-active {
         background-color: var(--scroll-bar-active-color-dark) !important;
     }
 

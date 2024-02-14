@@ -47,12 +47,11 @@ const css = `
 
     #container {
         position: relative;
-        height: calc(100% - 16px); /* Set the height to full minus 12px to account for custom scrollbar */
+        height: calc(100% - 16px); /* Set the height to full minus pixels to account for custom scrollbar */
         width: 100%;
         margin: 0;
         display: flex;
         flex-direction: row;
-        /* overflow: scroll; */
     }
 
     #line-number-container {
@@ -151,6 +150,7 @@ const css = `
         z-index: 1;
         pointer-events: none;
         border-radius: 4px;
+        transition: transform 0.2s;
     }
 
     .dark .background-highlight {
