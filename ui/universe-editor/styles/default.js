@@ -13,6 +13,7 @@ const css = `
         --color-neutral-600: #525252;
         --color-neutral-700: #404040;
         --color-neutral-800: #262626;
+        --color-neutral-900: #171717;
         --color-primary-dark: white;
         --color-primary-light: black;
 
@@ -46,12 +47,11 @@ const css = `
 
     #container {
         position: relative;
-        height: 100%;
+        height: calc(100% - 16px); /* Set the height to full minus pixels to account for custom scrollbar */
         width: 100%;
         margin: 0;
         display: flex;
         flex-direction: row;
-        overflow: scroll;
     }
 
     #line-number-container {
@@ -75,6 +75,13 @@ const css = `
         position: relative;
         overflow: scroll;
         min-height: 100%;
+
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+    }
+
+    #code-container::-webkit-scrollbar { 
+        display: none;  /* Safari and Chrome */
     }
 
     textarea, code, .width-measure {
@@ -113,8 +120,11 @@ const css = `
         position: absolute;
         left: 0;
         top: 0;
-
         overflow-x: hidden;
+    }
+
+    .dark .editor {
+        caret-color: var(--color-primary-dark);
     }
 
     pre {
@@ -140,6 +150,7 @@ const css = `
         z-index: 1;
         pointer-events: none;
         border-radius: 4px;
+        transition: transform 0.2s;
     }
 
     .dark .background-highlight {
@@ -165,8 +176,6 @@ const css = `
         left: 0;
     }
 
-    .dark .editor {
-        caret-color: var(--color-primary-dark);
-    }
+    
 `;
 export default css;

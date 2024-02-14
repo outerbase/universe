@@ -1,29 +1,8 @@
 <html>
 <head>
-    <title>Test</title>
+    <title>Universe Code Editor</title>
 
-    <script type="module" src="./universe-editor/editor-lite.js" defer></script>
-
-    <!-- <script src="./universe-editor/editor.js" defer></script>
-    <script src="./universe-editor/row.js" defer></script>
-    <script src="./universe-editor/row-text-content.js" defer></script>
-    <script src="./universe-editor/console.js" defer></script>
-    <script src="./universe-editor/action-bar.js" defer></script> -->
-    
-
-    <!-- <link href="./universe-editor/prism/prism.css" rel="stylesheet" />
-    <script src="./universe-editor/prism/prism.js"></script> -->
-
-    <!-- 
-        To run this example, make sure the three web components have their `export class` lines uncommented.
-        
-        Then, run the following commands in the root directory:
-
-        - npm run build-web-component-bundle 
-        - http-server --cors 
-
-        Then the script import above will work.
-    -->
+    <script type="module" src="./universe-editor/editor.js" defer></script>
 
     <style>
         body {
@@ -76,8 +55,14 @@ CREATE TABLE video_games (
     developer VARCHAR(255)
 );
 
-SELECT * FROM user WHERE id='123'
-`
+SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123'
+
+
+
+
+
+
+-- Extra space`
     const sqlEditor = document.querySelector('#sql-editor');
     sqlEditor.setAttribute('code', sql);
 

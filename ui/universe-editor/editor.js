@@ -1,482 +1,350 @@
-// import './row-text-content.js';
-// import './row.js';
+import './prism/prism.js';
+import './prism/prism-sql.min.js';
 
-// import './prism/prism.js';
-// import './prism/prism-sql.min.js';
+// Plugins
+import { attachKeyboardShortcuts } from './js/keyboard.js';
+import { setupLineNumbers } from './js/line-number.js';
+import { setupScrollbars } from './js/scrollbar.js';
+
+// Styles
+import defaultStyles from './styles/default.js';
+import scrollbarStyles from './styles/scrollbar.js';
+
+// Themes
+import moondustStyles from './themes/moondust.js';
+import invasionStyles from './themes/invasion.js';
+
+/**
+ * TODO:
+ * - No lines should have the background selected row active by default, currently last line is active on load
+ * - Break logical parts of the code into separate files
+ * - Width is not properly calculating leaving horizontal scrolling when no long text exists
+ * - Add support for database schema syntax highlighting
+ */
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
-<style>
-    #container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-    }
+<div id="outer-container">
+    <div id="container" class="moondust dark">
+        <!-- The line number container to draw a new number for each line -->
+        <div id="line-number-container">
+            <div>1</div>
+        </div>
 
-    #editor-rows {
-        padding: 16px 0;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        overflow-y: hidden;
-        background: transparent;
-    }
+        <div id="code-container">
+            <!-- The div is used to highlight the active line -->
+            <div class="background-highlight"></div>
 
-    #bottom-pane {
-        display: flex;
-        flex-direction: column;
-        height: 300px;
-        width: 100%;
-        background-color: yellow;
-    }
-</style>
+            <!-- The textarea is used to capture user input -->
+            <textarea class="editor" spellcheck="false"></textarea>
 
-<div id="container">
-    <!-- <outerbase-action-bar></outerbase-action-bar> -->
+            <!-- The code element is used to display the syntax highlighted code -->
+            <pre><code></code></pre>
 
-    <div id="editor-rows">
-
+            <!-- The span is used to measure the width of the textarea's content -->
+            <span class="width-measure"></span>
+        </div>
     </div>
 
-    <!-- <outerbase-console></outerbase-console> -->
+    <div id="scrollbar-bottom">
+        <div id="scrollbar-bottom-thumb"></div>
+    </div>
 </div>
 `;
 
-// export
- class OuterbaseEditor extends HTMLElement {
+export class OuterbaseEditorLite extends HTMLElement {
+    // The DOM element of the outer parent container
+    outerContainer = null;
+    // The DOM element of the parent container
     container = null;
-    rowData = [];
-
+    //
+    codeContainer = null;
+    // The DOM element of the scrollbar
+    scrollbarBottom = null;
+    // The DOM element of the scrollbar thumb
+    scrollbarBottomThumb = null;
+    // The text to display in the editor
     code = "";
-
-    // Store selected text value
-    selectedTextValue = "";
-
-    // Drag and drop row support
-    draggedElement = null;
-    dropTarget = null;
+    // The DOM element of the textarea
+    editor = null;
+    // The DOM element where the syntax highlighted code is displayed
+    visualizer = null;
+    // The DOM element used to measure the width of the textarea's content
+    widthMeasure = null;
+    // TODO: Needs to be implemented
+    schema = {}
 
     static get observedAttributes() {
         return [
+            // The text to display in the editor
             "code",
-            "readonly",
-            "show-line-numbers",
-            "language"
+            // The code language to use for syntax highlighting
+            "language",
+            // The theme to use for syntax highlighting, such as "Moondust"
+            "theme",
+            // The secondary theme for light/dark mode, "light" or "dark"
+            "mode",
+            // The height of the editors parent container
+            "height",
+            // The database schema to use for syntax highlighting
+            "schema",
         ];
     }
 
     constructor() {
         super();
 
+        // Default web component setup
         this.shadow = this.attachShadow({ mode: "open" });
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
-    }
 
-    redrawRowData() {
-        // Parse the code into rows array from string, splitting on `\n` characters
-        this.rowData = this.code.trim().split(`\n`).map((item, index) => {
-            item = item.replace(/^ +/g, match => '\u00A0'.repeat(match.length));
+        // Preserve the references to the textarea and code elements
+        this.outerContainer = this.shadow.querySelector("#outer-container");
+        this.container = this.shadow.querySelector("#container");
+        this.codeContainer = this.shadow.querySelector("#code-container");
+        this.scrollbarBottom = this.shadow.querySelector("#scrollbar-bottom");
+        this.scrollbarBottomThumb = this.shadow.querySelector("#scrollbar-bottom-thumb");
+        this.editor = this.shadow.querySelector(".editor");
+        this.visualizer = this.shadow.querySelector("code");
+        this.widthMeasure = this.shadow.querySelector(".width-measure");
 
-            return {
-                value: item,
-                lineNumber: (index + 1).toString(),
-                'readonly': this.getAttribute('readonly') === "true" ? true : false
-            };
-        });
+        this.redrawSyntaxHighlighting();
 
-        // If no rows exist, put a default row in.
-        if (this.rowData.length === 0) {
-            this.rowData = [{ value: "" }];
-        }
+        // Add Prism JS
+        // const script = document.createElement('script');
+        // script.src = "./universe-editor/prism-lite/prism.js";
+        // script.onload = () => {
+        //     setTimeout(() => {
+        //         this.redrawSyntaxHighlighting();
+        //         this.updateLineNumbers();
+        //     }, 0);
 
-        this.render();
+        //     // if (typeof Prism !== 'undefined') {
+        //     //     console.log("Prism is loaded: ", Prism.languages);
+        //     //     // Ensure Prism and its languages are loaded
+        //     //     // if (Prism.languages.javascript && Prism.languages.sql) {
+        //     //         console.log("Prism languages are loaded");
+        //     //         // Define a new token for highlighting "user_profile"
+        //     //         const schemaPattern = {
+        //     //             'db-schema': { // This is the token name
+        //     //                 pattern: /\buser_profile\b/, // Matches "user_profile" as a whole word
+        //     //                 // alias: 'special-class' // Use 'alias' to apply a special CSS class
+        //     //             }
+        //     //         };
+        
+        //     //         // Insert the new token in JavaScript and SQL languages before 'keyword', or another suitable token
+        //     //         Prism.languages.insertBefore('javascript', 'keyword', schemaPattern);
+        //     //         Prism.languages.insertBefore('sql', 'keyword', schemaPattern);
+        //     //     // }
+        
+        //     //     Prism.highlightAllUnder(this.shadow);
+        //     // }
+        // };
+        // this.shadow.appendChild(script);
+
+        const styleSheet = new CSSStyleSheet();
+        styleSheet.replaceSync(defaultStyles);
+
+        const styleScrollbar = new CSSStyleSheet();
+        styleScrollbar.replaceSync(scrollbarStyles);
+
+        const styleMoondust = new CSSStyleSheet();
+        styleMoondust.replaceSync(moondustStyles);
+
+        const styleInvasion = new CSSStyleSheet();
+        styleInvasion.replaceSync(invasionStyles);
+
+        this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleMoondust, styleInvasion];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "code") {
-            this.code = newValue;
-            this.redrawRowData();
-        } else if (name === "readonly") {
-            if (newValue === "true") {
-                this.rowData.forEach((item, index) => {
-                    item['readonly'] = true;
-                });
-            } else {
-                this.rowData.forEach((item, index) => {
-                    item['readonly'] = false;
-                });
-            }
-
-            this.render();
-        }  else if (name === "show-line-numbers" && this.shadow.querySelector("#line-number-container")) {
-            this.render();
-        }
-    }
-
-    selectAllText() {
-        // Assuming this method is called within the parent web component
-        const childComponents = this.shadowRoot.querySelectorAll('outerbase-editor-row');
-
-        var firstBlock;
-        var lastBlock;
-
-        childComponents.forEach((rowComponent) => {
-            console.log('Row Component: ', rowComponent.shadowRoot)
-
-            const slot = rowComponent.shadowRoot.querySelector('slot'); // Add a name if it's a named slot, e.g., 'slot[name="something"]'
-            const editorRowText = slot.assignedElements()[0].shadowRoot;
-            const codeObject = editorRowText.querySelector('#code')
-            const codeValue = codeObject.innerHTML;
-
-            lastBlock = rowComponent;
+            this.editor.value = newValue;
+            this.updateLineNumbers();
             
-            if (!firstBlock) {
-                firstBlock = rowComponent;
-            }
+            // This timeout is necessary to ensure that the syntax highlighting is applied
+            // after the web component has initially rendered.
+            setTimeout(() => {
+                this.redrawSyntaxHighlighting();
+            }, 0);
+        }
 
-            console.log('Code Object', codeObject)
+        if (name === "language") {
+            this.visualizer.className = `language-${newValue}`;
+        }
 
-            // CHange the background color of the codeObject
-            // codeObject.style.backgroundColor = '#e8f0fe20'; // Example selection color
+        if (name === "theme") {
+            this.outerContainer.className = newValue;
+        }
 
-
-            // codeObject.selectAllText();
-
-            // console.log('Text Components', codeValue)
-
-            this.selectedTextValue += codeValue + '\n';
-        });
-
-        // Get all blocks
-        // const blocks = this.shadowRoot.querySelectorAll('outerbase-editor-row');
-        // if (blocks.length === 0) return; // Exit if no blocks found
-
-        const selection = window.getSelection();
-        const range = new Range();
-
-        // Set the start of the range to the start of the first block
-        range.setStart(this.container, 0);
-        // Set the end of the range to the end of the last block
-        // Note: This assumes blocks are text nodes or contain text nodes. Adjust as necessary.
-        range.setEnd(this.container, 3);
-
-        // Clear existing selections
-        selection.removeAllRanges();
-        // Add the new range
-        selection.addRange(range);
-
-        console.log('Range: ', range)
+        if (name === "mode") {
+            this.container.className = newValue;
+        }
     }
 
     connectedCallback() {
-        this.render();
+        // Keyboard shortcuts, see `keyboard-actions.js` for details
+        attachKeyboardShortcuts(
+            this.editor,
+            this.container,
+            this.codeContainer,
+            this.visualizer,
+            this.getAttribute("language"),
+            () => this.redrawSyntaxHighlighting(),
+            () => this.updateLineNumbers(),
+            () => this.highlightItems(),
+            () => this.adjustTextAreaSize(),
+            (direction) => this.indentLine(direction),
+            (event) => this.dispatchEvent(event)
+        );
 
-        this.container = this.shadow.querySelector("#editor-rows");
-    
-        this.container.addEventListener('dragstart', (event) => {
-            this.draggedElement = event.target.closest('outerbase-editor-row');
-            event.dataTransfer.effectAllowed = 'move';
+        this.editor.addEventListener("mousedown", (e) => {
+            // When a user clicks on a row, we want to highlight the active line. A slight
+            // delay is required to ensure the active line is highlighted after the click event.
+            // Using `click` event instead of `mousedown` will add additional render delay.
+            setTimeout(() => {
+                this.highlightItems();
+            }, 0);
         });
-    
-        this.container.addEventListener('dragover', (event) => {
-            event.preventDefault(); // Necessary to allow dropping
-            const target = event.target.closest('outerbase-editor-row');
-            if (target && target !== this.draggedElement) {
-                this.dropTarget = target;
-                event.dataTransfer.dropEffect = 'move';
-            }
-        });
+
+        // Initial adjustment in case of any pre-filled content
+        this.adjustTextAreaSize();
         
-        this.container.addEventListener('dragend', (event) => {
-            if (!this.dropTarget) return;
-            const targetIndex = this.getRowDataIndex(this.dropTarget);
-            const draggedIndex = this.getRowDataIndex(this.draggedElement);
-
-            // Move the dragged element data to the target index
-            this.rowData.splice(targetIndex, 0, this.rowData.splice(draggedIndex, 1)[0]);
-            
-            // Update lineNumber for each rowData item
-            this.rowData.forEach((item, index) => {
-                item.lineNumber = (index + 1).toString();
-            });
-
-            this.render(); // Re-render the UI
-
-            // Reset everything
-            this.draggedElement = null;
-            this.dropTarget = null;
-        });
-
-        this.addEventListener('keydown', (event) => {
-            if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
-                event.preventDefault(); // Prevent the default action
-                this.selectAllText(); // Custom method to handle selection
-
-                console.log('SELECT ALL TEXT')
-            }
-        });
-
-        this.addEventListener('action-newline', (event) => {
-            let lineNumber = event.detail.lineNumber;
-            let textAfterCursor = event.detail.textAfterCursor;
-            let textToPersist = event.detail.textToPersist;
-
-            // Insert a new row at the line number
-            this.rowData.splice(lineNumber, 0, { value: textAfterCursor ?? "" });
-            this.render(); 
-
-            // Previous line
-            if (lineNumber > 0) {
-                this.rowData[lineNumber - 1].value = textToPersist ?? "";
-                this.render(); 
-            }
-
-            let codeElement = this.getCodeDivFromLineNumber(lineNumber)
-
-            // Make codeElement contentEditable
-            codeElement.contentEditable = true;
-            codeElement.focus();
-        });
-
-        this.addEventListener('action-delete', (event) => {
-            let lineNumber = event.detail.lineNumber;
-            let textAfterCursor = event.detail.textAfterCursor;
-
-            // Delete the row at the line number
-            this.rowData.splice(lineNumber - 1, 1);
-
-            // Append textAfterCursor to the previous line
-            if (lineNumber > 1) {
-                this.rowData[lineNumber - 2].value += textAfterCursor ?? "";
-            }
-
-            this.render(); 
-
-            // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`)
-            if (!rowElement || !rowElement.shadowRoot) return;
-            let rowShadowRoot = rowElement.shadowRoot
-            
-
-            // Find the `slot` element in rowElement
-            let slotElement = rowShadowRoot.querySelector('slot');
-
-            // Find the `outerbase-editor-row-text` element in slotElement
-            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-            
-            if (!rowTextElement) return;
-            let codeElement = rowTextElement.querySelector('#code');
-
-            // Make codeElement contentEditable
-            codeElement.contentEditable = true;
-            codeElement.focus();
-
-            if (codeElement.childNodes.length === 0) return;
-
-            // Move cursor to end of line, minus the length of textAfterCursor
-            this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length - (textAfterCursor?.length ?? 0));
-        });
-
-        this.addEventListener('action-update', (event) => {
-            let lineNumber = event.detail.lineNumber;
-            let value = event.detail.value;
-
-            // Update the row at the line number
-            this.rowData[lineNumber - 1].value = value;
-
-            // This render call loses focus, so we need to re-focus
-            // this.render();
-
-            // Send an event to the parent to update the code
-            this.dispatchEvent(new CustomEvent('code-update', {
-                detail: {
-                    code: this.rowData.map(item => item.value).join('\n')
-                }
-            }));
-        });
-
-        this.addEventListener('action-up', (event) => {
-            let lineNumber = event.detail.lineNumber;
-            let cursorPosition = event.detail.cursorPosition;
-
-            // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`)
-            if (!rowElement || !rowElement.shadowRoot) return;
-            let rowShadowRoot = rowElement.shadowRoot
-
-            // Find the `slot` element in rowElement
-            let slotElement = rowShadowRoot.querySelector('slot');
-
-            // Find the `outerbase-editor-row-text` element in slotElement
-            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-
-            if (!rowTextElement) return;
-            let codeElement = rowTextElement.querySelector('#code');
-
-            // Make codeElement contentEditable
-            codeElement.contentEditable = true;
-            codeElement.focus();
-
-            // Move the cursor up to the line above at the same position if possible
-            this.moveCursorToPosition(codeElement, cursorPosition);
-        });
-
-        this.addEventListener('action-down', (event) => {
-            let lineNumber = event.detail.lineNumber;
-            let cursorPosition = event.detail.cursorPosition;
-
-            // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
-            if (!rowElement || !rowElement.shadowRoot) return;
-            let rowShadowRoot = rowElement.shadowRoot
-
-            // Find the `slot` element in rowElement
-            let slotElement = rowShadowRoot.querySelector('slot');
-
-            // Find the `outerbase-editor-row-text` element in slotElement
-            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-
-            if (!rowTextElement) return;
-            let codeElement = rowTextElement.querySelector('#code');
-
-            // Make codeElement contentEditable
-            codeElement.contentEditable = true;
-            codeElement.focus();
-
-            // Move the cursor up to the line below at the same position if possible
-            this.moveCursorToPosition(codeElement, cursorPosition);
-        });
-
-        this.addEventListener('action-left', (event) => {
-            let lineNumber = event.detail.lineNumber;
-
-            // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber - 2}"]`)
-            if (!rowElement || !rowElement.shadowRoot) return;
-            let rowShadowRoot = rowElement.shadowRoot
-
-            // Find the `slot` element in rowElement
-            let slotElement = rowShadowRoot.querySelector('slot');
-
-            // Find the `outerbase-editor-row-text` element in slotElement
-            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-
-            if (!rowTextElement) return;
-            let codeElement = rowTextElement.querySelector('#code');
-
-            // Make codeElement contentEditable
-            codeElement.contentEditable = true;
-            codeElement.focus();
-
-            // Move the cursor of codeElement to the end of the line
-            if (codeElement.childNodes.length === 0) return;
-            this.moveCursorToPosition(codeElement, codeElement.childNodes[0].length);
-        });
-
-        this.addEventListener('action-right', (event) => {
-            let lineNumber = event.detail.lineNumber;
-
-            // Row shadow root
-            let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
-            if (!rowElement || !rowElement.shadowRoot) return;
-            let rowShadowRoot = rowElement.shadowRoot
-
-            // Find the `slot` element in rowElement
-            let slotElement = rowShadowRoot.querySelector('slot');
-
-            // Find the `outerbase-editor-row-text` element in slotElement
-            let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-
-            if (!rowTextElement) return;
-            let codeElement = rowTextElement.querySelector('#code');
-
-            // Make codeElement contentEditable
-            codeElement.contentEditable = true;
-            codeElement.focus();
-        });
+        // TODO: This should be optimized with logic rather than lazily using a timeout
+        // to give time for the `adjustTextAreaSize` method to calculate the correct width.
+        setTimeout(() => {
+            setupScrollbars(this);
+            setupLineNumbers(this);
+        }, 100);
     }
+    
 
-    getCodeDivFromLineNumber(lineNumber) {
-        let rowElement = this.shadow.querySelector(`outerbase-editor-row[data-index="${lineNumber}"]`)
-        if (!rowElement || !rowElement.shadowRoot) return;
-        let rowShadowRoot = rowElement.shadowRoot
-
-        // Find the `slot` element in rowElement
-        let slotElement = rowShadowRoot.querySelector('slot');
-
-        // Find the `outerbase-editor-row-text` element in slotElement
-        let rowTextElement = slotElement.assignedElements()[0].shadowRoot;
-        let codeElement = rowTextElement.querySelector('#code');
-
-        return codeElement
-    }
-
-    moveCursorToPosition(element, position) {
-        var range = document.createRange();
-        var sel = window.getSelection();
-
-        if (element && element.childNodes.length === 0) return;
-
-        let lineLength = element.childNodes[0].length;
-        range.setStart(element.childNodes[0], position > lineLength ? lineLength : position);
-
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
-    getRowDataIndex(element) {
-        const indexAttr = element.getAttribute('data-index');
-        return indexAttr ? parseInt(indexAttr, 10) : null;
-    }
-
-    render() {
-        this.container = this.shadow.querySelector("#editor-rows");
-        this.container.innerHTML = ''
-        this.rowData.forEach((item, index) => this.createAndAppendRow(item, index));
-    }
-
-    createAndAppendRow(data, index) {
-        // Create a string of "9" repeated for the max line number length
-        const maxLineNumberLength = this.rowData.length.toString().length;
-        const maxLineNumberString = "9".repeat(maxLineNumberLength);
-
-        const editorRow = document.createElement("outerbase-editor-row");
-        editorRow.setAttribute("line-number", index + 1);
-        editorRow.setAttribute("max-line-number", maxLineNumberString);
-        editorRow.setAttribute("data-index", index.toString());
-        editorRow.setAttribute("readonly", data['readonly'] ? "true" : "false");
-        editorRow.setAttribute("show-line-numbers", this.getAttribute("show-line-numbers"));
-        editorRow.setAttribute("language", this.getAttribute("language"));
-
-        // If the text starts with OB:WASM:SOME_ID_HERE, then show the row as a special case
-        if (data.value?.startsWith("OB:WASM:")) {
-            data.isBlock = true;
-            
-            // Get content after OB:WASM:
-            let wasmId = data.value.substring(8);
-            data.blockContent = wasmId;
-
-            const specialDiv = document.createElement("div");
-            specialDiv.style = "width: 400px; height: 80px; font-family: 'Monaco', 'Courier New', monospace; font-size: 13px; color: white; background-color: rgb(33, 33, 33); border: 1px solid rgb(60, 60, 60); border-radius: 8px; padding: 8px 16px; margin: 8px 0;";
-            specialDiv.textContent = data.blockContent;
-            specialDiv.setAttribute("line-number", index + 1);
-            editorRow.appendChild(specialDiv);
-        } else {
-            // Create and append the outerbase-editor-row-text element
-            const editorRowText = document.createElement("outerbase-editor-row-text");
-            editorRowText.setAttribute("line-number", index + 1);
-            editorRowText.setAttribute("value", data.value);
-            editorRowText.setAttribute("readonly", data['readonly'] ? "true" : "false");
-            editorRowText.setAttribute("language", this.getAttribute("language"));
-            editorRow.appendChild(editorRowText);
+    updateLineNumbers() {
+        const lineCount = this.editor.value.split("\n").length;
+        const lineNumberContainer = this.shadow.querySelector("#line-number-container");
+        lineNumberContainer.innerHTML = ''; // Clear existing line numbers
+    
+        for (let i = 1; i <= lineCount; i++) {
+            const lineNumberDiv = document.createElement("div");
+            lineNumberDiv.textContent = i;
+            lineNumberContainer.appendChild(lineNumberDiv);
         }
 
-        // Append the row to the container
-        this.container.appendChild(editorRow);
-        return editorRow;
+        this.highlightItems();
+    }    
+
+    adjustTextareaHeight(textarea) {
+        // Reset the height to ensure we're not measuring the old content
+        textarea.style.height = 'auto';
+
+        // Height is number of lines * line height
+        const lineHeight = 18; // Match this to your actual line height
+        const lineCount = textarea.value.split("\n").length;
+        const height = lineCount * lineHeight;
+
+        textarea.style.height = `${height}px`;
+        this.shadow.querySelector("#line-number-container").style.height = `${height}px`;
+        // this.codeContainer.style.height = `${height}px`;
+    }
+
+    adjustTextareaWidth(textarea) {
+        // Copy textarea content into the widthMeasure span
+        this.widthMeasure.textContent = textarea.value || textarea.placeholder;
+        // Adjust the textarea width based on the widthMeasure span's width
+        textarea.style.width = Math.max(this.widthMeasure.offsetWidth + 1, textarea.scrollWidth) + 'px';    
+
+        // Adjust width of `background-highlight` div to match the width of the textarea
+        this.shadow.querySelector(".background-highlight").style.width = textarea.style.width;
+    }
+
+    indentLine(direction) {
+        var start = this.editor.selectionStart;
+        var end = this.editor.selectionEnd;
+        var selectedText = this.editor.value.substring(start, end);
+        var beforeText = this.editor.value.substring(0, start);
+        var afterText = this.editor.value.substring(end);
+
+        // Find the start of the current line
+        var lineStart = beforeText.lastIndexOf("\n") + 1;
+
+        if (direction === 'right') {
+            // Add a tab (or spaces) at the start of the line
+            this.editor.value = beforeText.substring(0, lineStart) + "    " + beforeText.substring(lineStart) + selectedText + afterText;
+            // Adjust the cursor position
+            this.editor.selectionStart = start + 4; // Assuming 4 spaces or 1 tab
+            this.editor.selectionEnd = end + 4;
+        } else if (direction === 'left') {
+            // Remove a tab (or spaces) from the start of the line if present
+            var lineIndent = beforeText.substring(lineStart);
+            if (lineIndent.startsWith("    ")) { // Assuming 4 spaces or 1 tab
+                this.editor.value = beforeText.substring(0, lineStart) + beforeText.substring(lineStart + 4) + selectedText + afterText;
+                // Adjust the cursor position
+                this.editor.selectionStart = start - 4 > lineStart ? start - 4 : lineStart;
+                this.editor.selectionEnd = end - 4 > lineStart ? end - 4 : lineStart;
+            }
+        }
+
+        // After updating the textarea's value, manually trigger Prism highlighting
+        this.redrawSyntaxHighlighting();
+    }
+
+    adjustTextAreaSize() {
+        // Update the height & width of the textarea to match the content
+        requestAnimationFrame(() => {
+            this.adjustTextareaHeight(this.editor);
+            this.adjustTextareaWidth(this.editor);
+        });
+    }
+
+    // Method to highlight the active line
+    highlightItems() {
+        this.highlightActiveLine();
+        this.highlightActiveLineNumber();
+    }
+
+    highlightActiveLine() {
+        const lineHeight = 18; // Match this to your actual line height
+        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
+        const highlightPosition = (lineNumber - 1) * lineHeight;
+        const backgroundHighlight = this.shadow.querySelector('.background-highlight');
+        
+        requestAnimationFrame(() => {
+            backgroundHighlight.style.top = `${highlightPosition}px`;
+            backgroundHighlight.style.opacity = 1;
+
+            // Animate the `backgroundHighlight` component by scaling up and down
+            // to create a smooth transition between active lines
+            backgroundHighlight.style.transform = 'scaleY(1.25)';
+            setTimeout(() => {
+                backgroundHighlight.style.transform = 'scaleY(1)';
+            }, 200);
+        });
+    }
+
+    highlightActiveLineNumber() {
+        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
+        const lineNumbers = this.shadow.querySelectorAll("#line-number-container div");
+    
+        // Remove the active class from all line numbers
+        lineNumbers.forEach(line => {
+            line.classList.remove('active-line-number');
+        });
+    
+        // Add the active class to the current line number
+        if (lineNumbers[lineNumber - 1]) {
+            lineNumbers[lineNumber - 1].classList.add('active-line-number');
+        }
+    }
+    
+
+    redrawSyntaxHighlighting() {
+        // After updating the textarea's value, manually trigger Prism highlighting
+        this.visualizer.innerHTML = this.editor.value;
+        
+        try {
+            Prism.highlightElement(this.visualizer);
+        } catch (error) { }
     }
 }
 
-window.customElements.define("outerbase-editor", OuterbaseEditor);
+window.customElements.define("outerbase-editor-lite", OuterbaseEditorLite);

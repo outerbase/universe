@@ -94,7 +94,7 @@ export function attachKeyboardShortcuts(editor, container, codeContainer, visual
                 // Use setTimeout to allow the textarea to update
                 setTimeout(() => {
                 // Scroll the parent container to the bottom
-                    container.scrollTop = container.scrollHeight;
+                    codeContainer.scrollTop = codeContainer.scrollHeight;
                 }, 0);
             }
 
