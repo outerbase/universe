@@ -1,4 +1,4 @@
-export function attachKeyboardShortcuts(editor, container, codeContainer, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, indentLine, dispatchCustomEvent) {
+export function registerKeyboardShortcuts(editor, container, codeContainer, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, indentLine, dispatchCustomEvent) {
     editor.addEventListener("keydown", (e) => {
         if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
             // For an instant reflection of the active line and line number on key press
