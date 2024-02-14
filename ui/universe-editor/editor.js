@@ -312,6 +312,13 @@ export class OuterbaseEditorLite extends HTMLElement {
         requestAnimationFrame(() => {
             backgroundHighlight.style.top = `${highlightPosition}px`;
             backgroundHighlight.style.opacity = 1;
+
+            // Animate the `backgroundHighlight` component by scaling up and down
+            // to create a smooth transition between active lines
+            backgroundHighlight.style.transform = 'scaleY(1.25)';
+            setTimeout(() => {
+                backgroundHighlight.style.transform = 'scaleY(1)';
+            }, 200);
         });
     }
 
