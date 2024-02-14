@@ -16,7 +16,6 @@ import invasionStyles from './themes/invasion.js';
 
 /**
  * TODO:
- * - Custom scrollbar in our code-editor component
  * - No lines should have the background selected row active by default, currently last line is active on load
  * - Break logical parts of the code into separate files
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists

@@ -8,26 +8,12 @@ export function setupScrollbars(_this) {
         updateScrollbarDimensions(_this);
 
         // Synchronize horizontal scroll between code editor and scrollbar thumb
-        const scrollWidth = _this.codeContainer.scrollWidth //- _this.codeContainer.clientWidth;
+        const scrollWidth = _this.codeContainer.scrollWidth;
         const scrollX = _this.codeContainer.scrollLeft;
-        const thumbX = (scrollX / scrollWidth) * 100; // Convert scroll position to percentage
+        const thumbX = (scrollX / scrollWidth) * 100;
 
         _this.scrollbarBottomThumb.style.left = `${thumbX}%`;
     });
-
-    // function updateScrollbarThumbWidth() {
-    //     if (!_this.codeContainer) return
-        
-    //     const containerWidth = _this.codeContainer.offsetWidth; // Visible width
-    //     const scrollWidth = _this.codeContainer.scrollWidth; // Total scrollable content width
-    //     const scrollbarWidth = containerWidth / scrollWidth * 100; // Percentage of visible width to total width
-
-    //     console.log('containerWidth: ', containerWidth)
-    //     console.log('scrollWidth: ', scrollWidth)
-    //     console.log('scrollbarWidth: ', scrollbarWidth)
-    
-    //     _this.scrollbarBottomThumb.style.width = `${scrollbarWidth}%`; // Set thumb width as a percentage of its parent
-    // }
 
     function setup() {
         let isDragging = false;
@@ -54,8 +40,6 @@ export function setupScrollbars(_this) {
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const deltaX = e.pageX - startX; // Calculate mouse movement
-            // const codeContainer = document.getElementById('code-container');
-            // const scrollWidth = this.codeContainer.scrollWidth - this.codeContainer.clientWidth;
             const thumbWidthPercent = _this.codeContainer.clientWidth / _this.codeContainer.scrollWidth;
             const scrollX = scrollStartX + (deltaX / thumbWidthPercent);
             _this.codeContainer.scrollLeft = scrollX;
