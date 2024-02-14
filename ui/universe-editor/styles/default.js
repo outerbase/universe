@@ -54,22 +54,6 @@ const css = `
         flex-direction: row;
     }
 
-    #line-number-container {
-        padding: var(--padding-horizontal);
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size);
-        line-height: var(--line-height);
-        color: var(--color-neutral-500);
-        text-align: right;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-
-    .dark #line-number-container {
-        color: var(--color-neutral-400);
-    }
-
     #code-container {
         flex: 1;
         position: relative;
@@ -157,14 +141,6 @@ const css = `
         background-color: var(--color-neutral-800);
     }
 
-    .active-line-number {
-        color: var(--color-neutral-800);
-    }
-
-    .dark .active-line-number {
-        color: var(--color-neutral-50);
-    }
-
     .width-measure {
         font-family: var(--font-family-mono);
         font-size: var(--font-size) !important;
@@ -175,7 +151,5 @@ const css = `
         top: 0;
         left: 0;
     }
-
-    
 `;
 export default css;

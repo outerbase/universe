@@ -2,22 +2,24 @@ import './prism/prism.js';
 import './prism/prism-sql.min.js';
 
 // Plugins
-import { attachKeyboardShortcuts } from './js/keyboard.js';
-import { setupLineNumbers } from './js/line-number.js';
-import { setupScrollbars } from './js/scrollbar.js';
+import { registerKeyboardShortcuts } from './js/keyboard.js';
+import { registerLineNumbers } from './js/line-number.js';
+import { registerScrollbars } from './js/scrollbar.js';
 
 // Styles
 import defaultStyles from './styles/default.js';
 import scrollbarStyles from './styles/scrollbar.js';
+import lineNumberStyles from './styles/line-number.js';
 
 // Themes
-import moondustStyles from './themes/moondust.js';
-import invasionStyles from './themes/invasion.js';
+import moondustTheme from './themes/moondust.js';
+import invasionTheme from './themes/invasion.js';
 
 /**
  * TODO:
  * - No lines should have the background selected row active by default, currently last line is active on load
  * - Break logical parts of the code into separate files
+ * - Update the keyboard actions calling to pass in `this` as the first argument and remove unnecessary parameters
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
  * - Add support for database schema syntax highlighting
  */
@@ -99,48 +101,14 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
 
         // Preserve the references to the textarea and code elements
-        this.outerContainer = this.shadow.querySelector("#outer-container");
-        this.container = this.shadow.querySelector("#container");
-        this.codeContainer = this.shadow.querySelector("#code-container");
-        this.scrollbarBottom = this.shadow.querySelector("#scrollbar-bottom");
-        this.scrollbarBottomThumb = this.shadow.querySelector("#scrollbar-bottom-thumb");
+        this.outerContainer = this.shadow.getElementById("outer-container");
+        this.container = this.shadow.getElementById("container");
+        this.codeContainer = this.shadow.getElementById("code-container");
+        this.scrollbarBottom = this.shadow.getElementById("scrollbar-bottom");
+        this.scrollbarBottomThumb = this.shadow.getElementById("scrollbar-bottom-thumb");
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
         this.widthMeasure = this.shadow.querySelector(".width-measure");
-
-        this.redrawSyntaxHighlighting();
-
-        // Add Prism JS
-        // const script = document.createElement('script');
-        // script.src = "./universe-editor/prism-lite/prism.js";
-        // script.onload = () => {
-        //     setTimeout(() => {
-        //         this.redrawSyntaxHighlighting();
-        //         this.updateLineNumbers();
-        //     }, 0);
-
-        //     // if (typeof Prism !== 'undefined') {
-        //     //     console.log("Prism is loaded: ", Prism.languages);
-        //     //     // Ensure Prism and its languages are loaded
-        //     //     // if (Prism.languages.javascript && Prism.languages.sql) {
-        //     //         console.log("Prism languages are loaded");
-        //     //         // Define a new token for highlighting "user_profile"
-        //     //         const schemaPattern = {
-        //     //             'db-schema': { // This is the token name
-        //     //                 pattern: /\buser_profile\b/, // Matches "user_profile" as a whole word
-        //     //                 // alias: 'special-class' // Use 'alias' to apply a special CSS class
-        //     //             }
-        //     //         };
-        
-        //     //         // Insert the new token in JavaScript and SQL languages before 'keyword', or another suitable token
-        //     //         Prism.languages.insertBefore('javascript', 'keyword', schemaPattern);
-        //     //         Prism.languages.insertBefore('sql', 'keyword', schemaPattern);
-        //     //     // }
-        
-        //     //     Prism.highlightAllUnder(this.shadow);
-        //     // }
-        // };
-        // this.shadow.appendChild(script);
 
         const styleSheet = new CSSStyleSheet();
         styleSheet.replaceSync(defaultStyles);
@@ -148,13 +116,16 @@ export class OuterbaseEditorLite extends HTMLElement {
         const styleScrollbar = new CSSStyleSheet();
         styleScrollbar.replaceSync(scrollbarStyles);
 
+        const styleLineNumber = new CSSStyleSheet();
+        styleLineNumber.replaceSync(lineNumberStyles);
+
         const styleMoondust = new CSSStyleSheet();
-        styleMoondust.replaceSync(moondustStyles);
+        styleMoondust.replaceSync(moondustTheme);
 
         const styleInvasion = new CSSStyleSheet();
-        styleInvasion.replaceSync(invasionStyles);
+        styleInvasion.replaceSync(invasionTheme);
 
-        this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleMoondust, styleInvasion];
+        this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleLineNumber, styleMoondust, styleInvasion];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -163,7 +134,7 @@ export class OuterbaseEditorLite extends HTMLElement {
             this.updateLineNumbers();
             
             // This timeout is necessary to ensure that the syntax highlighting is applied
-            // after the web component has initially rendered.
+            // after the web component has initially rendered after code was made available.
             setTimeout(() => {
                 this.redrawSyntaxHighlighting();
             }, 0);
@@ -184,7 +155,7 @@ export class OuterbaseEditorLite extends HTMLElement {
 
     connectedCallback() {
         // Keyboard shortcuts, see `keyboard-actions.js` for details
-        attachKeyboardShortcuts(
+        registerKeyboardShortcuts(
             this.editor,
             this.container,
             this.codeContainer,
@@ -208,20 +179,20 @@ export class OuterbaseEditorLite extends HTMLElement {
         });
 
         // Initial adjustment in case of any pre-filled content
-        this.adjustTextAreaSize();
+        // this.adjustTextAreaSize();
         
         // TODO: This should be optimized with logic rather than lazily using a timeout
         // to give time for the `adjustTextAreaSize` method to calculate the correct width.
         setTimeout(() => {
-            setupScrollbars(this);
-            setupLineNumbers(this);
+            registerScrollbars(this);
+            registerLineNumbers(this);
         }, 100);
     }
     
 
     updateLineNumbers() {
         const lineCount = this.editor.value.split("\n").length;
-        const lineNumberContainer = this.shadow.querySelector("#line-number-container");
+        const lineNumberContainer = this.shadow.getElementById("line-number-container");
         lineNumberContainer.innerHTML = ''; // Clear existing line numbers
     
         for (let i = 1; i <= lineCount; i++) {
@@ -238,13 +209,12 @@ export class OuterbaseEditorLite extends HTMLElement {
         textarea.style.height = 'auto';
 
         // Height is number of lines * line height
-        const lineHeight = 18; // Match this to your actual line height
+        const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
         const lineCount = textarea.value.split("\n").length;
         const height = lineCount * lineHeight;
 
         textarea.style.height = `${height}px`;
-        this.shadow.querySelector("#line-number-container").style.height = `${height}px`;
-        // this.codeContainer.style.height = `${height}px`;
+        this.shadow.getElementById("line-number-container").style.height = `${height}px`;
     }
 
     adjustTextareaWidth(textarea) {
@@ -303,7 +273,7 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     highlightActiveLine() {
-        const lineHeight = 18; // Match this to your actual line height
+        const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
         const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
         const highlightPosition = (lineNumber - 1) * lineHeight;
         const backgroundHighlight = this.shadow.querySelector('.background-highlight');
@@ -347,4 +317,4 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 }
 
-window.customElements.define("outerbase-editor-lite", OuterbaseEditorLite);
+window.customElements.define("outerbase-editor", OuterbaseEditorLite);
