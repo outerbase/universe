@@ -4,9 +4,6 @@ const css = `
         --font-size: 13px;
         --line-height: 18px;
         --padding-horizontal: 0 10px;
-
-        /* Z index layer definitions */
-        --z-scroll-bar: 3;
         
         --color-neutral-50: #fafafa;
         --color-neutral-200: #e5e5e5;

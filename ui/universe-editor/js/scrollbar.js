@@ -1,6 +1,4 @@
 export function setupScrollbars(_this) {
-    console.log('Parent: ', _this.codeContainer)
-
     setup();
     updateScrollbarDimensions(_this);
 
