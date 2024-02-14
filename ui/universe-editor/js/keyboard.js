@@ -1,31 +1,32 @@
-export function registerKeyboardShortcuts(editor, container, codeContainer, visualizer, language, redrawSyntaxHighlighting, updateLineNumbers, highlightItems, adjustTextAreaSize, indentLine, dispatchCustomEvent) {
-    editor.addEventListener("keydown", (e) => {
+export function registerKeyboardShortcuts(_this) {
+    _this.editor.addEventListener("keydown", (e) => {
         if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Enter" || e.key === "Backspace") {
             // For an instant reflection of the active line and line number on key press
             // we use the `keydown` event instead of `keyup` or `input`. It won't be able
             // to calculate the correct details immediately because of `keydown`, so we
             // defer the calculation to the next tick using `setTimeout`.
             setTimeout(() => {
-                highlightItems();
+                // _this.highlightItems();
+                _this.render(["line"]);
             }, 0);
         }
     });
 
-    editor.addEventListener("input", (e) => {
-        visualizer.innerHTML = e.target.value;
+    _this.editor.addEventListener("input", (e) => {
+        _this.visualizer.innerHTML = e.target.value;
 
         // Update the line numbers
-        updateLineNumbers(); 
+        _this.updateLineNumbers(); 
 
         // Highlight the active line, line number, and code syntax
-        Prism.highlightElement(visualizer);
+        Prism.highlightElement(_this.visualizer);
 
         // Update the height & width of the textarea to match the content
-        adjustTextAreaSize();
+        _this.adjustTextAreaSize();
     });
 
     // Use arrow function here to ensure `this` refers to the class instance
-    editor.addEventListener("keydown", (e) => {
+    _this.editor.addEventListener("keydown", (e) => {
         if (e.key === "Tab") {
             e.preventDefault(); // Stop the default tab behavior
             var start = e.target.selectionStart;
@@ -41,11 +42,11 @@ export function registerKeyboardShortcuts(editor, container, codeContainer, visu
             e.target.selectionEnd = start + 4; // Move the caret after the tab
         }  
         else if (e.key === "Backspace") {
-            adjustTextAreaSize();
+            _this.adjustTextAreaSize();
         }
         else if (e.metaKey && e.key === "Enter") {
             e.preventDefault(); // Prevent the default action
-            dispatchCustomEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { execute: true, code: editor.value } }));
+            _this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { execute: true, code: _this.editor.value } }));
         }
         else if (e.key === "Enter") {
             e.preventDefault(); // Prevent the default enter behavior
@@ -68,49 +69,31 @@ export function registerKeyboardShortcuts(editor, container, codeContainer, visu
             e.target.selectionStart = e.target.selectionEnd = newPos;
 
             // Scroll code container to the far left
-            codeContainer.scrollLeft = 0;
-            
-            // Scroll container down 18 pixels to show the new line
-            // setTimeout(() => {
-            //     container.scrollTop = container.scrollHeight;
-            //   }, 0);
+            _this.codeContainer.scrollLeft = 0;
 
-            // const beforeHeight = container.scrollHeight;
-
-            // Use setTimeout to check the scrollHeight after the key action
-            // setTimeout(() => {
-            //     const afterHeight = container.scrollHeight;
-
-            //     // Compare before and after heights to determine if a change occurred
-            //     if (afterHeight > beforeHeight) {
-            //         // Scroll the parent container to the bottom if there was a change
-            //         container.scrollTop = container.scrollHeight;
-            //     }
-            // }, 0);
-
-            const cursorPosition = editor.selectionStart;
+            const cursorPosition = _this.editor.selectionStart;
             // Check if the cursor is at the end of the text (or on the last line)
-            if (cursorPosition === editor.value.length) {
+            if (cursorPosition === _this.editor.value.length) {
                 // Use setTimeout to allow the textarea to update
                 setTimeout(() => {
                 // Scroll the parent container to the bottom
-                    codeContainer.scrollTop = codeContainer.scrollHeight;
+                _this.codeContainer.scrollTop = _this.codeContainer.scrollHeight;
                 }, 0);
             }
 
             // Defer the update of line numbers, required or the line number will be off by 1
-            updateLineNumbers();
-            adjustTextAreaSize();
+            _this.updateLineNumbers();
+            _this.adjustTextAreaSize();
         }
         else  if (e.metaKey && e.key === ']') {
             // Check for CMD + ] for right indent
             e.preventDefault(); // Prevent the default action
-            indentLine('right');
+            indentLine(_this, 'right');
         }
         else if (e.metaKey && e.key === '[') {
             // Check for CMD + [ for left indent
             e.preventDefault(); // Prevent the default action
-            indentLine('left');
+            indentLine(_this, 'left');
         } 
         else if (e.metaKey && e.key === '/') {
             e.preventDefault(); // Prevent the default action
@@ -128,7 +111,7 @@ export function registerKeyboardShortcuts(editor, container, codeContainer, visu
             var lineText = text.substring(lineStart, lineEnd);
             var afterLine = text.substring(lineEnd);
         
-            const commentCharacters = language === "sql" ? "-- " : "// ";
+            const commentCharacters = _this.getAttribute("language") === "sql" ? "-- " : "// ";
         
             // Check if the line is already commented out
             if (lineText.startsWith(commentCharacters)) {
@@ -152,11 +135,11 @@ export function registerKeyboardShortcuts(editor, container, codeContainer, visu
         
         
         setTimeout(() => {
-            dispatchCustomEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: editor.value } }));
+            _this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: _this.editor.value } }));
         }, 50);
         
         // After updating the textarea's value, manually trigger Prism highlighting
-        redrawSyntaxHighlighting();
+        _this.render(["syntax"]);
     });
 }
 
