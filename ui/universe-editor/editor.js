@@ -17,11 +17,11 @@ import invasionTheme from './themes/invasion.js';
 
 /**
  * TODO:
- * - Update the keyboard actions calling to pass in `this` as the first argument and remove unnecessary parameters
  * - Rename some of the divs such as `outer-container`, `container`, `code-container`, etc.
  * - Can we get rid of `widthMeasure` and instead use the `editor` element to measure the width?
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
  * - Rename scrollbar to be horizontalScrollbar
+ * - Cleanup the themes styles to be more condensed with overlapping values
  * - Add support for database schema syntax highlighting
  */
 
@@ -159,18 +159,7 @@ export class OuterbaseEditorLite extends HTMLElement {
 
     connectedCallback() {
         // Keyboard shortcuts, see `keyboard-actions.js` for details
-        registerKeyboardShortcuts(
-            this.editor,
-            this.container,
-            this.codeContainer,
-            this.visualizer,
-            this.getAttribute("language"),
-            () => this.render(["syntax"]),
-            () => this.updateLineNumbers(),
-            () => this.render(["line"]),
-            () => this.render(["syntax"]),
-            (direction) => indentLine(this, direction),
-            (event) => this.dispatchEvent(event)
+        registerKeyboardShortcuts(this
         );
 
         this.editor.addEventListener("mousedown", (e) => {
