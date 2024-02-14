@@ -13,15 +13,6 @@ const css = `
         opacity: 1;
     }
 
-    .scrollbar-active {
-        opacity: 1;
-        background-color: var(--scroll-bar-active-color) !important;
-    }
-
-    .dark ~ #scrollbar-bottom > .scrollbar-active {
-        background-color: var(--scroll-bar-active-color-dark) !important;
-    }
-
     #scrollbar-bottom {
         opacity: 0;
         position: absolute; 
@@ -58,6 +49,15 @@ const css = `
     }
     
     .dark ~ #scrollbar-bottom > #scrollbar-bottom-thumb:hover {
+        background-color: var(--scroll-bar-active-color-dark) !important;
+    }
+
+    .scrollbar-active {
+        opacity: 1;
+        background-color: var(--scroll-bar-active-color) !important;
+    }
+
+    .dark ~ #scrollbar-bottom > .scrollbar-active {
         background-color: var(--scroll-bar-active-color-dark) !important;
     }
 `;
