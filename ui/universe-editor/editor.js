@@ -1,9 +1,9 @@
-import './prism-lite/prism.js';
-import './prism-lite/prism-sql.min.js';
+import './prism/prism.js';
+import './prism/prism-sql.min.js';
 
 import { attachKeyboardShortcuts } from './js/keyboard.js';
 import { setupLineNumbers } from './js/line-number.js';
-import { setupScrollbars } from './js/scrollbar.js';
+import { setupScrollbars, updateScrollbarDimensions } from './js/scrollbar.js';
 
 import defaultStyles from './themes/default.js';
 import moondustStyles from './themes/moondust.js';
@@ -55,6 +55,8 @@ export class OuterbaseEditorLite extends HTMLElement {
     container = null;
     //
     codeContainer = null;
+    // The DOM element of the scrollbar
+    scrollbarBottom = null;
     // The DOM element of the scrollbar thumb
     scrollbarBottomThumb = null;
     // The text to display in the editor
@@ -96,6 +98,7 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.outerContainer = this.shadow.querySelector("#outer-container");
         this.container = this.shadow.querySelector("#container");
         this.codeContainer = this.shadow.querySelector("#code-container");
+        this.scrollbarBottom = this.shadow.querySelector("#scrollbar-bottom");
         this.scrollbarBottomThumb = this.shadow.querySelector("#scrollbar-bottom-thumb");
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
