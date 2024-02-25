@@ -19,32 +19,32 @@
 
         <div style="flex: 1; display: flex; flex-direction: column;">
             <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
-            <div style="height: 300px; position: relative; overflow: hidden;">
-                <outerbase-editor-lite
+            <div style="height: 100%; position: relative; overflow: hidden;">
+                <outerbase-editor
                     id="sql-editor"
                     language="sql"
                     theme="moondust"
                     mode="dark"
-                ></outerbase-editor-lite>
+                    show-keyword-tooltips="true"
+                ></outerbase-editor>
             </div>
         </div>
 
-        <div style="flex: 1; display: flex; flex-direction: column;">
+        <!-- <div style="flex: 1; display: flex; flex-direction: column;">
             <p style="color: white; font-weight: bold; padding-left: 8px;">Javascript</p>
             <div style="flex: 1;">
-                <outerbase-editor-lite
+                <outerbase-editor
                     id="js-editor"
                     language="javascript"
                     theme="moondust"
                     mode="dark"
-                ></outerbase-editor-lite>
+                ></outerbase-editor>
             </div>
-        </div>
+        </div> -->
     </div>
 </body>
 
 <script>
-    // var sql = "-- Comment here...\nSELECT * FROM table_name WHERE id > 50 LIMIT 100; -- Comment goes at the end of the line too\n\n\n\n\n\n\n\n\n\n\n\n\ntodo\n\n\nokay"
     var sql = `-- Comment this line out
 CREATE TABLE video_games (
     game_id SERIAL PRIMARY KEY,
