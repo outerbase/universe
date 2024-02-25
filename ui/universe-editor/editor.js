@@ -5,6 +5,7 @@ import './prism/prism-sql.min.js';  // Defines tokens for SQL langauge
 import { registerKeyboardShortcuts } from './js/keyboard.js';
 import { registerLineNumbers, updateLineNumbersHeight } from './js/line-number.js';
 import { registerScrollbars } from './js/scrollbar.js';
+import { registerHoverKeywords } from './js/hover-keywords.js';
 
 // Styles
 import defaultStyles from './styles/default.js';
@@ -18,15 +19,35 @@ import invasionTheme from './themes/invasion.js';
 /**
  * TODO:
  * - Rename some of the divs such as `outer-container`, `container`, `code-container`, etc.
+ * - Can we refactor the other `js` files to inject their HTML + CSS into the shadow DOM like the `hover-keywords.js` file?
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
  * - Rename scrollbar to be horizontalScrollbar
  * - Add support for database schema syntax highlighting
+ * - Add empty DOM zones for plugins to inject themselves either `above` or `below` the editor
+ */
+
+/**
+ * Tips for writing better SQL to present to users:
+ * REF: https://medium.com/learning-sql/12-tips-for-optimizing-sql-queries-for-faster-performance-8c6c092d7af1
+ * 
+ * - Include a WHERE clause to filter down the result set
+ * - Use LIMIT to limit the number of rows returned
+ * - Do not use SELECT * to select all columns
+ * - Minimize the user of wildcard characters such as *, %, and _
+ * - Indexes increase READ speed but slow down WRITE speed
+ * - Using the correct data type can improve performance on columns, such as using INT instead of VARCHAR
+ * - Avoid subqueries and instead use JOINs
+ * - Use EXISTS instead of IN
+ * - Use STORED PROCEDUREs
+ * - Use UNION ALL instead of UNION
+ * - Use `IN` instead of `OR` -- WHERE state_id=3 OR state_id=11 OR state_id=34  vs  WHERE state_id IN (3,11,34) -- (IN is faster)
+ * - Use TRUNCATE instead of DELETE to remove all rows from a table
  */
 
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
-<div id="outer-container">
-    <div id="container" class="moondust dark">
+<div id="outer-container" class="moondust">
+    <div id="container" class="dark">
         <!-- The line number container to draw a new number for each line -->
         <div id="line-number-container">
             <div>1</div>
@@ -84,6 +105,11 @@ export class OuterbaseEditorLite extends HTMLElement {
             "height",
             // The database schema to use for syntax highlighting
             "schema",
+
+            //
+            "show-line-numbers",
+            //
+            "show-keyword-tooltips",
         ];
     }
 
@@ -104,24 +130,33 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.visualizer = this.shadow.querySelector("code");
 
         // Import the required styles for the editor
-        const styleSheet = new CSSStyleSheet();
-        styleSheet.replaceSync(defaultStyles);
+        // const styleSheet = new CSSStyleSheet();
+        // styleSheet.replaceSync(defaultStyles);
 
-        const styleScrollbar = new CSSStyleSheet();
-        styleScrollbar.replaceSync(scrollbarStyles);
+        // const styleScrollbar = new CSSStyleSheet();
+        // styleScrollbar.replaceSync(scrollbarStyles);
 
-        const styleLineNumber = new CSSStyleSheet();
-        styleLineNumber.replaceSync(lineNumberStyles);
+        // const styleLineNumber = new CSSStyleSheet();
+        // styleLineNumber.replaceSync(lineNumberStyles);
 
-        // Import the supported themes
-        const styleMoondust = new CSSStyleSheet();
-        styleMoondust.replaceSync(moondustTheme);
+        // // Import the supported themes
+        // const styleMoondust = new CSSStyleSheet();
+        // styleMoondust.replaceSync(moondustTheme);
 
-        const styleInvasion = new CSSStyleSheet();
-        styleInvasion.replaceSync(invasionTheme);
+        // const styleInvasion = new CSSStyleSheet();
+        // styleInvasion.replaceSync(invasionTheme);
 
-        // Apply the styles to the shadow DOM
-        this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleLineNumber, styleMoondust, styleInvasion];
+        // // Apply the styles to the shadow DOM
+        // this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleLineNumber, styleMoondust, styleInvasion];
+
+        // Previously we were using `adoptedStyleSheets` to apply the styles to the shadow DOM
+        // with `new CSSStyleSheet()` but it's not supported in all browsers yet. So we're using
+        // the `applyStyle` method to apply the styles to the shadow DOM instead.
+        this.applyStyle(this.shadow, defaultStyles);
+        this.applyStyle(this.shadow, scrollbarStyles);
+        this.applyStyle(this.shadow, lineNumberStyles);
+        this.applyStyle(this.shadow, moondustTheme);
+        this.applyStyle(this.shadow, invasionTheme);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -169,10 +204,29 @@ export class OuterbaseEditorLite extends HTMLElement {
         // Initial adjustment in case of any pre-filled content
         this.render(["syntax"]);
 
+
+        /**
+         * TODO:
+         * 
+         * Need to figure out how to dynamically register plugins that are requested
+         * based on their existence, or by allowing the files themselves to register
+         * themselves with the editor.
+         */
+
         // Register all plugins
         registerKeyboardShortcuts(this);
         registerLineNumbers(this);
         registerScrollbars(this);
+
+        if (this.getAttribute("show-keyword-tooltips") === "true") {
+            registerHoverKeywords(this);
+        }
+    }
+
+    applyStyle(shadowRoot, cssText) {
+        const styleEl = document.createElement('style');
+        styleEl.textContent = cssText;
+        shadowRoot.appendChild(styleEl);
     }
 
     /**

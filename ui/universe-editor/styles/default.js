@@ -22,19 +22,19 @@ const css = `
     }
 
     ::-moz-selection {
-        background: var(--color-neutral-300);
+        background: var(--color-neutral-300) !important;
     }
 
     ::selection {
-        background: var(--color-neutral-300);
+        background: var(--color-neutral-300) !important;
     }
 
     .dark ::-moz-selection {
-        background: var(--color-neutral-700);
+        background: var(--color-neutral-700) !important;
     }
 
     .dark ::selection {
-        background: var(--color-neutral-700);
+        background: var(--color-neutral-700) !important;
     }
 
     #outer-container {
