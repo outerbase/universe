@@ -1,4 +1,4 @@
-export function setupScrollbars(_this) {
+export function registerScrollbars(_this) {
     setup();
     updateScrollbarDimensions(_this);
 
