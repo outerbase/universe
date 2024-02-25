@@ -1,13 +1,19 @@
 {
-  "name": "universe",
-  "version": "1.0.0",
+  "name": "@outerbase/universe",
+  "version": "1.0.1",
   "description": "",
-  "main": "editor.js",
+  "main": "dist/universe.js",
+  "module": "dist/universe.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "run-local-server": "npx serve .",
-    "build-web-component-bundle": "webpack --mode production"
+    "build-web-component-bundle": "webpack --mode production",
+    "prepack": "npm run build-web-component-bundle",
+    "publish-npm-module": "npm publish --access restricted"
   },
+  "files": [
+    "dist/*"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -18,5 +24,6 @@
     "html-webpack-plugin": "^5.5.3",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
-  }
+  },
+  "private": false
 }

@@ -1,5 +1,10 @@
 # universe
 
+## Publish update to NPM
+
+1. Update version in `package.json`
+2. Run command `npm run publish-npm-module`
+
 ## Test in `index.html`
 
 1. Comment out the following lines in `editor.js`
