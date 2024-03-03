@@ -6,6 +6,7 @@ import { registerKeyboardShortcuts } from './js/keyboard.js';
 import { registerLineNumbers, updateLineNumbersHeight } from './js/line-number.js';
 import { registerScrollbars } from './js/scrollbar.js';
 import { registerHoverKeywords } from './js/hover-keywords.js';
+import { registerLineHints } from './js/line-hint.js';
 
 // Styles
 import defaultStyles from './styles/default.js';
@@ -48,20 +49,27 @@ var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <div id="outer-container" class="moondust">
     <div id="container" class="dark">
-        <!-- The line number container to draw a new number for each line -->
-        <div id="line-number-container">
-            <div>1</div>
+        <div id="left">
+            <div id="line-number-container">
+                <div>1</div>
+            </div>
         </div>
 
-        <div id="code-container">
-            <!-- The div is used to highlight the active line -->
-            <div class="background-highlight"></div>
+        <div id="center">
+            <div id="code-container">
+                <!-- The div is used to highlight the active line -->
+                <div class="background-highlight"></div>
 
-            <!-- The textarea is used to capture user input -->
-            <textarea class="editor" spellcheck="false"></textarea>
+                <!-- The textarea is used to capture user input -->
+                <textarea class="editor" spellcheck="false"></textarea>
 
-            <!-- The code element is used to display the syntax highlighted code -->
-            <pre><code></code></pre>
+                <!-- The code element is used to display the syntax highlighted code -->
+                <pre><code></code></pre>
+            </div>
+        </div>
+
+        <div id="right">
+
         </div>
     </div>
 
@@ -129,32 +137,12 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.editor = this.shadow.querySelector(".editor");
         this.visualizer = this.shadow.querySelector("code");
 
-        // Import the required styles for the editor
-        // const styleSheet = new CSSStyleSheet();
-        // styleSheet.replaceSync(defaultStyles);
-
-        // const styleScrollbar = new CSSStyleSheet();
-        // styleScrollbar.replaceSync(scrollbarStyles);
-
-        // const styleLineNumber = new CSSStyleSheet();
-        // styleLineNumber.replaceSync(lineNumberStyles);
-
-        // // Import the supported themes
-        // const styleMoondust = new CSSStyleSheet();
-        // styleMoondust.replaceSync(moondustTheme);
-
-        // const styleInvasion = new CSSStyleSheet();
-        // styleInvasion.replaceSync(invasionTheme);
-
-        // // Apply the styles to the shadow DOM
-        // this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleLineNumber, styleMoondust, styleInvasion];
-
-        // Previously we were using `adoptedStyleSheets` to apply the styles to the shadow DOM
-        // with `new CSSStyleSheet()` but it's not supported in all browsers yet. So we're using
-        // the `applyStyle` method to apply the styles to the shadow DOM instead.
+        // Apply styles for plugins
         this.applyStyle(this.shadow, defaultStyles);
         this.applyStyle(this.shadow, scrollbarStyles);
         this.applyStyle(this.shadow, lineNumberStyles);
+
+        // Apply styles for themes
         this.applyStyle(this.shadow, moondustTheme);
         this.applyStyle(this.shadow, invasionTheme);
     }
@@ -217,6 +205,7 @@ export class OuterbaseEditorLite extends HTMLElement {
         registerKeyboardShortcuts(this);
         registerLineNumbers(this);
         registerScrollbars(this);
+        registerLineHints(this);
 
         if (this.getAttribute("show-keyword-tooltips") === "true") {
             registerHoverKeywords(this);
@@ -296,17 +285,27 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     highlightActiveLineNumber() {
-        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
-        const lineNumbers = this.shadow.querySelectorAll("#line-number-container div");
+        // Get the start and end positions of the selection
+        const selectionStart = this.editor.selectionStart;
+        const selectionEnd = this.editor.selectionEnd;
+    
+        // Calculate the line numbers for the start and end of the selection
+        const startLineNumber = this.editor.value.substring(0, selectionStart).split("\n").length;
+        const endLineNumber = this.editor.value.substring(0, selectionEnd).split("\n").length;
+    
+        const lineNumbers = this.shadowRoot.querySelectorAll("#line-number-container div");
     
         // Remove the active class from all line numbers
         lineNumbers.forEach(line => {
             line.classList.remove('active-line-number');
         });
     
-        // Add the active class to the current line number
-        if (lineNumbers[lineNumber - 1]) {
-            lineNumbers[lineNumber - 1].classList.add('active-line-number');
+        // Add the active class to all line numbers in the selection range
+        for (let i = startLineNumber; i <= endLineNumber; i++) {
+            const lineNumberDiv = lineNumbers[i - 1];
+            if (lineNumberDiv) {
+                lineNumberDiv.classList.add('active-line-number');
+            }
         }
     }
 

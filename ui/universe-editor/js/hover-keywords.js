@@ -194,6 +194,8 @@ const hideTooltip = (_this) => {
 };
 
 function getWordAtIndex(str, index) {
+    if (!str) return null;
+
     // Check if the index is within the bounds of the string
     if (index < 0 || index >= str.length) {
         return null; // or throw an error, or return an empty string, depending on your needs
@@ -227,6 +229,8 @@ function getWordAtIndex(str, index) {
   }
 
   function getXPositionOfWordAtIndex(str, index, charWidth = 7.8) {
+    if (!str) return null;
+    
     // Check if the index is within the bounds of the string
     if (index < 0 || index >= str.length) {
       return null; // or throw an error, or return an empty string, depending on your needs
