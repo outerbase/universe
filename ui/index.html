@@ -78,7 +78,7 @@ SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FRO
     }
 }`
     const editor = document.querySelector('#js-editor');
-    editor.setAttribute('code', js);
+    // editor.setAttribute('code', js);
 
     onload = function() {
         document.body.style.backgroundColor = 'black'
@@ -88,14 +88,14 @@ SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FRO
         const sqlEditor = document.querySelector('#sql-editor');
         const jsEditor = document.querySelector('#js-editor');
         sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
-        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+        // jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
     }
 
     function changeMode() {
         const sqlEditor = document.querySelector('#sql-editor');
         const jsEditor = document.querySelector('#js-editor');
         sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
-        jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
+        // jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
         document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
     }
     

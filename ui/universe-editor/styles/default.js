@@ -6,6 +6,7 @@ const css = `
         --padding-horizontal: 0 10px;
         
         --color-neutral-50: #fafafa;
+        --color-neutral-100: #f5f5f5;
         --color-neutral-200: #e5e5e5;
         --color-neutral-300: #d4d4d4;
         --color-neutral-400: #a3a3a3;
@@ -14,6 +15,7 @@ const css = `
         --color-neutral-700: #404040;
         --color-neutral-800: #262626;
         --color-neutral-900: #171717;
+        --color-neutral-950: #0a0a0a;
         --color-primary-dark: white;
         --color-primary-light: black;
 
@@ -52,6 +54,21 @@ const css = `
         margin: 0;
         display: flex;
         flex-direction: row;
+    }
+
+    #left {
+        position: relative;
+        display: flex;
+    }
+
+    #center {
+        flex: 1;
+        position: relative;
+    }
+
+    #right {
+        position: relative;
+        display: flex;
     }
 
     #code-container {
