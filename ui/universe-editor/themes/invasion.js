@@ -71,6 +71,6 @@ const css = `
     .invasion .dark .token.string {
         color: #50FA7B !important;
     }
-`
+`;
 
 export default css;

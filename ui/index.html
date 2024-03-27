@@ -1,36 +1,40 @@
 <html>
-<head>
-    <title>Universe Code Editor</title>
+    <head>
+        <title>Universe Code Editor</title>
 
-    <script type="module" src="./universe-editor/editor.js" defer></script>
+        <script type="module" src="./universe-editor/editor.js" defer></script>
+        <script
+            type="module"
+            src="../node_modules/@outerbase/scrollable-element/lit-dist/src/components/scrollable-element/index.js"
+        ></script>
 
-    <style>
-        body {
-            margin: 0;
-            background-color: black;
-        }
-    </style>
-</head>
+        <style>
+            body {
+                margin: 0;
+                background-color: black;
+            }
+        </style>
+    </head>
 
-<body>
-    <div style="height: 100%; display: flex; flex-direction: column;">
-        <button onclick="changeTheme()">Change Theme</button>
-        <button onclick="changeMode()">Change Mode</button>
+    <body>
+        <div style="height: 100%; display: flex; flex-direction: column">
+            <button onclick="changeTheme()">Change Theme</button>
+            <button onclick="changeMode()">Change Mode</button>
 
-        <div style="flex: 1; display: flex; flex-direction: column;">
-            <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
-            <div style="height: 100%; position: relative; overflow: hidden;">
-                <outerbase-editor
-                    id="sql-editor"
-                    language="sql"
-                    theme="moondust"
-                    mode="dark"
-                    show-keyword-tooltips="true"
-                ></outerbase-editor>
+            <div style="flex: 1; display: flex; flex-direction: column">
+                <p style="color: white; font-weight: bold; padding-left: 8px">SQL</p>
+                <div style="height: 100%; position: relative; overflow: hidden">
+                    <outerbase-editor
+                        id="sql-editor"
+                        language="sql"
+                        theme="moondust"
+                        mode="dark"
+                        show-keyword-tooltips="true"
+                    ></outerbase-editor>
+                </div>
             </div>
-        </div>
 
-        <!-- <div style="flex: 1; display: flex; flex-direction: column;">
+            <!-- <div style="flex: 1; display: flex; flex-direction: column;">
             <p style="color: white; font-weight: bold; padding-left: 8px;">Javascript</p>
             <div style="flex: 1;">
                 <outerbase-editor
@@ -41,11 +45,11 @@
                 ></outerbase-editor>
             </div>
         </div> -->
-    </div>
-</body>
+        </div>
+    </body>
 
-<script>
-    var sql = `-- Comment this line out
+    <script>
+        var sql = `-- Comment this line out
 CREATE TABLE video_games (
     game_id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -62,11 +66,11 @@ SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FRO
 
 
 
--- Extra space`
-    const sqlEditor = document.querySelector('#sql-editor');
-    sqlEditor.setAttribute('code', sql);
+-- Extra space`;
+        const sqlEditor = document.querySelector('#sql-editor');
+        sqlEditor.setAttribute('code', sql);
 
-    var js = `function test() {
+        var js = `function test() {
     // Comment here...
     var value = 5;
     var string = "123";
@@ -76,39 +80,36 @@ SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FRO
     } else {
         console.log('Value is less than 10');
     }
-}`
-    const editor = document.querySelector('#js-editor');
-    editor.setAttribute('code', js);
+}`;
+        const editor = document.querySelector('#js-editor');
+        editor.setAttribute('code', js);
 
-    onload = function() {
-        document.body.style.backgroundColor = 'black'
-    }
+        onload = function () {
+            document.body.style.backgroundColor = 'black';
+        };
 
-    function changeTheme() {
-        const sqlEditor = document.querySelector('#sql-editor');
-        const jsEditor = document.querySelector('#js-editor');
-        sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
-        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
-    }
+        function changeTheme() {
+            const sqlEditor = document.querySelector('#sql-editor');
+            const jsEditor = document.querySelector('#js-editor');
+            sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+            jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
+        }
 
-    function changeMode() {
-        const sqlEditor = document.querySelector('#sql-editor');
-        const jsEditor = document.querySelector('#js-editor');
-        sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
-        jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
-        document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
-    }
-    
+        function changeMode() {
+            const sqlEditor = document.querySelector('#sql-editor');
+            const jsEditor = document.querySelector('#js-editor');
+            sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
+            jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
+            document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
+        }
 
-    // Add an event listener for the 'code-update' event
-    // editor.addEventListener('code-update', (event) => {
+        // Add an event listener for the 'code-update' event
+        // editor.addEventListener('code-update', (event) => {
         // Access the code from the event detail
         // console.log('Code updated:', event.detail.code);
 
         // You can now use event.detail.code as needed
         // For example, display it in another element, store it, etc.
-    // });
-</script>
-
-
+        // });
+    </script>
 </html>
