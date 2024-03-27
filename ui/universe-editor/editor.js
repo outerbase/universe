@@ -3,13 +3,11 @@ import './prism/prism-sql.min.js';  // Defines tokens for SQL langauge
 
 // Plugins
 import { registerKeyboardShortcuts } from './js/keyboard.js';
-import { registerLineNumbers, updateLineNumbersHeight } from './js/line-number.js';
-import { registerScrollbars } from './js/scrollbar.js';
+import { registerLineNumbers } from './js/line-number.js';
 import { registerHoverKeywords } from './js/hover-keywords.js';
 
 // Styles
 import defaultStyles from './styles/default.js';
-import scrollbarStyles from './styles/scrollbar.js';
 import lineNumberStyles from './styles/line-number.js';
 
 // Themes
@@ -21,7 +19,6 @@ import invasionTheme from './themes/invasion.js';
  * - Rename some of the divs such as `outer-container`, `container`, `code-container`, etc.
  * - Can we refactor the other `js` files to inject their HTML + CSS into the shadow DOM like the `hover-keywords.js` file?
  * - Width is not properly calculating leaving horizontal scrolling when no long text exists
- * - Rename scrollbar to be horizontalScrollbar
  * - Add support for database schema syntax highlighting
  * - Add empty DOM zones for plugins to inject themselves either `above` or `below` the editor
  */
@@ -29,7 +26,7 @@ import invasionTheme from './themes/invasion.js';
 /**
  * Tips for writing better SQL to present to users:
  * REF: https://medium.com/learning-sql/12-tips-for-optimizing-sql-queries-for-faster-performance-8c6c092d7af1
- * 
+ *
  * - Include a WHERE clause to filter down the result set
  * - Use LIMIT to limit the number of rows returned
  * - Do not use SELECT * to select all columns
@@ -44,11 +41,12 @@ import invasionTheme from './themes/invasion.js';
  * - Use TRUNCATE instead of DELETE to remove all rows from a table
  */
 
-var templateEditor = document.createElement("template");
+var templateEditor = document.createElement('template');
 templateEditor.innerHTML = `
 <div id="outer-container" class="moondust">
-    <div id="container" class="dark">
-        <!-- The line number container to draw a new number for each line -->
+
+<scrollable-element><div id="container" class="dark">
+            <!-- The line number container to draw a new number for each line -->
         <div id="line-number-container">
             <div>1</div>
         </div>
@@ -58,16 +56,12 @@ templateEditor.innerHTML = `
             <div class="background-highlight"></div>
 
             <!-- The textarea is used to capture user input -->
-            <textarea class="editor" spellcheck="false"></textarea>
+            <textarea id="autoresizing" class="editor" spellcheck="false"></textarea>
 
             <!-- The code element is used to display the syntax highlighted code -->
             <pre><code></code></pre>
         </div>
-    </div>
-
-    <div id="scrollbar-bottom">
-        <div id="scrollbar-bottom-thumb"></div>
-    </div>
+    </div></scrollable-element>
 </div>
 `;
 
@@ -78,38 +72,34 @@ export class OuterbaseEditorLite extends HTMLElement {
     container = null;
     //
     codeContainer = null;
-    // The DOM element of the scrollbar
-    scrollbarBottom = null;
-    // The DOM element of the scrollbar thumb
-    scrollbarBottomThumb = null;
     // The text to display in the editor
-    code = "";
+    code = '';
     // The DOM element of the textarea
     editor = null;
     // The DOM element where the syntax highlighted code is displayed
     visualizer = null;
     // TODO: Needs to be implemented
-    schema = {}
+    schema = {};
 
     static get observedAttributes() {
         return [
             // The text to display in the editor
-            "code",
+            'code',
             // The code language to use for syntax highlighting
-            "language",
+            'language',
             // The theme to use for syntax highlighting, such as "Moondust"
-            "theme",
+            'theme',
             // The secondary theme for light/dark mode, "light" or "dark"
-            "mode",
+            'mode',
             // The height of the editors parent container
-            "height",
+            'height',
             // The database schema to use for syntax highlighting
-            "schema",
+            'schema',
 
             //
-            "show-line-numbers",
+            'show-line-numbers',
             //
-            "show-keyword-tooltips",
+            'show-keyword-tooltips',
         ];
     }
 
@@ -117,24 +107,19 @@ export class OuterbaseEditorLite extends HTMLElement {
         super();
 
         // Default web component setup
-        this.shadow = this.attachShadow({ mode: "open" });
+        this.shadow = this.attachShadow({ mode: 'open' });
         this.shadowRoot.innerHTML = templateEditor.innerHTML;
 
         // Preserve the references to the textarea and code elements
-        this.outerContainer = this.shadow.getElementById("outer-container");
-        this.container = this.shadow.getElementById("container");
-        this.codeContainer = this.shadow.getElementById("code-container");
-        this.scrollbarBottom = this.shadow.getElementById("scrollbar-bottom");
-        this.scrollbarBottomThumb = this.shadow.getElementById("scrollbar-bottom-thumb");
-        this.editor = this.shadow.querySelector(".editor");
-        this.visualizer = this.shadow.querySelector("code");
+        this.outerContainer = this.shadow.getElementById('outer-container');
+        this.container = this.shadow.getElementById('container');
+        this.codeContainer = this.shadow.getElementById('code-container');
+        this.editor = this.shadow.querySelector('.editor');
+        this.visualizer = this.shadow.querySelector('code');
 
         // Import the required styles for the editor
         // const styleSheet = new CSSStyleSheet();
         // styleSheet.replaceSync(defaultStyles);
-
-        // const styleScrollbar = new CSSStyleSheet();
-        // styleScrollbar.replaceSync(scrollbarStyles);
 
         // const styleLineNumber = new CSSStyleSheet();
         // styleLineNumber.replaceSync(lineNumberStyles);
@@ -147,47 +132,49 @@ export class OuterbaseEditorLite extends HTMLElement {
         // styleInvasion.replaceSync(invasionTheme);
 
         // // Apply the styles to the shadow DOM
-        // this.shadow.adoptedStyleSheets = [styleSheet, styleScrollbar, styleLineNumber, styleMoondust, styleInvasion];
+        // this.shadow.adoptedStyleSheets = [styleSheet, styleLineNumber, styleMoondust, styleInvasion];
 
         // Previously we were using `adoptedStyleSheets` to apply the styles to the shadow DOM
         // with `new CSSStyleSheet()` but it's not supported in all browsers yet. So we're using
         // the `applyStyle` method to apply the styles to the shadow DOM instead.
         this.applyStyle(this.shadow, defaultStyles);
-        this.applyStyle(this.shadow, scrollbarStyles);
         this.applyStyle(this.shadow, lineNumberStyles);
         this.applyStyle(this.shadow, moondustTheme);
         this.applyStyle(this.shadow, invasionTheme);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "code") {
+        if (name === 'code') {
             this.editor.value = newValue;
             this.updateLineNumbers();
-            
+
             // This timeout is necessary to ensure that the syntax highlighting is applied
             // after the web component has initially rendered after code was made available.
             setTimeout(() => {
-                this.render(["syntax"]);
+                this.render(['syntax']);
             }, 0);
         }
 
-        if (name === "language") {
+        if (name === 'language') {
             this.visualizer.className = `language-${newValue}`;
         }
 
-        if (name === "theme") {
+        if (name === 'theme') {
             this.outerContainer.className = newValue;
         }
 
-        if (name === "mode") {
+        if (name === 'mode') {
             this.container.className = newValue;
         }
     }
 
     connectedCallback() {
-        this.editor.addEventListener("mousedown", (e) => {
+        const textarea = document.getElementById('autoresizing');
+        textarea.addEventListener('input', autoResize, false);
+
+        this.editor.addEventListener('mousedown', (e) => {
             requestAnimationFrame(() => {
-                this.render(["line"]);
+                this.render(['line']);
             });
         });
 
@@ -202,12 +189,11 @@ export class OuterbaseEditorLite extends HTMLElement {
         });
 
         // Initial adjustment in case of any pre-filled content
-        this.render(["syntax"]);
-
+        this.render(['syntax']);
 
         /**
          * TODO:
-         * 
+         *
          * Need to figure out how to dynamically register plugins that are requested
          * based on their existence, or by allowing the files themselves to register
          * themselves with the editor.
@@ -216,9 +202,8 @@ export class OuterbaseEditorLite extends HTMLElement {
         // Register all plugins
         registerKeyboardShortcuts(this);
         registerLineNumbers(this);
-        registerScrollbars(this);
 
-        if (this.getAttribute("show-keyword-tooltips") === "true") {
+        if (this.getAttribute('show-keyword-tooltips') === 'true') {
             registerHoverKeywords(this);
         }
     }
@@ -235,54 +220,38 @@ export class OuterbaseEditorLite extends HTMLElement {
      */
     render(options) {
         // If `options` contains `line`, then we need to highlight the active line
-        if (options.includes("line")) {
+        if (options.includes('line')) {
             this.highlightActiveLine();
             this.highlightActiveLineNumber();
         }
 
         // If `options` contains `syntax`, then we need to redraw the syntax highlighting
         // related parts to the code editor
-        if (options.includes("syntax")) {
+        if (options.includes('syntax')) {
             this.redrawSyntaxHighlighting();
-            this.adjustTextAreaSize();
         }
     }
 
-    adjustTextAreaSize() {
-        // Height is number of lines * line height
-        const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
-        const lineCount = this.editor.value.split("\n").length;
-        const height = lineCount * lineHeight;
-
-        // Set height of elements based on contents
-        updateLineNumbersHeight(this, height);
-        this.editor.style.height = `${height}px`;
-    
-        // Set width of elements based on contents
-        this.editor.style.width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px';    
-        this.shadow.querySelector(".background-highlight").style.width = this.editor.style.width;
-    }
-
     updateLineNumbers() {
-        const lineCount = this.editor.value.split("\n").length;
-        const lineNumberContainer = this.shadow.getElementById("line-number-container");
+        const lineCount = this.editor.value.split('\n').length;
+        const lineNumberContainer = this.shadow.getElementById('line-number-container');
         lineNumberContainer.innerHTML = ''; // Clear existing line numbers
-    
+
         for (let i = 1; i <= lineCount; i++) {
-            const lineNumberDiv = document.createElement("div");
+            const lineNumberDiv = document.createElement('div');
             lineNumberDiv.textContent = i;
             lineNumberContainer.appendChild(lineNumberDiv);
         }
 
-        this.render(["line"]);
+        this.render(['line']);
     }
 
     highlightActiveLine() {
         const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
-        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
+        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split('\n').length;
         const highlightPosition = (lineNumber - 1) * lineHeight;
         const backgroundHighlight = this.shadow.querySelector('.background-highlight');
-        
+
         requestAnimationFrame(() => {
             backgroundHighlight.style.top = `${highlightPosition}px`;
 
@@ -296,14 +265,14 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     highlightActiveLineNumber() {
-        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
-        const lineNumbers = this.shadow.querySelectorAll("#line-number-container div");
-    
+        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split('\n').length;
+        const lineNumbers = this.shadow.querySelectorAll('#line-number-container div');
+
         // Remove the active class from all line numbers
-        lineNumbers.forEach(line => {
+        lineNumbers.forEach((line) => {
             line.classList.remove('active-line-number');
         });
-    
+
         // Add the active class to the current line number
         if (lineNumbers[lineNumber - 1]) {
             lineNumbers[lineNumber - 1].classList.add('active-line-number');
@@ -312,11 +281,16 @@ export class OuterbaseEditorLite extends HTMLElement {
 
     redrawSyntaxHighlighting() {
         this.visualizer.innerHTML = this.editor.value;
-        
+
         try {
             Prism.highlightElement(this.visualizer);
-        } catch (error) { }
+        } catch (error) {}
+    }
+
+    autoResize() {
+        this.style.height = 'auto'; // Reset height to recalculate
+        this.style.height = this.scrollHeight + 'px'; // Set new height
     }
 }
 
-window.customElements.define("outerbase-editor", OuterbaseEditorLite);
+window.customElements.define('outerbase-editor', OuterbaseEditorLite);

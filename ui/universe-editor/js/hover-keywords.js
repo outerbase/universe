@@ -1,5 +1,4 @@
 export function registerHoverKeywords(_this) {
-    
     /**
      * TODO:
      * - Can we track when multiple words are hovered over, such as `CREATE TABLE`?
@@ -51,7 +50,7 @@ export function registerHoverKeywords(_this) {
             font-size: 12px;
             font-weight: 600;
         }
-    `
+    `;
 
     var html = `<div class="hover-tooltip">
         <div class="tooltip-title">Title</div>
@@ -99,7 +98,7 @@ export function registerHoverKeywords(_this) {
         // console.log('Leave from tooltip', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
         leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime);
     });
-    
+
     _this.shadow.getElementById('code-container').addEventListener('mouseout', (event) => {
         // console.log('Leave from container', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
         leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime);
@@ -107,7 +106,7 @@ export function registerHoverKeywords(_this) {
 
     _this.shadow.getElementById('code-container').addEventListener('mousemove', (e) => {
         clearTimeout(hoverTimeout);
-        clearTimeout(leaveTimeout); 
+        clearTimeout(leaveTimeout);
 
         const codeElement = _this.shadow.querySelector('code');
         const lineHeight = parseInt(getComputedStyle(codeElement).lineHeight);
@@ -127,20 +126,21 @@ export function registerHoverKeywords(_this) {
 
         // If no word is found, exit early to help performance.
         if (!word) {
-            return
+            return;
         }
 
         const accepted_keywords = [
             {
                 word: 'VARCHAR',
-                description: 'Variable-length character string that can hold letters, numbers and special characters. By default the length is 1 character, but to define a desired maximum length you can pass in an integer value. To use the maximum length available in the database you can use MAX.',
+                description:
+                    'Variable-length character string that can hold letters, numbers and special characters. By default the length is 1 character, but to define a desired maximum length you can pass in an integer value. To use the maximum length available in the database you can use MAX.',
                 example: `VARCHAR -- Default length is 1 character
 VARCHAR(255) -- Maximum length is 255 characters
 VARCHAR(MAX) -- Maximum length available in the database`,
                 performance: 'Medium',
-                complexity: 'Low'
-            }
-        ]
+                complexity: 'Low',
+            },
+        ];
 
         var acceptedWord = false;
         for (var i = 0; i < accepted_keywords.length; i++) {
@@ -198,12 +198,12 @@ function getWordAtIndex(str, index) {
     if (index < 0 || index >= str.length) {
         return null; // or throw an error, or return an empty string, depending on your needs
     }
-  
+
     // Use a regular expression to split the string into words
     // This regex will split the string at spaces, punctuation, and line breaks
     // Adjust the regex as needed based on what you consider a word boundary
     const words = str.split(/\b/);
-  
+
     // Find the word that contains the index
     let currentIndex = 0;
     for (let word of words) {
@@ -220,40 +220,40 @@ function getWordAtIndex(str, index) {
 
         currentIndex += word.length;
     }
-  
+
     // Return null if no word is found at the index
     // This could happen if the index is in spaces or punctuation
     return null;
-  }
+}
 
-  function getXPositionOfWordAtIndex(str, index, charWidth = 7.8) {
+function getXPositionOfWordAtIndex(str, index, charWidth = 7.8) {
     // Check if the index is within the bounds of the string
     if (index < 0 || index >= str.length) {
-      return null; // or throw an error, or return an empty string, depending on your needs
+        return null; // or throw an error, or return an empty string, depending on your needs
     }
-  
+
     // Use a regular expression to split the string into words and non-word segments
     const segments = str.split(/(\b)/);
-  
+
     let currentIndex = 0;
     let xPosition = 0; // Initialize X position
-  
+
     for (let segment of segments) {
-      if (index >= currentIndex && index < currentIndex + segment.length) {
-        // If the segment at the index is a word
-        if (/\w/.test(segment)) {
-          // Calculate the X position of the start of the word
-          xPosition = currentIndex * charWidth;
-          return xPosition;
-        } else {
-          // If the index is not part of a word (e.g., space or punctuation),
-          // you might want to handle this differently depending on your requirements
-          return null;
+        if (index >= currentIndex && index < currentIndex + segment.length) {
+            // If the segment at the index is a word
+            if (/\w/.test(segment)) {
+                // Calculate the X position of the start of the word
+                xPosition = currentIndex * charWidth;
+                return xPosition;
+            } else {
+                // If the index is not part of a word (e.g., space or punctuation),
+                // you might want to handle this differently depending on your requirements
+                return null;
+            }
         }
-      }
-      currentIndex += segment.length;
+        currentIndex += segment.length;
     }
-  
+
     // Return null if no word is found at the index
     return null;
-  }
+}

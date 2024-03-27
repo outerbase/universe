@@ -41,13 +41,11 @@ const css = `
         height: 100%; 
         display: flex; 
         flex-direction: column; 
-        overflow: hidden; 
         position: relative;
     }
 
     #container {
         position: relative;
-        height: calc(100% - 16px); /* Set the height to full minus pixels to account for custom scrollbar */
         width: 100%;
         margin: 0;
         display: flex;
@@ -57,9 +55,7 @@ const css = `
     #code-container {
         flex: 1;
         position: relative;
-        overflow: scroll;
         min-height: 100%;
-
         -ms-overflow-style: none;  /* Internet Explorer 10+ */
         scrollbar-width: none;  /* Firefox */
     }
@@ -71,20 +67,20 @@ const css = `
     textarea, code, .width-measure {
         padding: var(--padding-horizontal) !important;
         white-space: pre;
-        overflow-wrap: normal;
-        word-wrap: normal;
+        width: 100%; /* Adjust width as needed */
+        min-height: 50px; /* Minimum height */
+        overflow-y: hidden; /* Prevent scrollbar */
     }
 
     textarea {
         resize: none;
         outline: none;
-        overflow: hidden;
     }
 
     pre, textarea, code, .width-measure {
         margin: 0 !important;
         min-height: 100%;
-        min-width: calc(100% - 20px) !important;
+        min-width: 100%;
         background-color: transparent !important;
         font-family: var(--font-family-mono);
         font-size: var(--font-size)  !important;
@@ -98,13 +94,7 @@ const css = `
     .editor {
         color: transparent;
         caret-color: var(--color-primary-light);
-        width: 100%;
-        height: 100%;
         border: none;
-        position: absolute;
-        left: 0;
-        top: 0;
-        overflow-x: hidden;
     }
 
     .dark .editor {
@@ -119,9 +109,6 @@ const css = `
         pointer-events: none;
         position: absolute;
         top: 0px;
-        left: 0px;
-        width: calc(100% - 20px) !important;
-        height: 100%;
         color: var(--color-primary-light);
     }
 
@@ -139,17 +126,6 @@ const css = `
 
     .dark .background-highlight {
         background-color: var(--color-neutral-800);
-    }
-
-    .width-measure {
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size) !important;
-        line-height: var(--line-height) !important;
-        visibility: hidden;
-        /*white-space: pre;*/
-        position: absolute;
-        top: 0;
-        left: 0;
     }
 `;
 export default css;
