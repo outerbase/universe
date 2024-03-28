@@ -38,35 +38,31 @@ const css = `
     }
 
     #outer-container {
-        height: 100%; 
-        display: flex; 
-        flex-direction: column; 
-        overflow: hidden; 
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
         position: relative;
     }
 
     #container {
         position: relative;
-        height: calc(100% - 16px); /* Set the height to full minus pixels to account for custom scrollbar */
-        width: 100%;
         margin: 0;
         display: flex;
         flex-direction: row;
+
+        overflow-y: hidden;
+        overflow-x: hidden;
     }
 
     #code-container {
         flex: 1;
         position: relative;
-        overflow: scroll;
+        overflow-x: hidden;
+        overflow-y: hidden;
         min-height: 100%;
-
-        -ms-overflow-style: none;  /* Internet Explorer 10+ */
-        scrollbar-width: none;  /* Firefox */
     }
 
-    #code-container::-webkit-scrollbar { 
-        display: none;  /* Safari and Chrome */
-    }
 
     textarea, code, .width-measure {
         padding: var(--padding-horizontal) !important;

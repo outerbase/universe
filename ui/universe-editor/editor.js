@@ -47,27 +47,26 @@ import invasionTheme from './themes/invasion.js';
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <div id="outer-container" class="moondust">
-    <div id="container" class="dark">
-        <!-- The line number container to draw a new number for each line -->
-        <div id="line-number-container">
-            <div>1</div>
+    <outerbase-scrollable>
+        <div id="container" class="dark">
+            <!-- The line number container to draw a new number for each line -->
+            <div id="line-number-container">
+                <div>1</div>
+            </div>
+
+            <outerbase-scrollable>
+                <div id="code-container">
+                    <!-- The div is used to highlight the active line -->
+                    <div class="background-highlight"></div>
+
+                    <!-- The textarea is used to capture user input -->
+                    <textarea class="editor" spellcheck="false"></textarea>
+
+                    <!-- The code element is used to display the syntax highlighted code -->
+                    <pre><code></code></pre>
+                </div>
+            </outerbase-scrollable>
         </div>
-
-        <div id="code-container">
-            <!-- The div is used to highlight the active line -->
-            <div class="background-highlight"></div>
-
-            <!-- The textarea is used to capture user input -->
-            <textarea class="editor" spellcheck="false"></textarea>
-
-            <!-- The code element is used to display the syntax highlighted code -->
-            <pre><code></code></pre>
-        </div>
-    </div>
-
-    <div id="scrollbar-bottom">
-        <div id="scrollbar-bottom-thumb"></div>
-    </div>
 </div>
 `;
 
@@ -259,7 +258,9 @@ export class OuterbaseEditorLite extends HTMLElement {
         this.editor.style.height = `${height}px`;
     
         // Set width of elements based on contents
-        this.editor.style.width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px';    
+        let width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px'; 
+        this.editor.style.width = width;
+        this.container.style.width = width;
         this.shadow.querySelector(".background-highlight").style.width = this.editor.style.width;
     }
 
