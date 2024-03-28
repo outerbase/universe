@@ -58,8 +58,12 @@ const css = `
     #code-container {
         flex: 1;
         position: relative;
-        overflow-x: hidden;
-        overflow-y: hidden;
+        min-height: 100%;
+    }
+
+    #scrolley-codey {
+        position: relative;
+        min-width: 100%;
         min-height: 100%;
     }
 
@@ -148,4 +152,3 @@ const css = `
         left: 0;
     }
 `;
-export default css;

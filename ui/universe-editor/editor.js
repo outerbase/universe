@@ -47,14 +47,15 @@ import invasionTheme from './themes/invasion.js';
 var templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
 <div id="outer-container" class="moondust">
-    <outerbase-scrollable>
+    <outerbase-scrollable axis="vertical" id="vertical-scroller">
         <div id="container" class="dark">
             <!-- The line number container to draw a new number for each line -->
             <div id="line-number-container">
                 <div>1</div>
             </div>
 
-            <outerbase-scrollable>
+            <div id="scrolley-codey">
+            <outerbase-scrollable axis="horizontal" id="horizontal-scroller">
                 <div id="code-container">
                     <!-- The div is used to highlight the active line -->
                     <div class="background-highlight"></div>
@@ -65,8 +66,11 @@ templateEditor.innerHTML = `
                     <!-- The code element is used to display the syntax highlighted code -->
                     <pre><code></code></pre>
                 </div>
-            </outerbase-scrollable>
+                </outerbase-scrollable>
+                </div>
         </div>
+        </outerbase-scrollable>
+
 </div>
 `;
 
@@ -260,7 +264,6 @@ export class OuterbaseEditorLite extends HTMLElement {
         // Set width of elements based on contents
         let width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px'; 
         this.editor.style.width = width;
-        this.container.style.width = width;
         this.shadow.querySelector(".background-highlight").style.width = this.editor.style.width;
     }
 
