@@ -152,3 +152,4 @@ const css = `
         left: 0;
     }
 `;
+export default css;
