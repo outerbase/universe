@@ -219,6 +219,25 @@ export class OuterbaseEditorLite extends HTMLElement {
     }
 
     /**
+     * 
+     * @param {*} plugin - The plugin HTML DOM to add to the editor
+     * @param {*} location – "left", "center" or "right"
+     * @param {*} position - Index to insert the plugin at
+     */
+    addPlugin(html, location, position) {
+        if (location !== "left" && location !== "center" && location !== "right") {
+            throw new Error("Invalid location for plugin. Must be 'left', 'center' or 'right'");
+        }
+
+        // If a position is specified, then insert the plugin at that position.
+        if (position) {
+            this.shadow.getElementById(location).insertBefore(html, this.shadow.getElementById(location).childNodes[0]);
+        } else {
+            this.shadow.getElementById(location).appendChild(html);
+        }
+    }
+
+    /**
      * Controls the rendering updates for the various components of the editor.
      * @param {*} options - An array of options to render updates for, such as `line` or `syntax`
      */
