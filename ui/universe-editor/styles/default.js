@@ -85,7 +85,7 @@ const css = `
         display: none;  /* Safari and Chrome */
     }
 
-    textarea, code, .width-measure {
+    textarea, code {
         padding: var(--padding-horizontal) !important;
         white-space: pre;
         overflow-wrap: normal;
@@ -98,7 +98,7 @@ const css = `
         overflow: hidden;
     }
 
-    pre, textarea, code, .width-measure {
+    pre, textarea, code {
         margin: 0 !important;
         min-height: 100%;
         min-width: calc(100% - 20px) !important;
@@ -156,17 +156,6 @@ const css = `
 
     .dark .background-highlight {
         background-color: var(--color-neutral-800);
-    }
-
-    .width-measure {
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size) !important;
-        line-height: var(--line-height) !important;
-        visibility: hidden;
-        /*white-space: pre;*/
-        position: absolute;
-        top: 0;
-        left: 0;
     }
 `;
 export default css;
