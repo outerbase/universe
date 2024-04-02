@@ -163,7 +163,6 @@ export class OuterbaseEditorLite extends HTMLElement {
     onBlur(_event) {
         const editor = this.shadowRoot.querySelector('.editor')
         const backgroundHighlight = this.shadowRoot.querySelector('.background-highlight')
-        debugger
         backgroundHighlight.style.opacity = 0
         this.dispatchEvent(
             new CustomEvent('change', {
