@@ -1,4 +1,4 @@
-export function registerHoverKeywords(_this) {
+export function registerHoverKeywords() {
     /**
      * TODO:
      * - Can we track when multiple words are hovered over, such as `CREATE TABLE`?
@@ -76,12 +76,12 @@ export function registerHoverKeywords(_this) {
     // Create a new DOM element that will contain the hover tooltip
     var insertDiv = document.createElement('div')
     insertDiv.innerHTML = html
-    _this.shadowRoot.getElementById('code-container').appendChild(insertDiv)
+    this.shadowRoot.getElementById('code-container').appendChild(insertDiv)
 
     // Add css to the shadow DOM
     var style = document.createElement('style')
     style.innerHTML = css
-    _this.shadowRoot.appendChild(style)
+    this.shadowRoot.appendChild(style)
 
     var previousWord = ''
     let tooltipDebounceTime = 250
@@ -89,29 +89,29 @@ export function registerHoverKeywords(_this) {
     let leaveTimeout // For hiding the tooltip
 
     // Prevent tooltip from hiding when mouse is over it
-    _this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseenter', () => {
+    this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseenter', () => {
         // console.log('Enter: ', leaveTimeout)
         clearTimeout(leaveTimeout)
     })
 
-    _this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseleave', (event) => {
+    this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseleave', (event) => {
         // console.log('Leave from tooltip', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
-        leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime)
+        leaveTimeout = setTimeout(() => hideTooltip(this), tooltipDebounceTime)
     })
 
-    _this.shadowRoot.getElementById('code-container').addEventListener('mouseout', (event) => {
+    this.shadowRoot.getElementById('code-container').addEventListener('mouseout', (event) => {
         // console.log('Leave from container', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
-        leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime)
+        leaveTimeout = setTimeout(() => hideTooltip(this), tooltipDebounceTime)
     })
 
-    _this.shadowRoot.getElementById('code-container').addEventListener('mousemove', (e) => {
+    this.shadowRoot.getElementById('code-container').addEventListener('mousemove', (e) => {
         clearTimeout(hoverTimeout)
         clearTimeout(leaveTimeout)
 
-        const codeElement = _this.shadowRoot.querySelector('code')
+        const codeElement = this.shadowRoot.querySelector('code')
         const lineHeight = parseInt(getComputedStyle(codeElement).lineHeight)
         const line = Math.floor(e.offsetY / lineHeight)
-        const lineText = _this.editor.value.split('\n')[line]
+        const lineText = this.editor.value.split('\n')[line]
 
         // Get word at cursor position on the line
         const rect = codeElement.getBoundingClientRect()
@@ -153,15 +153,15 @@ VARCHAR(MAX) -- Maximum length available in the database`,
         // If the word is accepted, show the tooltip
         if (acceptedWord) {
             previousWord = word
-            hoverTimeout = setTimeout(() => showTooltip(_this, wordX, lineHeight, line, acceptedWord), 1000)
+            hoverTimeout = setTimeout(() => showTooltip(this, wordX, lineHeight, line, acceptedWord), 1000)
         }
     })
 
     // TODO removeEventListener()s
 }
 
-const showTooltip = (_this, wordX, lineHeight, line, acceptedWord) => {
-    const hoverTooltip = _this.shadowRoot.querySelector('.hover-tooltip')
+const showTooltip = (this, wordX, lineHeight, line, acceptedWord) => {
+    const hoverTooltip = this.shadowRoot.querySelector('.hover-tooltip')
     hoverTooltip.style.left = `${wordX}px`
     hoverTooltip.style.top = `${line * lineHeight + lineHeight}px`
     hoverTooltip.style.opacity = '1'
@@ -189,8 +189,8 @@ const showTooltip = (_this, wordX, lineHeight, line, acceptedWord) => {
     }
 }
 
-const hideTooltip = (_this) => {
-    const hoverTooltip = _this.shadowRoot.querySelector('.hover-tooltip')
+const hideTooltip = (this) => {
+    const hoverTooltip = this.shadowRoot.querySelector('.hover-tooltip')
     hoverTooltip.style.opacity = '0'
     hoverTooltip.style.zIndex = '0'
 }

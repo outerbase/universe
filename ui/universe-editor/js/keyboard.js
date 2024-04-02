@@ -1,6 +1,6 @@
-export function registerKeyboardShortcuts(_this) {
-    const editor = _this.shadowRoot.querySelector('.editor')
-    const render = _this.render.bind(_this)
+export function registerKeyboardShortcuts() {
+    const editor = this.shadowRoot.querySelector('.editor')
+    const render = this.render.bind(this)
 
     // TODO remove these event listeners
     editor.addEventListener('keydown', (e) => {
@@ -17,24 +17,24 @@ export function registerKeyboardShortcuts(_this) {
             // to calculate the correct details immediately because of `keydown`, so we
             // defer the calculation to the next tick using `setTimeout`.
             setTimeout(() => {
-                // _this.highlightItems();
+                // this.highlightItems();
                 render(['line'])
             }, 0)
         }
     })
 
     editor.addEventListener('input', (e) => {
-        const visualizer = _this.shadowRoot.querySelector('code')
+        const visualizer = this.shadowRoot.querySelector('code')
         visualizer.innerHTML = e.target.value
 
         // Update the line numbers
-        _this.updateLineNumbers()
+        this.updateLineNumbers()
 
         // Highlight the active line, line number, and code syntax
         Prism.highlightElement(visualizer)
 
         // Update the height & width of the textarea to match the content
-        _this.adjustTextAreaSize()
+        this.adjustTextAreaSize()
     })
 
     // Use arrow function here to ensure `this` refers to the class instance
@@ -53,10 +53,10 @@ export function registerKeyboardShortcuts(_this) {
             // Put caret at right position again
             e.target.selectionStart = e.target.selectionEnd = start + 4 // Move the caret after the tab
         } else if (e.key === 'Backspace') {
-            _this.adjustTextAreaSize()
+            this.adjustTextAreaSize()
         } else if (e.metaKey && e.key === 'Enter') {
             e.preventDefault() // Prevent the default action
-            _this.dispatchEvent(
+            this.dispatchEvent(
                 new CustomEvent('outerbase-editor-event', {
                     bubbles: true,
                     composed: true,
@@ -84,7 +84,8 @@ export function registerKeyboardShortcuts(_this) {
             e.target.selectionStart = e.target.selectionEnd = newPos
 
             // Scroll code container to the far left
-            _this.codeContainer.scrollLeft = 0
+            const codeContainer = this.shadowRoot.getElementById('code-container')
+            codeContainer.scrollLeft = 0
 
             const cursorPosition = editor.selectionStart
             // Check if the cursor is at the end of the text (or on the last line)
@@ -92,21 +93,21 @@ export function registerKeyboardShortcuts(_this) {
                 // Use setTimeout to allow the textarea to update
                 setTimeout(() => {
                     // Scroll the parent container to the bottom
-                    _this.codeContainer.scrollTop = _this.codeContainer.scrollHeight
+                    codeContainer.scrollTop = codeContainer.scrollHeight
                 }, 0)
             }
 
             // Defer the update of line numbers, required or the line number will be off by 1
-            _this.updateLineNumbers()
-            _this.adjustTextAreaSize()
+            this.updateLineNumbers()
+            this.adjustTextAreaSize()
         } else if (e.metaKey && e.key === ']') {
             // Check for CMD + ] for right indent
             e.preventDefault() // Prevent the default action
-            indentLine(_this, 'right')
+            indentLine.apply(this, 'right')
         } else if (e.metaKey && e.key === '[') {
             // Check for CMD + [ for left indent
             e.preventDefault() // Prevent the default action
-            indentLine(_this, 'left')
+            indentLine.apply(this, 'left')
         } else if (e.metaKey && e.key === '/') {
             e.preventDefault() // Prevent the default action
 
@@ -123,7 +124,7 @@ export function registerKeyboardShortcuts(_this) {
             var lineText = text.substring(lineStart, lineEnd)
             var afterLine = text.substring(lineEnd)
 
-            const commentCharacters = _this.getAttribute('language') === 'sql' ? '-- ' : '// '
+            const commentCharacters = this.getAttribute('language') === 'sql' ? '-- ' : '// '
 
             // Check if the line is already commented out
             if (lineText.startsWith(commentCharacters)) {
@@ -144,19 +145,17 @@ export function registerKeyboardShortcuts(_this) {
             }
         }
 
-        setTimeout(() => {
-            _this.dispatchEvent(
-                new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: editor.value } })
-            )
-        }, 50)
+        // setTimeout(() => {
+        //     this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: editor.value } }))
+        // }, 50)
 
         // After updating the textarea's value, manually trigger Prism highlighting
-        _this.render(['syntax'])
+        this.render(['syntax'])
     })
 }
 
-function indentLine(_this, direction) {
-    const editor = _this.shadowRoot.querySelector('.editor')
+function indentLine(direction) {
+    const editor = this.shadowRoot.querySelector('.editor')
     const start = editor.selectionStart
     const end = editor.selectionEnd
     const selectedText = editor.value.substring(start, end)
@@ -185,5 +184,5 @@ function indentLine(_this, direction) {
     }
 
     // After updating the textarea's value, manually trigger Prism highlighting
-    _this.render(['syntax'])
+    this.render(['syntax'])
 }

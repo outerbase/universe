@@ -4,7 +4,6 @@ import './prism/prism-sql.min.js' // Defines tokens for SQL langauge
 
 // Plugins
 import { registerKeyboardShortcuts } from './js/keyboard.js'
-import { updateLineNumbersHeight } from './js/line-number.js'
 import { registerHoverKeywords } from './js/hover-keywords.js'
 
 // Styles
@@ -201,10 +200,10 @@ export class OuterbaseEditorLite extends HTMLElement {
          */
 
         // Register all plugins
-        registerKeyboardShortcuts(this)
+        registerKeyboardShortcuts.apply(this)
 
         if (this.getAttribute('show-keyword-tooltips') === 'true') {
-            registerHoverKeywords(this)
+            registerHoverKeywords.apply(this)
         }
     }
 
@@ -251,18 +250,20 @@ export class OuterbaseEditorLite extends HTMLElement {
         const height = lineCount * lineHeight
 
         // Set height of elements based on contents
-        updateLineNumbersHeight(this.shadowRoot.getElementById('line-number-container'), height)
         editor.style.height = `${height}px`
 
+        // TODO what is this for? it makes the container huge when rendered as a plugin
+        //
         // Set width of elements based on contents
-        const width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px'
-        editor.style.width = width
-        this.shadowRoot.querySelector('.background-highlight').style.width = this.editor.style.width
+        // const width = Math.max(editor.offsetWidth + 1, editor.scrollWidth) + 'px'
+        // editor.style.width = width
+        // this.shadowRoot.querySelector('.background-highlight').style.width = editor.style.width
     }
 
     updateLineNumbers() {
-        const lineCount = this.editor.value.split('\n').length
-        const lineNumberContainer = this.shadow.getElementById('line-number-container')
+        const editor = this.shadowRoot.querySelector('.editor')
+        const lineCount = editor.value.split('\n').length
+        const lineNumberContainer = this.shadowRoot.getElementById('line-number-container')
         lineNumberContainer.innerHTML = '' // Clear existing line numbers
 
         for (let i = 1; i <= lineCount; i++) {
