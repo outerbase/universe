@@ -1,5 +1,4 @@
 export function registerHoverKeywords(_this) {
-    
     /**
      * TODO:
      * - Can we track when multiple words are hovered over, such as `CREATE TABLE`?
@@ -72,58 +71,58 @@ export function registerHoverKeywords(_this) {
                 </div>
             </div>
         </div>
-    </div>`;
+    </div>`
 
     // Create a new DOM element that will contain the hover tooltip
-    var insertDiv = document.createElement('div');
-    insertDiv.innerHTML = html;
-    _this.shadow.getElementById('code-container').appendChild(insertDiv);
+    var insertDiv = document.createElement('div')
+    insertDiv.innerHTML = html
+    _this.shadowRoot.getElementById('code-container').appendChild(insertDiv)
 
     // Add css to the shadow DOM
-    var style = document.createElement('style');
-    style.innerHTML = css;
-    _this.shadow.appendChild(style);
+    var style = document.createElement('style')
+    style.innerHTML = css
+    _this.shadowRoot.appendChild(style)
 
-    var previousWord = '';
-    let tooltipDebounceTime = 250;
-    let hoverTimeout; // For showing the tooltip
-    let leaveTimeout; // For hiding the tooltip
+    var previousWord = ''
+    let tooltipDebounceTime = 250
+    let hoverTimeout // For showing the tooltip
+    let leaveTimeout // For hiding the tooltip
 
     // Prevent tooltip from hiding when mouse is over it
-    _this.shadow.querySelector('.hover-tooltip').addEventListener('mouseenter', () => {
+    _this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseenter', () => {
         // console.log('Enter: ', leaveTimeout)
-        clearTimeout(leaveTimeout);
-    });
+        clearTimeout(leaveTimeout)
+    })
 
-    _this.shadow.querySelector('.hover-tooltip').addEventListener('mouseleave', (event) => {
+    _this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseleave', (event) => {
         // console.log('Leave from tooltip', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
-        leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime);
-    });
-    
-    _this.shadow.getElementById('code-container').addEventListener('mouseout', (event) => {
+        leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime)
+    })
+
+    _this.shadowRoot.getElementById('code-container').addEventListener('mouseout', (event) => {
         // console.log('Leave from container', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
-        leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime);
-    });
+        leaveTimeout = setTimeout(() => hideTooltip(_this), tooltipDebounceTime)
+    })
 
-    _this.shadow.getElementById('code-container').addEventListener('mousemove', (e) => {
-        clearTimeout(hoverTimeout);
-        clearTimeout(leaveTimeout); 
+    _this.shadowRoot.getElementById('code-container').addEventListener('mousemove', (e) => {
+        clearTimeout(hoverTimeout)
+        clearTimeout(leaveTimeout)
 
-        const codeElement = _this.shadow.querySelector('code');
-        const lineHeight = parseInt(getComputedStyle(codeElement).lineHeight);
-        const line = Math.floor(e.offsetY / lineHeight);
-        const lineText = _this.editor.value.split('\n')[line];
+        const codeElement = _this.shadowRoot.querySelector('code')
+        const lineHeight = parseInt(getComputedStyle(codeElement).lineHeight)
+        const line = Math.floor(e.offsetY / lineHeight)
+        const lineText = _this.editor.value.split('\n')[line]
 
         // Get word at cursor position on the line
-        const rect = codeElement.getBoundingClientRect();
-        const x = e.clientX - rect.left - 10;
-        const y = e.clientY - rect.top;
+        const rect = codeElement.getBoundingClientRect()
+        const x = e.clientX - rect.left - 10
+        const y = e.clientY - rect.top
 
         // Get character at X position if each character width is 15px
-        const charWidth = 7.8;
-        const charIndex = Math.floor(x / charWidth);
-        const word = getWordAtIndex(lineText, charIndex);
-        const wordX = getXPositionOfWordAtIndex(lineText, charIndex, charWidth) + 10;
+        const charWidth = 7.8
+        const charIndex = Math.floor(x / charWidth)
+        const word = getWordAtIndex(lineText, charIndex)
+        const wordX = getXPositionOfWordAtIndex(lineText, charIndex, charWidth) + 10
 
         // If no word is found, exit early to help performance.
         if (!word) {
@@ -133,127 +132,130 @@ export function registerHoverKeywords(_this) {
         const accepted_keywords = [
             {
                 word: 'VARCHAR',
-                description: 'Variable-length character string that can hold letters, numbers and special characters. By default the length is 1 character, but to define a desired maximum length you can pass in an integer value. To use the maximum length available in the database you can use MAX.',
+                description:
+                    'Variable-length character string that can hold letters, numbers and special characters. By default the length is 1 character, but to define a desired maximum length you can pass in an integer value. To use the maximum length available in the database you can use MAX.',
                 example: `VARCHAR -- Default length is 1 character
 VARCHAR(255) -- Maximum length is 255 characters
 VARCHAR(MAX) -- Maximum length available in the database`,
                 performance: 'Medium',
-                complexity: 'Low'
-            }
+                complexity: 'Low',
+            },
         ]
 
-        var acceptedWord = false;
+        var acceptedWord = false
         for (var i = 0; i < accepted_keywords.length; i++) {
             if (word?.toUpperCase() === accepted_keywords[i].word) {
-                acceptedWord = accepted_keywords[i];
-                break;
+                acceptedWord = accepted_keywords[i]
+                break
             }
         }
 
         // If the word is accepted, show the tooltip
         if (acceptedWord) {
-            previousWord = word;
-            hoverTimeout = setTimeout(() => showTooltip(_this, wordX, lineHeight, line, acceptedWord), 1000);
+            previousWord = word
+            hoverTimeout = setTimeout(() => showTooltip(_this, wordX, lineHeight, line, acceptedWord), 1000)
         }
-    });
+    })
+
+    // TODO removeEventListener()s
 }
 
 const showTooltip = (_this, wordX, lineHeight, line, acceptedWord) => {
-    const hoverTooltip = _this.shadow.querySelector('.hover-tooltip');
-    hoverTooltip.style.left = `${wordX}px`;
-    hoverTooltip.style.top = `${line * lineHeight + lineHeight}px`;
-    hoverTooltip.style.opacity = '1';
-    hoverTooltip.style.zIndex = '1000';
+    const hoverTooltip = _this.shadowRoot.querySelector('.hover-tooltip')
+    hoverTooltip.style.left = `${wordX}px`
+    hoverTooltip.style.top = `${line * lineHeight + lineHeight}px`
+    hoverTooltip.style.opacity = '1'
+    hoverTooltip.style.zIndex = '1000'
 
-    const tooltipTitle = hoverTooltip.querySelector('.tooltip-title');
-    const tooltipDescription = hoverTooltip.querySelector('.tooltip-description');
-    tooltipTitle.innerHTML = acceptedWord.word;
-    tooltipDescription.innerHTML = acceptedWord.description;
+    const tooltipTitle = hoverTooltip.querySelector('.tooltip-title')
+    const tooltipDescription = hoverTooltip.querySelector('.tooltip-description')
+    tooltipTitle.innerHTML = acceptedWord.word
+    tooltipDescription.innerHTML = acceptedWord.description
 
     // Scroll `tooltip-container` to top
-    const tooltipContainer = hoverTooltip.querySelector('.tooltip-container');
-    tooltipContainer.scrollTop = 0;
+    const tooltipContainer = hoverTooltip.querySelector('.tooltip-container')
+    tooltipContainer.scrollTop = 0
 
     // Replace code in `sql-editor` with the example
-    const tooltipExample = hoverTooltip.querySelector('.tooltip-example');
+    const tooltipExample = hoverTooltip.querySelector('.tooltip-example')
     if (acceptedWord.example) {
-        tooltipExample.style.display = 'block';
+        tooltipExample.style.display = 'block'
 
         // Get outerbase-editor where id = `sql-editor`
-        const sqlEditor = tooltipExample.querySelector('#sql-editor');
-        sqlEditor.setAttribute('code', acceptedWord.example);
+        const sqlEditor = tooltipExample.querySelector('#sql-editor')
+        sqlEditor.setAttribute('code', acceptedWord.example)
     } else {
-        tooltipExample.style.display = 'none';
+        tooltipExample.style.display = 'none'
     }
-};
+}
 
 const hideTooltip = (_this) => {
-    const hoverTooltip = _this.shadow.querySelector('.hover-tooltip');
-    hoverTooltip.style.opacity = '0';
-    hoverTooltip.style.zIndex = '0';
-};
+    const hoverTooltip = _this.shadowRoot.querySelector('.hover-tooltip')
+    hoverTooltip.style.opacity = '0'
+    hoverTooltip.style.zIndex = '0'
+}
 
 function getWordAtIndex(str, index) {
     // Check if the index is within the bounds of the string
     if (index < 0 || index >= str.length) {
-        return null; // or throw an error, or return an empty string, depending on your needs
+        return null // or throw an error, or return an empty string, depending on your needs
     }
-  
+
     // Use a regular expression to split the string into words
     // This regex will split the string at spaces, punctuation, and line breaks
     // Adjust the regex as needed based on what you consider a word boundary
-    const words = str.split(/\b/);
-  
+    const words = str.split(/\b/)
+
     // Find the word that contains the index
-    let currentIndex = 0;
+    let currentIndex = 0
     for (let word of words) {
         if (index >= currentIndex && index < currentIndex + word.length) {
             // Check if the word is actually a word and not just spaces or punctuation
             if (/\w/.test(word)) {
-                return word;
+                return word
             } else {
                 // If the character at the index is not part of a word (e.g., a space or punctuation),
                 // you might want to return an empty string or null, depending on your requirements
-                return null;
+                return null
             }
         }
 
-        currentIndex += word.length;
+        currentIndex += word.length
     }
-  
+
     // Return null if no word is found at the index
     // This could happen if the index is in spaces or punctuation
-    return null;
-  }
+    return null
+}
 
-  function getXPositionOfWordAtIndex(str, index, charWidth = 7.8) {
+function getXPositionOfWordAtIndex(str, index, charWidth = 7.8) {
     // Check if the index is within the bounds of the string
     if (index < 0 || index >= str.length) {
-      return null; // or throw an error, or return an empty string, depending on your needs
+        return null // or throw an error, or return an empty string, depending on your needs
     }
-  
+
     // Use a regular expression to split the string into words and non-word segments
-    const segments = str.split(/(\b)/);
-  
-    let currentIndex = 0;
-    let xPosition = 0; // Initialize X position
-  
+    const segments = str.split(/(\b)/)
+
+    let currentIndex = 0
+    let xPosition = 0 // Initialize X position
+
     for (let segment of segments) {
-      if (index >= currentIndex && index < currentIndex + segment.length) {
-        // If the segment at the index is a word
-        if (/\w/.test(segment)) {
-          // Calculate the X position of the start of the word
-          xPosition = currentIndex * charWidth;
-          return xPosition;
-        } else {
-          // If the index is not part of a word (e.g., space or punctuation),
-          // you might want to handle this differently depending on your requirements
-          return null;
+        if (index >= currentIndex && index < currentIndex + segment.length) {
+            // If the segment at the index is a word
+            if (/\w/.test(segment)) {
+                // Calculate the X position of the start of the word
+                xPosition = currentIndex * charWidth
+                return xPosition
+            } else {
+                // If the index is not part of a word (e.g., space or punctuation),
+                // you might want to handle this differently depending on your requirements
+                return null
+            }
         }
-      }
-      currentIndex += segment.length;
+        currentIndex += segment.length
     }
-  
+
     // Return null if no word is found at the index
-    return null;
-  }
+    return null
+}
