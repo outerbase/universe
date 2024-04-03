@@ -1,4 +1,6 @@
 export function registerHoverKeywords() {
+    if (typeof document === 'undefined') return
+
     /**
      * TODO:
      * - Can we track when multiple words are hovered over, such as `CREATE TABLE`?

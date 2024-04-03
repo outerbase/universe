@@ -42,8 +42,10 @@ import invasionTheme from './themes/invasion.js'
  * - Use TRUNCATE instead of DELETE to remove all rows from a table
  */
 
-var templateEditor = document.createElement('template')
-templateEditor.innerHTML = `
+let templateEditor
+if (typeof document !== 'undefined') {
+    templateEditor = document.createElement('template')
+    templateEditor.innerHTML = `
 <div id="outer-container" class="moondust">
     <outerbase-scrollable axis="vertical" id="vertical-scroller">
         <div id="container" class="dark">
@@ -71,6 +73,7 @@ templateEditor.innerHTML = `
 
 </div>
 `
+}
 
 export class OuterbaseEditorLite extends HTMLElement {
     // The DOM element of the outer parent container
@@ -116,6 +119,8 @@ export class OuterbaseEditorLite extends HTMLElement {
 
     constructor() {
         super()
+
+        if (!templateEditor) throw new Error('Missing expected templateEditor definition -- are you trying to SSR?')
 
         this.onMouseDown = this.onMouseDown.bind(this)
         this.onFocus = this.onFocus.bind(this)
