@@ -53,6 +53,8 @@ const css = `
 
         overflow-y: hidden;
         overflow-x: hidden;
+
+        min-height: 100%;
     }
 
     #code-container {
@@ -151,5 +153,5 @@ const css = `
         top: 0;
         left: 0;
     }
-`;
-export default css;
+`
+export default css
