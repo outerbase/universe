@@ -96,12 +96,12 @@ export function registerHoverKeywords() {
 
     this.shadowRoot.querySelector('.hover-tooltip').addEventListener('mouseleave', (event) => {
         // console.log('Leave from tooltip', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
-        leaveTimeout = setTimeout(() => hideTooltip(this), tooltipDebounceTime)
+        leaveTimeout = setTimeout(() => hideTooltip.apply(this), tooltipDebounceTime)
     })
 
     this.shadowRoot.getElementById('code-container').addEventListener('mouseout', (event) => {
         // console.log('Leave from container', 'Target:', event.target, 'RelatedTarget:', event.relatedTarget);
-        leaveTimeout = setTimeout(() => hideTooltip(this), tooltipDebounceTime)
+        leaveTimeout = setTimeout(() => hideTooltip.apply(this), tooltipDebounceTime)
     })
 
     this.shadowRoot.getElementById('code-container').addEventListener('mousemove', (e) => {
@@ -153,14 +153,14 @@ VARCHAR(MAX) -- Maximum length available in the database`,
         // If the word is accepted, show the tooltip
         if (acceptedWord) {
             previousWord = word
-            hoverTimeout = setTimeout(() => showTooltip(this, wordX, lineHeight, line, acceptedWord), 1000)
+            hoverTimeout = setTimeout(() => showTooltip(wordX, lineHeight, line, acceptedWord).apply(this), 1000)
         }
     })
 
     // TODO removeEventListener()s
 }
 
-const showTooltip = (this, wordX, lineHeight, line, acceptedWord) => {
+const showTooltip = (wordX, lineHeight, line, acceptedWord) => {
     const hoverTooltip = this.shadowRoot.querySelector('.hover-tooltip')
     hoverTooltip.style.left = `${wordX}px`
     hoverTooltip.style.top = `${line * lineHeight + lineHeight}px`
@@ -189,7 +189,7 @@ const showTooltip = (this, wordX, lineHeight, line, acceptedWord) => {
     }
 }
 
-const hideTooltip = (this) => {
+const hideTooltip = () => {
     const hoverTooltip = this.shadowRoot.querySelector('.hover-tooltip')
     hoverTooltip.style.opacity = '0'
     hoverTooltip.style.zIndex = '0'
