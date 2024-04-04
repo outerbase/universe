@@ -168,10 +168,10 @@ if (typeof document !== 'undefined') {
             const backgroundHighlight = this.shadowRoot.querySelector('.background-highlight')
             backgroundHighlight.style.opacity = 0
             this.dispatchEvent(
-                new CustomEvent('change', {
+                new CustomEvent('outerbase-editor-event', {
                     bubbles: true,
                     composed: true,
-                    detail: editor.value,
+                    detail: { code: editor.value },
                 })
             )
         }
