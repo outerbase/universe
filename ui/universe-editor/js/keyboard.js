@@ -57,10 +57,10 @@ export function registerKeyboardShortcuts() {
         } else if (e.metaKey && e.key === 'Enter') {
             e.preventDefault() // Prevent the default action
             this.dispatchEvent(
-                new CustomEvent('outerbase-editor-event', {
+                new CustomEvent('editor-change', {
                     bubbles: true,
                     composed: true,
-                    detail: { execute: true, code: editor.value },
+                    detail: { execute: true, value: editor.value },
                 })
             )
         } else if (e.key === 'Enter') {
@@ -146,7 +146,7 @@ export function registerKeyboardShortcuts() {
         }
 
         // setTimeout(() => {
-        //     this.dispatchEvent(new CustomEvent('outerbase-editor-event', { bubbles: true, composed: true, detail: { code: editor.value } }))
+        //     this.dispatchEvent(new CustomEvent('value', { bubbles: true, composed: true, detail: { value: editor.value } }))
         // }, 50)
 
         // After updating the textarea's value, manually trigger Prism highlighting
