@@ -57,7 +57,7 @@ const css = `
     #code-container {
         flex: 1;
         position: relative;
-        overflow: scroll;
+        overflow: hidden;
         min-height: 100%;
 
         -ms-overflow-style: none;  /* Internet Explorer 10+ */
@@ -75,23 +75,26 @@ const css = `
         word-wrap: normal;
     }
 
-    textarea {
-        resize: none;
-        outline: none;
-        overflow: hidden;
-    }
-
     pre, textarea, code, .width-measure {
         margin: 0 !important;
         min-height: 100%;
-        min-width: calc(100% - 20px) !important;
+        min-width: 100% !important;
         background-color: transparent !important;
         font-family: var(--font-family-mono);
         font-size: var(--font-size)  !important;
         line-height: var(--line-height) !important;
     }
 
-    .editor, pre, code {
+    textarea, .editor, pre, code {
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size);
+        line-height: var(--line-height);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow: auto;
+        margin: 0;
+        padding: var(--padding-horizontal);
+        box-sizing: border-box;
         z-index: 2;
     }
 
@@ -104,7 +107,7 @@ const css = `
         position: absolute;
         left: 0;
         top: 0;
-        overflow-x: hidden;
+        overflow: auto;
     }
 
     .dark .editor {
@@ -120,9 +123,14 @@ const css = `
         position: absolute;
         top: 0px;
         left: 0px;
-        width: calc(100% - 20px) !important;
+        width: 100% !important;
         height: 100%;
         color: var(--color-primary-light);
+        white-space: pre-wrap;
+    }
+
+    textarea {
+        height: auto;
     }
 
     .background-highlight {
