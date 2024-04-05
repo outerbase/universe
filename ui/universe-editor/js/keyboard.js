@@ -145,9 +145,16 @@ export function registerKeyboardShortcuts() {
             }
         }
 
-        // setTimeout(() => {
-        //     this.dispatchEvent(new CustomEvent('value', { bubbles: true, composed: true, detail: { value: editor.value } }))
-        // }, 50)
+        // This code bubbles the changes to the editor up to the host application.
+        setTimeout(() => {
+            this.dispatchEvent(
+                new CustomEvent('editor-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { value: editor.value },
+                })
+            )
+        }, 50)
 
         // After updating the textarea's value, manually trigger Prism highlighting
         this.render(['syntax'])
