@@ -38,35 +38,37 @@ const css = `
     }
 
     #outer-container {
-        height: 100%; 
-        display: flex; 
-        flex-direction: column; 
-        overflow: hidden; 
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
         position: relative;
     }
 
     #container {
         position: relative;
-        height: calc(100% - 16px); /* Set the height to full minus pixels to account for custom scrollbar */
-        width: 100%;
         margin: 0;
         display: flex;
         flex-direction: row;
+
+        overflow-y: hidden;
+        overflow-x: hidden;
+
+        min-height: 100%;
     }
 
     #code-container {
         flex: 1;
         position: relative;
-        overflow: scroll;
         min-height: 100%;
-
-        -ms-overflow-style: none;  /* Internet Explorer 10+ */
-        scrollbar-width: none;  /* Firefox */
     }
 
-    #code-container::-webkit-scrollbar { 
-        display: none;  /* Safari and Chrome */
+    #scrolley-codey {
+        position: relative;
+        min-width: 100%;
+        min-height: 100%;
     }
+
 
     textarea, code, .width-measure {
         padding: var(--padding-horizontal) !important;
@@ -151,5 +153,5 @@ const css = `
         top: 0;
         left: 0;
     }
-`;
-export default css;
+`
+export default css

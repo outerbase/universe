@@ -2,6 +2,7 @@
 <head>
     <title>Universe Code Editor</title>
 
+    <script type="module" src="../node_modules/@outerbase/scrollable-element/bundled/scrollable-element.js"></script>
     <script type="module" src="./universe-editor/editor.js" defer></script>
 
     <style>
@@ -13,7 +14,14 @@
 </head>
 
 <body>
-    <div style="height: 100%; display: flex; flex-direction: column;">
+    <outerbase-editor
+        id="sql-editor"
+        language="sql"
+        theme="moondust"
+        mode="dark"
+        show-keyword-tooltips="true"
+    ></outerbase-editor>
+    <!-- <div style="height: 100%; display: flex; flex-direction: column;">
         <button onclick="changeTheme()">Change Theme</button>
         <button onclick="changeMode()">Change Mode</button>
 
@@ -28,7 +36,7 @@
                     show-keyword-tooltips="true"
                 ></outerbase-editor>
             </div>
-        </div>
+        </div> -->
 
         <!-- <div style="flex: 1; display: flex; flex-direction: column;">
             <p style="color: white; font-weight: bold; padding-left: 8px;">Javascript</p>
@@ -41,7 +49,7 @@
                 ></outerbase-editor>
             </div>
         </div> -->
-    </div>
+    <!-- </div> -->
 </body>
 
 <script>
@@ -103,9 +111,9 @@ SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FRO
     // Add an event listener for the 'code-update' event
     // editor.addEventListener('code-update', (event) => {
         // Access the code from the event detail
-        // console.log('Code updated:', event.detail.code);
+        // console.log('Code updated:', event.detail.value);
 
-        // You can now use event.detail.code as needed
+        // You can now use event.detail.value as needed
         // For example, display it in another element, store it, etc.
     // });
 </script>
