@@ -5,7 +5,7 @@ import './prism/prism-sql.min.js' // Defines tokens for SQL langauge
 // Plugins
 import { registerKeyboardShortcuts } from './js/keyboard.js'
 import { registerHoverKeywords } from './js/hover-keywords.js'
-import { registerLineNumbers } from './js/line-number.js';
+import { registerLineNumbers, updateLineNumbersHeight } from './js/line-number.js';
 
 // Styles
 import defaultStyles from './styles/default.js'
@@ -281,6 +281,7 @@ if (typeof document !== 'undefined') {
             const height = lineCount * lineHeight
 
             // Set height of elements based on contents
+            updateLineNumbersHeight(this, height);
             editor.style.height = `${height}px`
 
             // TODO what is this for? it makes the container huge when rendered as a plugin
@@ -351,9 +352,7 @@ if (typeof document !== 'undefined') {
         }
 
         redrawSyntaxHighlighting() {
-            const editor = this.shadowRoot.querySelector('.editor')
-            const visualizer = this.shadowRoot.querySelector('code')
-            visualizer.innerHTML = editor.value
+            visualizer.innerHTML = this.editor.value
 
             try {
                 Prism.highlightElement(visualizer)
