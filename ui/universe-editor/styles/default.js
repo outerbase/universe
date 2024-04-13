@@ -6,6 +6,7 @@ const css = `
         --padding-horizontal: 0 10px;
         
         --color-neutral-50: #fafafa;
+        --color-neutral-100: #f5f5f5;
         --color-neutral-200: #e5e5e5;
         --color-neutral-300: #d4d4d4;
         --color-neutral-400: #a3a3a3;
@@ -14,6 +15,7 @@ const css = `
         --color-neutral-700: #404040;
         --color-neutral-800: #262626;
         --color-neutral-900: #171717;
+        --color-neutral-950: #0a0a0a;
         --color-primary-dark: white;
         --color-primary-light: black;
 
@@ -57,6 +59,19 @@ const css = `
         min-height: 100%;
     }
 
+    #left {
+        position: relative;
+        display: flex;
+    }
+    #center {
+        flex: 1;
+        position: relative;
+    }
+    #right {
+        position: relative;
+        display: flex;
+    }
+
     #code-container {
         flex: 1;
         position: relative;
@@ -70,7 +85,7 @@ const css = `
     }
 
 
-    textarea, code, .width-measure {
+    textarea, code {
         padding: var(--padding-horizontal) !important;
         white-space: pre;
         overflow-wrap: normal;
@@ -83,7 +98,7 @@ const css = `
         overflow: hidden;
     }
 
-    pre, textarea, code, .width-measure {
+    pre, textarea, code {
         margin: 0 !important;
         min-height: 100%;
         min-width: calc(100% - 20px) !important;
@@ -141,17 +156,6 @@ const css = `
 
     .dark .background-highlight {
         background-color: var(--color-neutral-800);
-    }
-
-    .width-measure {
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size) !important;
-        line-height: var(--line-height) !important;
-        visibility: hidden;
-        /*white-space: pre;*/
-        position: absolute;
-        top: 0;
-        left: 0;
     }
 `
 export default css
