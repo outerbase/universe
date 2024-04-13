@@ -110,6 +110,7 @@ export function registerKeyboardShortcuts() {
             indentLine.apply(this, 'left')
         } else if (e.metaKey && e.key === '/') {
             e.preventDefault() // Prevent the default action
+            e.stopPropagation() // Stop the event from bubbling up
 
             var start = e.target.selectionStart
             var end = e.target.selectionEnd
