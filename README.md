@@ -23,10 +23,10 @@
 
 Universe is a lightweight, extensible code editor that can be used anywhere on the web.
 
-- [**Core Components**](#core-components): Execute queries on your database easily.
-- [**Syntax Highlighting**](#syntax-highlighting): Run any saved queries from Outerbase in one line.
-- [**Theme Support**](#theme-support): Create Typescript models from your database schema.
-- [**Custom Plugins**](#custom-plugins): Use natural language to ask your database questions.
+- [**Core Components**](#core-components): Essentials of a code editor.
+- [**Syntax Highlighting**](#syntax-highlighting): Style your code tokens based on your language.
+- [**Theme Support**](#theme-support): Customize how your code syntax looks.
+- [**Custom Plugins**](#custom-plugins): Extend the functionality with custom plugins.
 
 ## Usage
 
@@ -39,7 +39,7 @@ You do not need have to build or compile Universe yourself to use it.
 TypeScript support is built-in, **not** required.
 
 Declaring an instance of the editor in your HTML you can do the following:
-```
+```html
 <universe-editor 
     language="sql" 
     mode="dark" 
@@ -50,7 +50,7 @@ Declaring an instance of the editor in your HTML you can do the following:
 
 For more advanced scenarios perhaps you need to declare properties more ad-hoc and you can do it with this method as well:
 
-```
+```html
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Create an instance of OuterbaseEditor
@@ -69,6 +69,11 @@ For more advanced scenarios perhaps you need to declare properties more ad-hoc a
 
         // Append OuterbaseEditor to the DOM
         document.body.appendChild(outerbaseEditor);
+
+        // Listen to event `change` to get the code from the editor
+        outerbaseEditor.addEventListener('change', (event) => {
+            console.log(event.detail.code);
+        });
     });
 </script>
 ```
@@ -92,7 +97,7 @@ Syntax highlighting today is supported by [Prism](https://prismjs.com/download.h
 
 To declare which language you are using with Universe you pass in the language as a property:
 
-```
+```html
 <universe-editor language="sql"></universe-editor>
 ```
 
@@ -105,7 +110,7 @@ Adding additional themes is made quite easy and mostly driven by CSS stylesheets
 1. Add a new file to the `./ui/themes` folder that exports a CSS string overriding values. Refer to `invasion.js` and `moondust.js` on how we override token value styles. Refer to [Prism](https://prismjs.com) to learn more about what tokens are made available for overriding and it should be dependent on the language you are making themes for.
 
 2. Add your new stylesheet export to the `index.js` file where we already apply the two other default themes
-```
+```ts
 // Apply styles for themes
 this.applyStyle(moondustTheme);
 this.applyStyle(invasionTheme);
@@ -116,7 +121,7 @@ this.applyStyle(INSERT_YOUR_THEME); // <- Add your styles
 
 Extensibility is a primary objective of what we set out to achieve with Universe and we accomplish this by allowing anyone to write their own plugins that add to or alter the behavior of the code editor.
 
-```
+```ts
 export class PluginA {
     constructor() { }
 

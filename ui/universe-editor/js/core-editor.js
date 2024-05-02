@@ -177,6 +177,7 @@ export class CoreEditor {
         this._adjustTextAreaSize();
 
         this.parent.broadcastEvent(this, 'onInputChange', value);
+        this.parent.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { code: value } }));
         
         try {
             Prism.highlightElement(this.visualizer);
