@@ -42,6 +42,7 @@ export class CoreKeyboardShortcuts {
         } 
         else if (e.metaKey && e.key === '/') {
             e.preventDefault();
+            e.stopPropagation();
             this._commentLine(e);
         }
         
