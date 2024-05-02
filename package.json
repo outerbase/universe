@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "run-local-server": "npx serve .",
     "build-web-component-bundle": "webpack --mode production",
-    "gzip": "gzip dist/universe.js.gz",
+    "gzip": "gzip --keep dist/universe.js",
     "build": "npm run build-web-component-bundle && npm run gzip",
     "prepack": "npm run build",
     "publish-npm-module": "npm publish --access public"
