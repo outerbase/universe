@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './ui/universe-editor/editor.js', // Your main JavaScript file
+  entry: './ui/universe-editor/index.js', // Your main JavaScript file
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'universe.js',

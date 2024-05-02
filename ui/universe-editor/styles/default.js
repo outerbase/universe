@@ -23,139 +23,36 @@ const css = `
         -moz-osx-font-smoothing: grayscale;
     }
 
-    ::-moz-selection {
-        background: var(--color-neutral-300) !important;
-    }
-
-    ::selection {
-        background: var(--color-neutral-300) !important;
-    }
-
-    .dark ::-moz-selection {
-        background: var(--color-neutral-700) !important;
-    }
-
-    .dark ::selection {
-        background: var(--color-neutral-700) !important;
-    }
-
-    #outer-container {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        position: relative;
-    }
-
     #container {
+        height: 100%; 
+        display: flex; 
+        flex-direction: column; 
+        overflow: hidden; 
         position: relative;
+    }
+
+    #layout-container {
+        position: relative;
+        height: 100%;
+        width: 100%;
         margin: 0;
         display: flex;
         flex-direction: row;
-
-        overflow-y: hidden;
-        overflow-x: hidden;
-
-        min-height: 100%;
     }
 
     #left {
         position: relative;
         display: flex;
     }
+
     #center {
         flex: 1;
         position: relative;
     }
+
     #right {
         position: relative;
         display: flex;
     }
-
-    #code-container {
-        flex: 1;
-        position: relative;
-        min-height: 100%;
-    }
-
-    #scrolley-codey {
-        position: relative;
-        min-width: 100%;
-        min-height: 100%;
-    }
-
-
-    textarea, code {
-        padding: var(--padding-horizontal) !important;
-        white-space: pre;
-        overflow-wrap: normal;
-        word-wrap: normal;
-    }
-
-    textarea {
-        resize: none;
-        outline: none;
-        overflow: hidden;
-    }
-
-    pre, textarea, code {
-        margin: 0 !important;
-        min-height: 100%;
-        min-width: calc(100% - 20px) !important;
-        background-color: transparent !important;
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size)  !important;
-        line-height: var(--line-height) !important;
-    }
-
-    .editor, pre, code {
-        z-index: 2;
-    }
-
-    .editor {
-        color: transparent;
-        caret-color: var(--color-primary-light);
-        width: 100%;
-        height: 100%;
-        border: none;
-        position: absolute;
-        left: 0;
-        top: 0;
-        overflow-x: hidden;
-    }
-
-    .dark .editor {
-        caret-color: var(--color-primary-dark);
-    }
-
-    pre {
-        padding: 0 !important;
-    }
-
-    code {
-        pointer-events: none;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: calc(100% - 20px) !important;
-        height: 100%;
-        color: var(--color-primary-light);
-    }
-
-    .background-highlight {
-        position: absolute;
-        width: 100%;
-        height: var(--line-height);
-        background-color: var(--color-neutral-200);
-        opacity: 0;
-        z-index: 1;
-        pointer-events: none;
-        border-radius: 4px;
-        transition: transform 0.2s;
-    }
-
-    .dark .background-highlight {
-        background-color: var(--color-neutral-800);
-    }
-`
-export default css
+`;
+export default css;

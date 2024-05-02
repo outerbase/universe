@@ -2,9 +2,12 @@
 <head>
     <title>Universe Code Editor</title>
 
-    <script type="module" src="../node_modules/@outerbase/scrollable-element/bundled/scrollable-element.js"></script>
-    <script type="module" src="./universe-editor/editor.js" defer></script>
+    <!-- Import the Universe editor as a module -->
+    <script type="module" src="./ui/universe-editor/index.js"></script>
 
+    <!-- Import your own custom plugin to use -->
+    <script type="module" src="./ui/pluginA.js"></script>
+    
     <style>
         body {
             margin: 0;
@@ -14,109 +17,28 @@
 </head>
 
 <body>
-    <outerbase-editor
-        id="sql-editor"
-        language="sql"
-        theme="moondust"
-        mode="dark"
-        show-keyword-tooltips="true"
-    ></outerbase-editor>
-    <!-- <div style="height: 100%; display: flex; flex-direction: column;">
-        <button onclick="changeTheme()">Change Theme</button>
-        <button onclick="changeMode()">Change Mode</button>
-
-        <div style="flex: 1; display: flex; flex-direction: column;">
-            <p style="color: white; font-weight: bold; padding-left: 8px;">SQL</p>
-            <div style="height: 100%; position: relative; overflow: hidden;">
-                <outerbase-editor
-                    id="sql-editor"
-                    language="sql"
-                    theme="moondust"
-                    mode="dark"
-                    show-keyword-tooltips="true"
-                ></outerbase-editor>
-            </div>
-        </div> -->
-
-        <!-- <div style="flex: 1; display: flex; flex-direction: column;">
-            <p style="color: white; font-weight: bold; padding-left: 8px;">Javascript</p>
-            <div style="flex: 1;">
-                <outerbase-editor
-                    id="js-editor"
-                    language="javascript"
-                    theme="moondust"
-                    mode="dark"
-                ></outerbase-editor>
-            </div>
-        </div> -->
-    <!-- </div> -->
+    
 </body>
 
 <script>
-    var sql = `-- Comment this line out
-CREATE TABLE video_games (
-    game_id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    genre VARCHAR(100),
-    platform VARCHAR(100),
-    release_date DATE,
-    developer VARCHAR(255)
-);
+    document.addEventListener("DOMContentLoaded", function() {
+        // Create an instance of universe-editor
+        const outerbaseEditor = document.createElement('universe-editor');
+        outerbaseEditor.setAttribute('language', 'sql');
+        outerbaseEditor.setAttribute('mode', 'dark');
+        outerbaseEditor.setAttribute('theme', 'invasion');
+        outerbaseEditor.setAttribute('code', 'SELECT * FROM users;');
 
-SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123' SELECT * FROM user WHERE id='123'
+        // Create instances of plugins
+        const pluginA = new PluginA();
+        outerbaseEditor.setAttribute('plugin-a', true)
 
+        // Register plugins with universe-editor
+        outerbaseEditor.registerPlugins([pluginA]);
 
-
-
-
-
--- Extra space`
-    const sqlEditor = document.querySelector('#sql-editor');
-    sqlEditor.setAttribute('code', sql);
-
-    var js = `function test() {
-    // Comment here...
-    var value = 5;
-    var string = "123";
-
-    if (value > 10) {
-        console.log('Value is greater than 10');
-    } else {
-        console.log('Value is less than 10');
-    }
-}`
-    const editor = document.querySelector('#js-editor');
-    editor.setAttribute('code', js);
-
-    onload = function() {
-        document.body.style.backgroundColor = 'black'
-    }
-
-    function changeTheme() {
-        const sqlEditor = document.querySelector('#sql-editor');
-        const jsEditor = document.querySelector('#js-editor');
-        sqlEditor.setAttribute('theme', sqlEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
-        jsEditor.setAttribute('theme', jsEditor.getAttribute('theme') === 'moondust' ? 'invasion' : 'moondust');
-    }
-
-    function changeMode() {
-        const sqlEditor = document.querySelector('#sql-editor');
-        const jsEditor = document.querySelector('#js-editor');
-        sqlEditor.setAttribute('mode', sqlEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
-        jsEditor.setAttribute('mode', jsEditor.getAttribute('mode') === 'dark' ? 'light' : 'dark');
-        document.body.style.backgroundColor = document.body.style.backgroundColor === 'black' ? 'white' : 'black';
-    }
-    
-
-    // Add an event listener for the 'code-update' event
-    // editor.addEventListener('code-update', (event) => {
-        // Access the code from the event detail
-        // console.log('Code updated:', event.detail.value);
-
-        // You can now use event.detail.value as needed
-        // For example, display it in another element, store it, etc.
-    // });
+        // Append universe-editor to the DOM
+        document.body.appendChild(outerbaseEditor);
+    });
 </script>
-
 
 </html>
