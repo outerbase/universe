@@ -73,4 +73,4 @@ const css = `
     }
 `
 
-export default css;
+export default css

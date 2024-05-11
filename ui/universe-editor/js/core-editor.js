@@ -1,54 +1,54 @@
-import '../prism/prism.js';          // Defines the Prism object
-import '../prism/prism-sql.min.js';  // Defines tokens for SQL langauge
+import '../prism/prism.js' // Defines the Prism object
+import '../prism/prism-sql.min.js' // Defines tokens for SQL langauge
 
 export class CoreEditor {
-    parent = null;
-    editor = null;
-    visualizer = null;
-    codeContainer = null;
+    parent = null
+    editor = null
+    visualizer = null
+    codeContainer = null
 
-    constructor() { }
+    constructor() {}
 
     init(parent, attributeValue) {
-        this.parent = parent;
-        this.editor = parent.shadowRoot.querySelector(".editor");
-        this.visualizer = parent.shadowRoot.querySelector("code");
-        this.codeContainer = parent.shadowRoot.getElementById("code-container");
+        this.parent = parent
+        this.editor = parent.shadowRoot.querySelector('.editor')
+        this.visualizer = parent.shadowRoot.querySelector('code')
+        this.codeContainer = parent.shadowRoot.getElementById('code-container')
 
-        let languageAttribute = parent.getAttribute("language");
-        this.visualizer.className = `language-${languageAttribute}`;
-        
+        let languageAttribute = parent.getAttribute('language')
+        this.visualizer.className = `language-${languageAttribute}`
+
         // Add event listeners for events on the textarea
-        parent.shadowRoot.querySelector('textarea').addEventListener('focus', this.onFocus.bind(this));
-        parent.shadowRoot.querySelector('textarea').addEventListener('blur', this.onBlur.bind(this));
+        parent.shadowRoot.querySelector('textarea').addEventListener('focus', this.onFocus.bind(this))
+        parent.shadowRoot.querySelector('textarea').addEventListener('blur', this.onBlur.bind(this))
 
         this.editor.addEventListener('mousedown', () => {
-            this.parent.broadcastEvent(this, 'onMouseDown', true);
-        });
+            this.parent.broadcastEvent(this, 'onMouseDown', true)
+        })
 
         this.editor.addEventListener('mouseup', () => {
-            this.parent.broadcastEvent(this, 'onMouseUp', true);
-        });
+            this.parent.broadcastEvent(this, 'onMouseUp', true)
+        })
 
         this.editor.addEventListener('mousemove', () => {
-            this.parent.broadcastEvent(this, 'onMouseMove', true);
-        });
+            this.parent.broadcastEvent(this, 'onMouseMove', true)
+        })
 
         this.editor.addEventListener('keydown', (event) => {
-            this.parent.broadcastEvent(this, 'onKeyDown', event);
-        });
+            this.parent.broadcastEvent(this, 'onKeyDown', event)
+        })
 
         this.editor.addEventListener('keyup', (event) => {
-            this.parent.broadcastEvent(this, 'onKeyUp', event);
-        });
+            this.parent.broadcastEvent(this, 'onKeyUp', event)
+        })
 
         this.editor.addEventListener('input', (event) => {
-            this.onInputChange(event.target.value);
-        });
+            this.onInputChange(event.target.value)
+        })
     }
 
     attributeName() {
-        return "core";
+        return 'core'
     }
 
     css() {
@@ -139,7 +139,7 @@ export class CoreEditor {
             height: 100%;
             color: var(--color-primary-light);
         }
-        `;
+        `
     }
 
     html() {
@@ -152,48 +152,48 @@ export class CoreEditor {
     }
 
     location() {
-        return "center"
+        return 'center'
     }
 
     attributeChangedCallback({ name, oldValue, newValue }) {
-        if (name === "code") {
-            this.onInputChange(newValue);
+        if (name === 'code') {
+            this.onInputChange(newValue)
         }
     }
 
     onFocus() {
         // Call onFocus method of each plugin instance when editor gains focus
-        this.parent.broadcastEvent(this, 'onFocus', true);
+        this.parent.broadcastEvent(this, 'onFocus', true)
     }
 
     onBlur() {
         // Call onBlur method of each plugin instance when editor loses focus
-        this.parent.broadcastEvent(this, 'onBlur', true);
+        this.parent.broadcastEvent(this, 'onBlur', true)
     }
 
     onInputChange(value) {
-        this.editor.value = value;
-        this.visualizer.innerHTML = value;
-        this._adjustTextAreaSize();
+        this.editor.value = value
+        this.visualizer.innerHTML = value
+        this._adjustTextAreaSize()
 
-        this.parent.broadcastEvent(this, 'onInputChange', value);
-        this.parent.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { code: value } }));
-        
+        this.parent.broadcastEvent(this, 'onInputChange', value)
+        this.parent.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { code: value } }))
+
         try {
-            Prism.highlightElement(this.visualizer);
-        } catch (error) { }
+            Prism.highlightElement(this.visualizer)
+        } catch (error) {}
     }
 
     _adjustTextAreaSize() {
         // Height is number of lines * line height
-        const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
-        const lineCount = this.editor.value.split("\n").length;
-        const height = lineCount * lineHeight;
+        const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight)
+        const lineCount = this.editor.value.split('\n').length
+        const height = lineCount * lineHeight
 
         // Set height of elements based on contents
-        this.editor.style.height = `${height}px`;
-        this.editor.style.width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px';    
+        this.editor.style.height = `${height}px`
+        this.editor.style.width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px'
     }
 }
 
-window.CoreEditor = CoreEditor;
+window.CoreEditor = CoreEditor

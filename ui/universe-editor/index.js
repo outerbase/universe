@@ -1,20 +1,20 @@
-import './prism/prism.js';          // Defines the Prism object
-import './prism/prism-sql.min.js';  // Defines tokens for SQL langauge
+import './prism/prism.js' // Defines the Prism object
+import './prism/prism-sql.min.js' // Defines tokens for SQL langauge
 
 // Plugins
-import { CoreEditor } from './js/core-editor.js';
-import { CoreLineNumbers } from './js/core-line-numbers.js';
-import { CoreLineHighlight } from './js/core-line-highlight.js';
-import { CoreKeyboardShortcuts } from './js/core-shortcuts.js';
+import { CoreEditor } from './js/core-editor.js'
+import { CoreLineNumbers } from './js/core-line-numbers.js'
+import { CoreLineHighlight } from './js/core-line-highlight.js'
+import { CoreKeyboardShortcuts } from './js/core-shortcuts.js'
 
 // Styles
-import defaultStyles from './styles/default.js';
+import defaultStyles from './styles/default.js'
 
 // Themes
-import moondustTheme from './themes/moondust.js';
-import invasionTheme from './themes/invasion.js';
+import moondustTheme from './themes/moondust.js'
+import invasionTheme from './themes/invasion.js'
 
-const templateEditor = document.createElement("template");
+const templateEditor = document.createElement('template')
 templateEditor.innerHTML = `
 <div id="container" class="moondust light">
     <div id="layout-container">
@@ -23,40 +23,35 @@ templateEditor.innerHTML = `
         <div id="right"></div>
     </div>
 </div>
-`;
+`
 
 export class OuterbaseEditor extends HTMLElement {
     static get observedAttributes() {
-        return [
-            'code', 
-            'language', 
-            'mode', 
-            'theme'
-        ];
+        return ['code', 'language', 'mode', 'theme']
     }
 
-    plugins = [];
+    plugins = []
 
     constructor() {
-        super();
+        super()
 
-        this.attachShadow({ mode: 'open' });
-        this.shadowRoot.appendChild(templateEditor.content.cloneNode(true));
+        this.attachShadow({ mode: 'open' })
+        this.shadowRoot.appendChild(templateEditor.content.cloneNode(true))
 
         // Apply default styles
-        this.applyStyle(defaultStyles);
+        this.applyStyle(defaultStyles)
 
         // Apply styles for themes
-        this.applyStyle(moondustTheme);
-        this.applyStyle(invasionTheme);
+        this.applyStyle(moondustTheme)
+        this.applyStyle(invasionTheme)
 
         // Register an empty array of plugins by default
-        this.registerPlugins([]);
+        this.registerPlugins([])
     }
 
     connectedCallback() {
         // Initialize plugins when the component is attached to the DOM
-        this.initPlugins();
+        this.initPlugins()
     }
 
     /**
@@ -72,15 +67,15 @@ export class OuterbaseEditor extends HTMLElement {
      */
     attributeChangedCallback(name, oldValue, newValue) {
         requestAnimationFrame(() => {
-            this.broadcastEvent(this, 'attributeChangedCallback', { name, oldValue, newValue });
-        });
+            this.broadcastEvent(this, 'attributeChangedCallback', { name, oldValue, newValue })
+        })
 
-        if (name === "theme") {
-            this.shadowRoot.querySelector("#container").className = newValue;
+        if (name === 'theme') {
+            this.shadowRoot.querySelector('#container').className = newValue
         }
 
-        if (name === "mode") {
-            this.shadowRoot.querySelector("#layout-container").className = newValue;
+        if (name === 'mode') {
+            this.shadowRoot.querySelector('#layout-container').className = newValue
         }
     }
 
@@ -95,57 +90,59 @@ export class OuterbaseEditor extends HTMLElement {
     initPlugins() {
         // Initialize each plugin instance that has been registered. Check
         // if the attribute has a valid value before initializing the plugin.
-        this.plugins.forEach(plugin => {
-            if (this.containsEvent(plugin.attributeName) && 
+        this.plugins.forEach((plugin) => {
+            if (
+                this.containsEvent(plugin.attributeName) &&
                 this.getAttribute(plugin.attributeName()) === null &&
-                plugin.attributeName() !== 'core') {
+                plugin.attributeName() !== 'core'
+            ) {
                 return
             }
 
-            if (this.containsEvent(plugin.location) && this.containsEvent(plugin.html)) {                
-                let location = this.shadowRoot.getElementById(plugin.location());
-                const insertBefore = this.containsEvent(plugin.insertBefore) ? plugin.insertBefore() : false;
-                const div = document.createElement('div');
-                div.innerHTML = plugin.html();
+            if (this.containsEvent(plugin.location) && this.containsEvent(plugin.html)) {
+                let location = this.shadowRoot.getElementById(plugin.location())
+                const insertBefore = this.containsEvent(plugin.insertBefore) ? plugin.insertBefore() : false
+                const div = document.createElement('div')
+                div.innerHTML = plugin.html()
 
                 // Set an ID for the plugin for future reference, particularly for
                 // plugins that need to be a parent of another plugin.
-                const random = Math.floor(100000 + Math.random() * 900000);
-                div.id = random;
-                plugin.id = random;
+                const random = Math.floor(100000 + Math.random() * 900000)
+                div.id = random
+                plugin.id = random
 
                 if (this.containsEvent(plugin.insertAsChild) && plugin.insertAsChild()) {
                     location = this.shadowRoot.querySelector(plugin.insertAsChild())
                 }
 
                 if (this.containsEvent(plugin.css)) {
-                    this.applyStyle(plugin.css());
+                    this.applyStyle(plugin.css())
                 }
-                               
+
                 if (insertBefore) {
-                    location.insertBefore(div, location.childNodes[0]);
+                    location.insertBefore(div, location.childNodes[0])
                 } else {
-                    location.appendChild(div);
+                    location.appendChild(div)
                 }
             }
 
             // Run the `init` function of the plugin after its placed in the DOM
             if (this.containsEvent(plugin.init)) {
-                plugin.init(this, this.getAttribute(plugin.attributeName()));
+                plugin.init(this, this.getAttribute(plugin.attributeName()))
             }
 
             // Now that all plugins are initialized, we can check if any plugins should be
             // a parent of another plugin. This is useful for plugins that need to wrap
             // other plugins in a container.
-            this.plugins.forEach(plugin => {
+            this.plugins.forEach((plugin) => {
                 if (this.containsEvent(plugin.insertAsParent) && plugin.insertAsParent()) {
-                    const parent = this.shadowRoot.getElementById(plugin.id);
-                    const parentOf = this.shadowRoot.querySelector(plugin.insertAsParent());
-                    const slot = parent.querySelector('slot');
-                    slot.appendChild(parentOf);
+                    const parent = this.shadowRoot.getElementById(plugin.id)
+                    const parentOf = this.shadowRoot.querySelector(plugin.insertAsParent())
+                    const slot = parent.querySelector('slot')
+                    slot.appendChild(parentOf)
                 }
-            });
-        });
+            })
+        })
     }
 
     /**
@@ -158,19 +155,14 @@ export class OuterbaseEditor extends HTMLElement {
      * editor.registerPlugins([new PluginA(), new PluginB()]);
      */
     registerPlugins(plugins) {
-        this.corePlugins = [
-            new CoreEditor(),
-            new CoreLineNumbers(),
-            new CoreLineHighlight(),
-            new CoreKeyboardShortcuts()
-        ]
+        this.corePlugins = [new CoreEditor(), new CoreLineNumbers(), new CoreLineHighlight(), new CoreKeyboardShortcuts()]
 
-        this.plugins = [...this.corePlugins, ...plugins];
+        this.plugins = [...this.corePlugins, ...plugins]
     }
 
     /**
      * Check if the event is a valid and callable function.
-     * @param {*} event 
+     * @param {*} event
      * @returns boolean
      */
     containsEvent(event) {
@@ -190,25 +182,25 @@ export class OuterbaseEditor extends HTMLElement {
      * @param {*} event – The event object to pass to the receiving plugin
      */
     broadcastEvent(fromPlugin, broadcastName, event) {
-        if (broadcastName.startsWith('_')) return;
+        if (broadcastName.startsWith('_')) return
 
-        this.plugins.forEach(plugin => {
+        this.plugins.forEach((plugin) => {
             if (this.containsEvent(plugin[broadcastName]) && plugin != fromPlugin) {
-                plugin[broadcastName](event);
+                plugin[broadcastName](event)
             }
-        });
+        })
     }
 
     /**
      * Apply styles to the shadow DOM from a CSS string. This function creates a
      * style element, sets the CSS text content, and appends it to the shadow DOM.
-     * @param {string} cssText – A string containing CSS to apply to the shadow DOM 
+     * @param {string} cssText – A string containing CSS to apply to the shadow DOM
      */
     applyStyle(cssText) {
-        const styleEl = document.createElement('style');
-        styleEl.textContent = cssText;
-        this.shadowRoot.appendChild(styleEl);
+        const styleEl = document.createElement('style')
+        styleEl.textContent = cssText
+        this.shadowRoot.appendChild(styleEl)
     }
 }
 
-customElements.define('universe-editor', OuterbaseEditor);
+customElements.define('universe-editor', OuterbaseEditor)

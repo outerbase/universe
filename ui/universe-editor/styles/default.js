@@ -54,5 +54,5 @@ const css = `
         position: relative;
         display: flex;
     }
-`;
-export default css;
+`
+export default css

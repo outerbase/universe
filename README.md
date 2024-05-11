@@ -23,58 +23,54 @@
 
 Universe is a lightweight, extensible code editor that can be used anywhere on the web.
 
-- [**Core Components**](#core-components): Essentials of a code editor.
-- [**Syntax Highlighting**](#syntax-highlighting): Style your code tokens based on your language.
-- [**Theme Support**](#theme-support): Customize how your code syntax looks.
-- [**Custom Plugins**](#custom-plugins): Extend the functionality with custom plugins.
+-   [**Core Components**](#core-components): Essentials of a code editor.
+-   [**Syntax Highlighting**](#syntax-highlighting): Style your code tokens based on your language.
+-   [**Theme Support**](#theme-support): Customize how your code syntax looks.
+-   [**Custom Plugins**](#custom-plugins): Extend the functionality with custom plugins.
 
 ## Usage
 
 You do not need have to build or compile Universe yourself to use it.
 
-- Load directly from our CDN
-- Host the bundle.js yourself
-- `npm install` into your project
+-   Load directly from our CDN
+-   Host the bundle.js yourself
+-   `npm install` into your project
 
 TypeScript support is built-in, **not** required.
 
 Declaring an instance of the editor in your HTML you can do the following:
+
 ```html
-<universe-editor 
-    language="sql" 
-    mode="dark" 
-    theme="invasion" 
-    code="SELECT * FROM table">
-</universe-editor>
+<universe-editor language="sql" mode="dark" theme="invasion" code="SELECT * FROM table"> </universe-editor>
 ```
 
 For more advanced scenarios perhaps you need to declare properties more ad-hoc and you can do it with this method as well:
 
 ```html
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Create an instance of OuterbaseEditor
-        const outerbaseEditor = document.createElement('universe-editor');
-        outerbaseEditor.setAttribute('language', 'sql');
-        outerbaseEditor.setAttribute('mode', 'dark');
-        outerbaseEditor.setAttribute('theme', 'invasion');
-        outerbaseEditor.setAttribute('code', 'SELECT * FROM table;');
+        const outerbaseEditor = document.createElement('universe-editor')
+        outerbaseEditor.setAttribute('language', 'sql')
+        outerbaseEditor.setAttribute('mode', 'dark')
+        outerbaseEditor.setAttribute('theme', 'invasion')
+        outerbaseEditor.setAttribute('code', 'SELECT * FROM table;')
 
         // Create instances of plugins
-        const pluginA = new PluginA();
+        const pluginA = new PluginA()
         outerbaseEditor.setAttribute('plugin-a', 'some value that plugin expects')
 
         // Register plugins with OuterbaseEditor
-        outerbaseEditor.registerPlugins([pluginA]);
+        outerbaseEditor.registerPlugins([pluginA])
 
         // Append OuterbaseEditor to the DOM
-        document.body.appendChild(outerbaseEditor);
+        document.body.appendChild(outerbaseEditor)
 
         // Listen to event `change` to get the code from the editor
         outerbaseEditor.addEventListener('change', (event) => {
-            console.log(event.detail.code);
-        });
-    });
+            console.log(event.detail.code)
+        })
+    })
 </script>
 ```
 
@@ -86,10 +82,10 @@ To view an example of Universe in action you can clone this repository and run `
 
 Included in Universe are some core components that by default are utilized to help render necessary visual aspects of our code editor.
 
-- **Core Editor** - Shows the syntax highlighted code and input area for the user.
-- **Core Line Numbers** - Line numbers that appear to the left of the code editor.
-- **Core Line Highlighting** - A visual indication of what line is currently selected, a basic background div.
-- **Core Shortcuts** - Non-visual keyboard listening class to perform custom actions when key combinations are triggered.
+-   **Core Editor** - Shows the syntax highlighted code and input area for the user.
+-   **Core Line Numbers** - Line numbers that appear to the left of the code editor.
+-   **Core Line Highlighting** - A visual indication of what line is currently selected, a basic background div.
+-   **Core Shortcuts** - Non-visual keyboard listening class to perform custom actions when key combinations are triggered.
 
 ## Syntax Highlighting
 
@@ -110,11 +106,12 @@ Adding additional themes is made quite easy and mostly driven by CSS stylesheets
 1. Add a new file to the `./ui/themes` folder that exports a CSS string overriding values. Refer to `invasion.js` and `moondust.js` on how we override token value styles. Refer to [Prism](https://prismjs.com) to learn more about what tokens are made available for overriding and it should be dependent on the language you are making themes for.
 
 2. Add your new stylesheet export to the `index.js` file where we already apply the two other default themes
+
 ```ts
 // Apply styles for themes
-this.applyStyle(moondustTheme);
-this.applyStyle(invasionTheme);
-this.applyStyle(INSERT_YOUR_THEME); // <- Add your styles
+this.applyStyle(moondustTheme)
+this.applyStyle(invasionTheme)
+this.applyStyle(INSERT_YOUR_THEME) // <- Add your styles
 ```
 
 ## Custom Plugins
@@ -123,19 +120,19 @@ Extensibility is a primary objective of what we set out to achieve with Universe
 
 ```ts
 export class PluginA {
-    constructor() { }
+    constructor() {}
 
     init(parent, attributeValue) {
         // Parent is an instance of the outerbase component
-        // attributeValue is the value of the attribute on the outerbase component   
+        // attributeValue is the value of the attribute on the outerbase component
     }
 
     attributeName() {
-        return "plugin-a";
+        return 'plugin-a'
     }
 
     css() {
-        return `.pluginClass { color: red; }`;
+        return `.pluginClass { color: red; }`
     }
 
     html() {
@@ -166,32 +163,20 @@ export class PluginA {
         // Handle attribute changes if desired
     }
 
-    onFocus() {
-        
-    }
+    onFocus() {}
 
-    onBlur() {
-        
-    }
+    onBlur() {}
 
-    onInputChange(value) {
-        
-    }
+    onInputChange(value) {}
 
-    onKeyDown(event) {
-        
-    }
+    onKeyDown(event) {}
 
-    onMouseDown() {
-        
-    }
+    onMouseDown() {}
 
-    onMouseUp() {
-        
-    }
+    onMouseUp() {}
 }
 
-window.PluginA = PluginA;
+window.PluginA = PluginA
 ```
 
 ## Contributing
