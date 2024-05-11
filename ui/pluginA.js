@@ -1,17 +1,17 @@
 export class PluginA {
-    constructor() { }
+    constructor() {}
 
     init(parent, attributeValue) {
         // Parent is an instance of the outerbase component
-        // attributeValue is the value of the attribute on the outerbase component   
+        // attributeValue is the value of the attribute on the outerbase component
     }
 
     attributeName() {
-        return "plugin-a";
+        return 'plugin-a'
     }
 
     css() {
-        return `.pluginClass { color: red; }`;
+        return `.pluginClass { color: red; }`
     }
 
     html() {
@@ -42,29 +42,17 @@ export class PluginA {
         // Handle attribute changes if desired
     }
 
-    onFocus() {
-        
-    }
+    onFocus() {}
 
-    onBlur() {
-        
-    }
+    onBlur() {}
 
-    onInputChange(value) {
-        
-    }
+    onInputChange(value) {}
 
-    onKeyDown(event) {
-        
-    }
+    onKeyDown(event) {}
 
-    onMouseDown() {
-        
-    }
+    onMouseDown() {}
 
-    onMouseUp() {
-        
-    }
+    onMouseUp() {}
 }
 
-window.PluginA = PluginA;
+window.PluginA = PluginA

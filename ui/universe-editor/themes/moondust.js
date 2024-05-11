@@ -47,6 +47,6 @@ const css = `
     .moondust .dark .token.comment {
         color: var(--color-neutral-500) !important;
     }
-`;
+`
 
-export default css;
+export default css

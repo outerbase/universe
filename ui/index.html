@@ -1,49 +1,46 @@
 <html>
-<head>
-    <title>Universe Code Editor</title>
+    <head>
+        <title>Universe Code Editor</title>
 
-    <!-- Import the Universe editor as a module -->
-    <script type="module" src="./ui/universe-editor/index.js"></script>
+        <!-- Import the Universe editor as a module -->
+        <script type="module" src="./universe-editor/index.js"></script>
 
-    <!-- Import your own custom plugin to use -->
-    <script type="module" src="./ui/pluginA.js"></script>
-    
-    <style>
-        body {
-            margin: 0;
-            background-color: black;
-        }
-    </style>
-</head>
+        <!-- Import your own custom plugin to use -->
+        <script type="module" src="./pluginA.js"></script>
 
-<body>
-    
-</body>
+        <style>
+            body {
+                margin: 0;
+                background-color: black;
+            }
+        </style>
+    </head>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Create an instance of universe-editor
-        const outerbaseEditor = document.createElement('universe-editor');
-        outerbaseEditor.setAttribute('language', 'sql');
-        outerbaseEditor.setAttribute('mode', 'dark');
-        outerbaseEditor.setAttribute('theme', 'invasion');
-        outerbaseEditor.setAttribute('code', 'SELECT * FROM users;');
+    <body></body>
 
-        // Create instances of plugins
-        const pluginA = new PluginA();
-        outerbaseEditor.setAttribute('plugin-a', true)
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Create an instance of universe-editor
+            const outerbaseEditor = document.createElement('universe-editor')
+            outerbaseEditor.setAttribute('language', 'sql')
+            outerbaseEditor.setAttribute('mode', 'dark')
+            outerbaseEditor.setAttribute('theme', 'invasion')
+            outerbaseEditor.setAttribute('code', 'SELECT * FROM users;')
 
-        // Register plugins with universe-editor
-        outerbaseEditor.registerPlugins([pluginA]);
+            // Create instances of plugins
+            const pluginA = new PluginA()
+            outerbaseEditor.setAttribute('plugin-a', true)
 
-        // Append universe-editor to the DOM
-        document.body.appendChild(outerbaseEditor);
+            // Register plugins with universe-editor
+            outerbaseEditor.registerPlugins([pluginA])
 
-        // Listen to event `onInputChange` to get the code from the editor
-        outerbaseEditor.addEventListener('change', (event) => {
-            console.log(event.detail.code);
-        });
-    });
-</script>
+            // Append universe-editor to the DOM
+            document.body.appendChild(outerbaseEditor)
 
+            // Listen to event `onInputChange` to get the code from the editor
+            outerbaseEditor.addEventListener('change', (event) => {
+                console.log(event.detail.code)
+            })
+        })
+    </script>
 </html>
