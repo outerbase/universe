@@ -113,6 +113,7 @@ export class OuterbaseEditor extends HTMLElement {
                 const random = Math.floor(100000 + Math.random() * 900000);
                 div.id = random;
                 plugin.id = random;
+                div.style.flex = '1';
 
                 if (this.containsEvent(plugin.insertAsChild) && plugin.insertAsChild()) {
                     location = this.shadowRoot.querySelector(plugin.insertAsChild())

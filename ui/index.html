@@ -21,6 +21,9 @@
 </body>
 
 <script>
+    if (typeof window === 'undefined') {
+        return
+    }
     document.addEventListener("DOMContentLoaded", function() {
         // Create an instance of universe-editor
         const outerbaseEditor = document.createElement('universe-editor');
@@ -39,7 +42,7 @@
         // Append universe-editor to the DOM
         document.body.appendChild(outerbaseEditor);
 
-        // Listen to event `onInputChange` to get the code from the editor
+        // Listen to event `change` to get the code from the editor
         outerbaseEditor.addEventListener('change', (event) => {
             console.log(event.detail.code);
         });
