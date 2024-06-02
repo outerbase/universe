@@ -19,7 +19,7 @@ export class CoreLineHighlight {
         return `
         .background-highlight {
             position: absolute;
-            width: 100%;
+            min-width: 100%;
             height: var(--line-height);
             background-color: var(--color-neutral-200);
             opacity: 0;

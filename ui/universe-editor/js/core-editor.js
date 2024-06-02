@@ -190,14 +190,10 @@ export class CoreEditor {
         const lineCount = this.editor.value.split("\n").length;
         const height = lineCount * lineHeight;
 
-        console.log('Textarea Editor: ', this.editor.scrollWidth, this.editor.clientWidth, this.editor.offsetWidth)
-        // Calculate the textarea width based on the content and how much it scrolls
-        this.editor.style.width = `${this.editor.scrollWidth}px`;
-
         // Go through each line of text and calculate the width of the line
         const lines = this.editor.value.split("\n");
         let width = 0;
-        let characterWidth = 7.9;
+        let characterWidth = 8;
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             const lineWidth = line.length * characterWidth;
