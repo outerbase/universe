@@ -193,19 +193,16 @@ export class CoreEditor {
         // Go through each line of text and calculate the width of the line
         const lines = this.editor.value.split("\n");
         let width = 0;
-        let characterWidth = 8;
+        let characterWidth = 7.87;
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             const lineWidth = line.length * characterWidth;
             width = Math.max(width, lineWidth);
         }
+
+        // Set the editor to the calculated width and height
         this.editor.style.width = `${width}px`;
-
-
-        // Set height of elements based on contents
-        this.editor.style.height = `${height}px`;
-        // this.editor.style.width = this.editor.scrollWidth + 'px'; 
-        // this.editor.style.width = Math.max(this.editor.offsetWidth + 1, this.editor.scrollWidth) + 'px';    
+        this.editor.style.height = `${height}px`;  
     }
 }
 
