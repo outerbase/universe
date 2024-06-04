@@ -177,7 +177,7 @@ export class CoreEditor {
         this._adjustTextAreaSize();
 
         this.parent.broadcastEvent(this, 'onInputChange', value);
-        this.parent.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { code: value } }));
+        this.parent.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { value } }));
         
         try {
             Prism.highlightElement(this.visualizer);
@@ -189,6 +189,7 @@ export class CoreEditor {
         const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
         const lineCount = this.editor.value.split("\n").length;
         const height = lineCount * lineHeight;
+        const widthPadding = 8;
 
         // Go through each line of text and calculate the width of the line
         const lines = this.editor.value.split("\n");
@@ -201,7 +202,7 @@ export class CoreEditor {
         }
 
         // Set the editor to the calculated width and height
-        this.editor.style.width = `${width}px`;
+        this.editor.style.width = `${width + widthPadding}px`;
         this.editor.style.height = `${height}px`;  
     }
 }
