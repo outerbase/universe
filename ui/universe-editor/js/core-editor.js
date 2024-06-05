@@ -157,6 +157,16 @@ export class CoreEditor {
 
     attributeChangedCallback({ name, oldValue, newValue }) {
         if (name === "code") {
+            // If the editor or visualizer is not ready, wait for them to be ready
+            if (!this.editor || !this.visualizer) {
+                setTimeout(() => {
+                    this.onInputChange(newValue);
+                }, 100);
+
+                return;
+            }
+
+            // Otherwise, call the function immediately
             this.onInputChange(newValue);
         }
     }
@@ -172,6 +182,8 @@ export class CoreEditor {
     }
 
     onInputChange(value) {
+        if (!this.editor || !this.visualizer) return;
+
         this.editor.value = value;
         this.visualizer.innerHTML = value;
         this._adjustTextAreaSize();
