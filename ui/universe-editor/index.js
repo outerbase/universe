@@ -7,6 +7,9 @@ import { CoreLineNumbers } from './js/core-line-numbers.js';
 import { CoreLineHighlight } from './js/core-line-highlight.js';
 import { CoreKeyboardShortcuts } from './js/core-shortcuts.js';
 
+// Additional Plugins
+import { HandlebarVariablesPlugin } from './plugins/handlebar-variables.js';
+
 // Styles
 import defaultStyles from './styles/default.js';
 
@@ -157,7 +160,10 @@ export class OuterbaseEditor extends HTMLElement {
             new CoreEditor(),
             new CoreLineNumbers(),
             new CoreLineHighlight(),
-            new CoreKeyboardShortcuts()
+            new CoreKeyboardShortcuts(),
+
+            // Add additional core plugins here
+            new HandlebarVariablesPlugin()
         ]
 
         this.plugins = [...this.corePlugins, ...plugins];

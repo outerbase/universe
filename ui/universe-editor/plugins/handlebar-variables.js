@@ -1,7 +1,9 @@
 export class HandlebarVariablesPlugin {
+    parent = null;
     constructor() { }
 
     init(parent, attributeValue) {
+        this.parent = parent;
         this.updatePrismLogic();
     }
 
