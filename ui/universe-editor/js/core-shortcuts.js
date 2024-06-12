@@ -45,10 +45,9 @@ export class CoreKeyboardShortcuts {
             e.stopPropagation();
             this._commentLine(e);
         }
-        
-        setTimeout(() => {
-            this.parent.dispatchEvent(new CustomEvent('universe-event', { bubbles: true, composed: true, detail: { value: this.editor.value } }));
-        }, 50);
+
+        // Likely a material change occurred with your text value from an above case, so we'll broadcast the change
+        this.parent.broadcastEvent(this, 'onInputChange', this.editor.value);
 
         // The shortcuts above may have manipulated the contents of the textarea and the cursor position,
         // so we need to manually trigger the value throughout all plugins in the editor. We'll do this

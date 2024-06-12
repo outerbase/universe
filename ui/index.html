@@ -7,6 +7,7 @@
 
     <!-- Import your own custom plugin to use -->
     <script type="module" src="./ui/pluginA.js"></script>
+    <script type="module" src="./ui/universe-editor/plugins/handlebar-variables.js"></script>
     
     <style>
         body {
@@ -30,18 +31,21 @@
         outerbaseEditor.setAttribute('code', 'SELECT * FROM users;');
 
         // Create instances of plugins
-        const pluginA = new PluginA();
-        outerbaseEditor.setAttribute('plugin-a', true)
+        // const pluginA = new PluginA();
+        // outerbaseEditor.setAttribute('plugin-a', true)
+
+        const handlebarVariables = new HandlebarVariablesPlugin();
+        outerbaseEditor.setAttribute('plugin-handlebar-variables', 'heyoooo')
 
         // Register plugins with universe-editor
-        outerbaseEditor.registerPlugins([pluginA]);
+        outerbaseEditor.registerPlugins([handlebarVariables]);
 
         // Append universe-editor to the DOM
         document.body.appendChild(outerbaseEditor);
 
         // Listen to event `change` to get the code from the editor
         outerbaseEditor.addEventListener('change', (event) => {
-            console.log(event.detail.code);
+            console.log(event.detail.value);
         });
     });
 </script>
