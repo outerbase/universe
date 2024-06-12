@@ -103,6 +103,10 @@ export class CoreLineNumbers {
     }
 
     _updateLineNumbers() {
+        if (typeof window === 'undefined') {
+            return
+        }
+
         const lineCount = this.editor.value.split("\n").length;
         const lineNumberContainer = this.parent.shadowRoot.getElementById("line-number-container");
         lineNumberContainer.innerHTML = ''; // Clear existing line numbers

@@ -46,6 +46,7 @@ const css = `
     }
 
     #center {
+        display: flex;
         flex: 1;
         position: relative;
     }

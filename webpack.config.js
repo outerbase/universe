@@ -5,8 +5,10 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'universe.js',
+    library: 'Universe',
     libraryTarget: 'umd', // This will make your library usable in various environments
-    globalObject: 'this'
+    globalObject: 'this',
+    libraryExport: 'default' // Ensures compatibility with different module systems
   },
   module: {
     rules: [
@@ -21,5 +23,9 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
+  },
+  externals: {
+    react: 'react',
+    'react-dom': 'react-dom',
   }
 };

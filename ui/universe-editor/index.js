@@ -7,6 +7,9 @@ import { CoreLineNumbers } from './js/core-line-numbers.js';
 import { CoreLineHighlight } from './js/core-line-highlight.js';
 import { CoreKeyboardShortcuts } from './js/core-shortcuts.js';
 
+// Additional Plugins
+import { HandlebarVariablesPlugin } from './plugins/handlebar-variables.js';
+
 // Styles
 import defaultStyles from './styles/default.js';
 
@@ -96,12 +99,6 @@ export class OuterbaseEditor extends HTMLElement {
         // Initialize each plugin instance that has been registered. Check
         // if the attribute has a valid value before initializing the plugin.
         this.plugins.forEach(plugin => {
-            if (this.containsEvent(plugin.attributeName) && 
-                this.getAttribute(plugin.attributeName()) === null &&
-                plugin.attributeName() !== 'core') {
-                return
-            }
-
             if (this.containsEvent(plugin.location) && this.containsEvent(plugin.html)) {                
                 let location = this.shadowRoot.getElementById(plugin.location());
                 const insertBefore = this.containsEvent(plugin.insertBefore) ? plugin.insertBefore() : false;
@@ -113,6 +110,7 @@ export class OuterbaseEditor extends HTMLElement {
                 const random = Math.floor(100000 + Math.random() * 900000);
                 div.id = random;
                 plugin.id = random;
+                div.style.flex = '1';
 
                 if (this.containsEvent(plugin.insertAsChild) && plugin.insertAsChild()) {
                     location = this.shadowRoot.querySelector(plugin.insertAsChild())
@@ -122,9 +120,9 @@ export class OuterbaseEditor extends HTMLElement {
                     this.applyStyle(plugin.css());
                 }
                                
-                if (insertBefore) {
+                if (insertBefore && plugin.html()) {
                     location.insertBefore(div, location.childNodes[0]);
-                } else {
+                } else if (plugin.html()) {
                     location.appendChild(div);
                 }
             }
@@ -162,7 +160,10 @@ export class OuterbaseEditor extends HTMLElement {
             new CoreEditor(),
             new CoreLineNumbers(),
             new CoreLineHighlight(),
-            new CoreKeyboardShortcuts()
+            new CoreKeyboardShortcuts(),
+
+            // Add additional core plugins here
+            new HandlebarVariablesPlugin()
         ]
 
         this.plugins = [...this.corePlugins, ...plugins];
