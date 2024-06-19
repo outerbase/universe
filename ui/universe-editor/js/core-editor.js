@@ -6,6 +6,7 @@ export class CoreEditor {
     editor = null;
     visualizer = null;
     codeContainer = null;
+    placeholder = null;
 
     constructor() { }
 
@@ -14,9 +15,15 @@ export class CoreEditor {
         this.editor = parent.shadowRoot.querySelector(".editor");
         this.visualizer = parent.shadowRoot.querySelector("code");
         this.codeContainer = parent.shadowRoot.getElementById("code-container");
+        this.placeholder = parent.shadowRoot.getElementById("placeholder");
+        this.placeholder.innerText = parent.getAttribute("placeholder");
 
         let languageAttribute = parent.getAttribute("language");
+        this.placeholder.className = `language-${languageAttribute}`;
         this.visualizer.className = `language-${languageAttribute}`;
+        
+        // Highlight the placeholder by default
+        Prism.highlightElement(this.placeholder);
         
         // Add event listeners for events on the textarea
         parent.shadowRoot.querySelector('textarea').addEventListener('focus', this.onFocus.bind(this));
@@ -83,7 +90,7 @@ export class CoreEditor {
             display: none;
         }
     
-        textarea, code {
+        textarea, code, #placeholder {
             padding: var(--padding-horizontal);
             white-space: pre;
             overflow-wrap: normal;
@@ -96,7 +103,7 @@ export class CoreEditor {
             overflow: hidden;
         }
     
-        pre, textarea, code {
+        pre, textarea, code, #placeholder {
             margin: 0 !important;
             min-height: 100%;
             min-width: calc(100% - 20px);
@@ -139,12 +146,18 @@ export class CoreEditor {
             height: 100%;
             color: var(--color-primary-light);
         }
+
+        #placeholder {
+            z-index: 1;
+            position: absolute;
+        }
         `;
     }
 
     html() {
         return `
         <div id="code-container">
+            <pre id="placeholder"></pre>
             <textarea class="editor" spellcheck="false"></textarea>
             <pre><code></code></pre>
         </div>
@@ -184,6 +197,14 @@ export class CoreEditor {
     onInputChange(value) {
         if (!this.editor || !this.visualizer) return;
 
+        // Control display of the placeholder
+        if (value.length === 0) {
+            this.placeholder.style.opacity = 1;
+            this.placeholder.innerText = this.parent.getAttribute("placeholder");
+        } else {
+            this.placeholder.style.opacity = 0;
+        }
+
         this.editor.value = value;
         this.visualizer.innerHTML = value;
         this._adjustTextAreaSize();
@@ -192,6 +213,7 @@ export class CoreEditor {
         this.parent.dispatchEvent(new CustomEvent('change', { bubbles: true, composed: true, detail: { value } }));
         
         try {
+            Prism.highlightElement(this.placeholder);
             Prism.highlightElement(this.visualizer);
         } catch (error) { }
     }
