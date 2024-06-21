@@ -29,14 +29,25 @@
         outerbaseEditor.setAttribute('mode', 'dark');
         outerbaseEditor.setAttribute('theme', 'invasion');
         outerbaseEditor.setAttribute('placeholder', '-- Enter SQL statement here');
-        outerbaseEditor.setAttribute('code', 'SELECT * FROM users;');
+        outerbaseEditor.setAttribute('code', `SELECT 
+    CASE 
+        WHEN u.email IS NULL OR u.email = '' THEN CONCAT('user_', u.id::text) 
+        ELSE u.email 
+    END AS user_identifier, 
+    COUNT(ae.id) as events_count 
+FROM workspace_profile.analytics_event ae 
+JOIN user_profile.user u ON ae.user_id = u.id 
+WHERE ae.created_at > (CURRENT_TIMESTAMP - INTERVAL '24 HOURS') 
+GROUP BY user_identifier 
+ORDER BY events_count DESC;
+`);
 
         // Create instances of plugins
         // const pluginA = new PluginA();
         // outerbaseEditor.setAttribute('plugin-a', true)
 
         const handlebarVariables = new HandlebarVariablesPlugin();
-        outerbaseEditor.setAttribute('plugin-handlebar-variables', 'heyoooo')
+        outerbaseEditor.setAttribute('plugin-handlebar-variables', '["var1", "var2", "var345"]')
 
         // Register plugins with universe-editor
         outerbaseEditor.registerPlugins([handlebarVariables]);
@@ -46,7 +57,7 @@
 
         // Listen to event `change` to get the code from the editor
         outerbaseEditor.addEventListener('change', (event) => {
-            console.log(event.detail.value);
+            // console.log(event.detail.value);
         });
     });
 </script>

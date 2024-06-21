@@ -172,9 +172,11 @@ export class CoreEditor {
         if (name === "code") {
             // If the editor or visualizer is not ready, wait for them to be ready
             if (!this.editor || !this.visualizer) {
+                const TEMP_DELAY_MS = 100
+                
                 setTimeout(() => {
                     this.onInputChange(newValue);
-                }, 100);
+                }, TEMP_DELAY_MS);
 
                 return;
             }

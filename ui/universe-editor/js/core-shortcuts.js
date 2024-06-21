@@ -52,7 +52,7 @@ export class CoreKeyboardShortcuts {
         // The shortcuts above may have manipulated the contents of the textarea and the cursor position,
         // so we need to manually trigger the value throughout all plugins in the editor. We'll do this
         // by dispatching a custom event with the updated code value.
-        this.parent.broadcastEvent(this, 'attributeChangedCallback', { name: 'value', oldValue: this.editor.value, newValue: e.target.value });
+        // this.parent.broadcastEvent(this, 'attributeChangedCallback', { name: 'value', oldValue: this.editor.value, newValue: e.target.value });
     }
 
     _tabLine(e) {
