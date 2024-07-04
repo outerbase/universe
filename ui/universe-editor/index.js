@@ -16,6 +16,7 @@ import defaultStyles from './styles/default.js';
 // Themes
 import moondustTheme from './themes/moondust.js';
 import invasionTheme from './themes/invasion.js';
+import freedomTheme from './themes/freedom.js';
 
 const templateEditor = document.createElement("template");
 templateEditor.innerHTML = `
@@ -52,6 +53,7 @@ export class OuterbaseEditor extends HTMLElement {
         // Apply styles for themes
         this.applyStyle(moondustTheme);
         this.applyStyle(invasionTheme);
+        this.applyStyle(freedomTheme);
 
         // Register an empty array of plugins by default
         this.registerPlugins([]);
