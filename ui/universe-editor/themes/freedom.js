@@ -35,7 +35,7 @@ const css = `
     }
 
     .freedom .token.string {
-        color: #e11d48 !important;
+        color: black !important;
     }
 
     
@@ -75,7 +75,7 @@ const css = `
     }
 
     .freedom .dark .token.string {
-        color: #fb7185 !important;
+        color: white !important;
     }
 `
 
