@@ -165,7 +165,7 @@ export class OuterbaseEditor extends HTMLElement {
             new CoreKeyboardShortcuts(),
 
             // Add additional core plugins here
-            new HandlebarVariablesPlugin()
+            // new HandlebarVariablesPlugin()
         ]
 
         this.plugins = [...this.corePlugins, ...plugins];

@@ -96,6 +96,14 @@ export class CoreLineNumbers {
         this._updateActives();
     }
 
+
+
+
+
+
+
+    
+
     _updateActives() {
         requestAnimationFrame(() => {
             this._highlightActiveLineNumber();
