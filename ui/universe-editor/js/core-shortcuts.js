@@ -26,7 +26,7 @@ export class CoreKeyboardShortcuts {
         }
         else if (e.metaKey && e.key === "Enter") {
             e.preventDefault();
-            this.parent.dispatchEvent(new CustomEvent('universe-event', { bubbles: true, composed: true, detail: { execute: true, code: this.editor.value } }));
+            this.parent.dispatchEvent(new CustomEvent('universe-event', { bubbles: true, composed: true, detail: { execute: true, value: this.editor.value } }));
         }
         else if (e.key === "Enter") {
             e.preventDefault();
@@ -45,15 +45,14 @@ export class CoreKeyboardShortcuts {
             e.stopPropagation();
             this._commentLine(e);
         }
-        
-        setTimeout(() => {
-            this.parent.dispatchEvent(new CustomEvent('universe-event', { bubbles: true, composed: true, detail: { code: this.editor.value } }));
-        }, 50);
+
+        // Likely a material change occurred with your text value from an above case, so we'll broadcast the change
+        this.parent.broadcastEvent(this, 'onInputChange', this.editor.value);
 
         // The shortcuts above may have manipulated the contents of the textarea and the cursor position,
         // so we need to manually trigger the value throughout all plugins in the editor. We'll do this
         // by dispatching a custom event with the updated code value.
-        this.parent.broadcastEvent(this, 'attributeChangedCallback', { name: 'code', oldValue: this.editor.value, newValue: e.target.value });
+        // this.parent.broadcastEvent(this, 'attributeChangedCallback', { name: 'value', oldValue: this.editor.value, newValue: e.target.value });
     }
 
     _tabLine(e) {
