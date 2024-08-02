@@ -63,27 +63,12 @@ export class CoreLineHighlight {
         backgroundHighlight.style.opacity = 0;
     }
 
-    onMouseDown() {
-        this.updateActives();
+    onStateChange({ startLineNumber }) {
+        this.highlightActiveLine(startLineNumber + 1);
     }
 
-    onKeyDown() {
-        this.updateActives();
-    }
-
-    onInputChange(value) {
-        this.updateActives();
-    }
-
-    updateActives() {
-        requestAnimationFrame(() => {
-            this.highlightActiveLine();
-        })
-    }
-
-    highlightActiveLine() {
+    highlightActiveLine(lineNumber) {
         const lineHeight = parseFloat(getComputedStyle(this.editor).lineHeight);
-        const lineNumber = this.editor.value.substr(0, this.editor.selectionStart).split("\n").length;
         const highlightPosition = (lineNumber - 1) * lineHeight;
         const backgroundHighlight = this.parent.shadowRoot.querySelector('.background-highlight');
 
