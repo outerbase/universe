@@ -113,8 +113,12 @@ export class CoreEditor {
             line-height: var(--line-height);
         }
     
-        .editor, pre, code {
+        pre, code {
             z-index: 2;
+        }
+
+        textarea.editor {
+            z-index: 3;
         }
     
         .editor {
