@@ -3,6 +3,7 @@ import './prism/prism-sql.min.js';  // Defines tokens for SQL langauge
 
 // Plugins
 import { CoreEditor } from './js/core-editor.js';
+import { CoreEditorState } from './js/core-editor-state.js';
 import { CoreLineNumbers } from './js/core-line-numbers.js';
 import { CoreLineHighlight } from './js/core-line-highlight.js';
 import { CoreKeyboardShortcuts } from './js/core-shortcuts.js';
@@ -160,6 +161,7 @@ export class OuterbaseEditor extends HTMLElement {
     registerPlugins(plugins) {
         this.corePlugins = [
             new CoreEditor(),
+            new CoreEditorState(),
             new CoreLineNumbers(),
             new CoreLineHighlight(),
             new CoreKeyboardShortcuts(),

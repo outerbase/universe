@@ -9,7 +9,7 @@ export class CoreLineNumbers {
     init(parent, attributeValue) {
         this.parent = parent;
         this.editor = parent.shadowRoot.querySelector(".editor");
-        this.codeContainer = this.parent.shadowRoot.getElementById('code-container')
+        this.codeContainer = this.parent.shadowRoot.getElementById('code-container');
         
         this.codeContainer.addEventListener('scroll', () => {
             // Synchronize vertical scroll between line numbers and code editor
@@ -62,60 +62,16 @@ export class CoreLineNumbers {
         return "left"
     }
 
-    onMouseDown() {
-        if (!this.isFocused) return
-        this._updateActives();
+    onStateChange({ startLineNumber, endLineNumber, lines }) {
+        this._updateLineNumbers(lines.length);
+        this._highlightActiveLineNumber(startLineNumber + 1, endLineNumber + 1);
     }
 
-    onMouseUp() {
-        if (!this.isFocused) return
-        this._updateActives();
-    }
-
-    onMouseMove() {
-        if (!this.isFocused) return
-        this._updateActives();
-    }
-
-    onKeyDown() {
-        if (!this.isFocused) return
-        this._updateActives();
-    }
-
-    onFocus() {
-        this.isFocused = true;
-    }
-
-    onBlur() {
-        this.isFocused = false;
-        this._unhighlightAllLineNumbers();
-    }
-
-    onInputChange(value) {
-        this._updateLineNumbers();
-        this._updateActives();
-    }
-
-
-
-
-
-
-
-    
-
-    _updateActives() {
-        requestAnimationFrame(() => {
-            this._highlightActiveLineNumber();
-        })
-    }
-
-    _updateLineNumbers() {
+    _updateLineNumbers(lineCount) {
         if (typeof window === 'undefined') {
             return
         }
 
-        const lineCount = this.editor.value.split("\n").length;
         const lineNumberContainer = this.parent.shadowRoot.getElementById("line-number-container");
         lineNumberContainer.innerHTML = ''; // Clear existing line numbers
     
@@ -135,14 +91,7 @@ export class CoreLineNumbers {
         });
     }
 
-    _highlightActiveLineNumber() {
-        // Get the start and end positions of the selection
-        const selectionStart = this.editor.selectionStart;
-        const selectionEnd = this.editor.selectionEnd;
-    
-        // Calculate the line numbers for the start and end of the selection
-        const startLineNumber = this.editor.value.substring(0, selectionStart).split("\n").length;
-        const endLineNumber = this.editor.value.substring(0, selectionEnd).split("\n").length;
+    _highlightActiveLineNumber(startLineNumber, endLineNumber) {
         const lineNumbers = this.parent.shadowRoot.querySelectorAll("#line-number-container div");
     
         // Before applying a highlight to any line numbers, remove all highlights first
